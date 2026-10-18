@@ -7,7 +7,7 @@ export const greeting = {
   subTitle: "Senior Software Engineer · Full-stack & Platform",
   valueProp:
     "I build and operate production systems, mostly on AWS. Eight years across Rails, Node.js and Go, lately LLM platforms over Bedrock, OpenAI and Gemini, with the reliability work that keeps them boring.",
-  chips: ["Cairo, Egypt · UTC+3", "English · Arabic (native)", "8+ years"],
+  chips: ["Cairo, Egypt", "English · Arabic (native)", "8+ years"],
   resumeLink: "/resume.pdf",
   githubLink: "https://github.com/abdelwahab313",
   linkedinLink: "https://www.linkedin.com/in/abdelwahab313/"

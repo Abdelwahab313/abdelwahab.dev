@@ -86,7 +86,8 @@ Rules, in priority order:
    verbatim from the CV are exempt (for example `OnTheGoSystems (WPML — WordPress plugins)`).
 7. **No self-assessment numbers.** Proficiency bars off (`viewSkillBars: false`).
 8. **No availability signals.** No "open to work" badges or status pills anywhere. Location
-   and timezone live in the hero quick facts.
+   lives in the hero quick facts. The site shows no timezone, so it does not narrow which
+   roles or regions a reader assumes.
 9. **No filler lines.** The Geophysics "leveraged strong analytical skills" sentence goes.
 10. **Company and product names exactly as in section 1.** Not "DailyMealz", "nformacy",
     "Devsquads", "Fikrlabs".
@@ -112,7 +113,7 @@ Value line:
 > and Go, lately LLM platforms over Bedrock, OpenAI and Gemini, with the reliability work
 > that keeps them boring.
 
-Quick facts (`greeting.chips`): `Cairo, Egypt · UTC+3`, `English · Arabic (native)`, `8+ years`.
+Quick facts (`greeting.chips`): `Cairo, Egypt`, `English · Arabic (native)`, `8+ years`.
 
 Actions: Resume (`/resume.pdf`), GitHub, LinkedIn, Email (`#contact`). No availability badge
 and no code card in the hero. No product card in the hero; products live only in the Products
