@@ -1,15 +1,15 @@
 ---
 title: Atomic commands, racy decisions
 kind: note
-status: draft
-date: 2026-10-16
+status: published
+date: 2026-10-15
 lede: Every Redis command is atomic. The check-then-write your app wraps around them is not, and that gap is how 100 units become 107 orders.
 tags: [redis, lua, concurrency]
 ---
 
 ## 100 units, 107 orders
 
-A flash sale. One phone model, 100 units at the sale price, at most two per order. The stock counter lives in Redis under `sale:phone:stock`, and a fleet of app servers behind a load balancer decrements it.
+A Black Friday flash sale. One phone model, 100 units at the sale price, at most two per order. The stock counter lives in Redis under `sale:phone:stock`, and a fleet of app servers behind a load balancer decrements it.
 
 The sale closes. You had 100 phones. The system accepted 107 reservations. Seven people paid for a phone that does not exist, and finance finds out three days later.
 
@@ -207,9 +207,12 @@ My rule is blunt. Reach for the atomic command first. Use Lua when the decision 
 
 - Redis docs, Scripting with Lua: https://redis.io/docs/latest/develop/programmability/eval-intro/
 - Redis docs, Lua API reference (script flags, `redis.call` / `redis.pcall`): https://redis.io/docs/latest/develop/programmability/lua-api/
+- Redis docs, Redis functions (7.0, persistence and replication, `FCALL_RO`): https://redis.io/docs/latest/develop/programmability/functions-intro/
+- Redis `redis.conf` on the 7.2 branch: `busy-reply-threshold` default of 5 seconds, `lua-time-limit` alias, `io-threads`: https://github.com/redis/redis/blob/7.2/redis.conf
+- Redis 6.0 release notes, threaded I/O: https://github.com/redis/redis/blob/6.0/00-RELEASENOTES
+- Redis 7.4 release notes, #13108 LRU eviction for `EVAL` scripts: https://github.com/redis/redis/blob/7.4/00-RELEASENOTES
 - Redis source, `src/eval.c`: `evalGenericCommand`, `luaCreateFunction`
 - Redis source, `src/script.c`: `scriptPrepareForRun`, `scriptCall`, `scriptInterrupt`, `scriptKill`
 - Redis source, `src/script_lua.c`: `luaRedisGenericCommand`, `luaCallFunction`
 - Redis source, `src/functions.c`, `src/function_lua.c`: Redis Functions engine
 - Redis PR #9780, Redis Functions and the 7.0 scripting refactor: https://github.com/redis/redis/pull/9780
-- Alibaba Cloud, building a flash-sale system on ApsaraDB for Redis (origin of the oversell scenario)
