@@ -1837,7 +1837,7 @@ a:hover .arrow svg {
 html[data-theme="dark"] .astro-code,
 html[data-theme="dark"] .astro-code span {
   color: var(--shiki-dark);
-  background-color: var(--shiki-dark-bg);
+  background-color: var(--bg-2);
 }
 
 html[data-theme="light"] .astro-code,
@@ -1879,6 +1879,12 @@ html[data-theme="light"] .astro-code span {
   font-weight: 600;
   color: var(--ink);
   border-bottom-color: var(--border-strong);
+}
+
+.post-body a {
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .post-body img {
