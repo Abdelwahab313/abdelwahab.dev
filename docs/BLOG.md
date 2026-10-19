@@ -87,8 +87,8 @@ Tone rules live in `CONTENT.md` section 2. The two that catch most drafts:
 3. Anonymous unless agreed. No product or company names in a post, and no
    outbound product link. The four migrated case studies were anonymized
    2026-10-08: bodies keep only the names of public tooling (AWS services,
-   OpenAI, Bedrock, Gemini, Langfuse), never the product, the employer, or a
-   `*.wpml.org` URL.
+   OpenAI, Bedrock, Gemini, Langfuse), never the product, the employer, or an
+   employer URL.
 
 Case studies may be deeper than the two-page CV. That is the point of the
 section: the CV is the summary, the case study is the reasoning.
@@ -116,6 +116,56 @@ the post disappears from the deployed site.
 
 ## Images and diagrams
 
-Put the file under `public/img/blog/` (line-art SVG, same style as the
-covers) and reference it from the body with standard Markdown:
-`![Alt text](/img/blog/name.svg)`. Give every image real alt text.
+Figures are hand-authored SVG that follows the page theme. Two kinds:
+
+- **Cover**: `public/img/blog/<slug>.svg`, `viewBox="0 0 1200 600"`, named in
+  frontmatter as `cover` with a `coverAlt`. The page inlines it (so CSS
+  variables apply) and the same file is served standalone for `og:image` and
+  feeds, where the `var(--x, #hex)` fallbacks give the dark palette.
+- **Diagram**: `src/diagrams/<slug>-<name>.svg`, placed in the body with
+  `![Caption](diagram:<slug>-<name>)` on its own line. The remark plugin in
+  `src/lib/remark-diagrams.mjs` inlines it as a `<figure class="diagram">` with
+  the caption as `<figcaption>` and the build fails if the file is missing.
+  Astro caches rendered Markdown by the `.md` file, so after editing only a
+  diagram run `npx astro build --force` (or touch the post).
+
+Rules, enforced by review:
+
+1. **One idea per figure.** A figure exists because prose could not carry the
+   shape: a sequence, an interleaving, a before/after, a control loop, a
+   quantity. If a reader learns nothing from it that the text did not say,
+   cut it. Two or three figures per post, placed right after the paragraph
+   they explain.
+2. **Colours are the page's tokens, never literals.** Every `fill`/`stroke`
+   is `var(--token, #dark-fallback)`: `--ink #edeae3` (primary strokes and
+   labels), `--muted #949aa2` (secondary labels, things that are idle, dead or
+   dashed), `--body #c2c7cd` (longer text), `--border #262b33` (axes, tracks),
+   `--surface #161a20` (box fills and the cover background), `--accent
+   #57c7ba` and `--accent-soft rgba(87,199,186,0.12)` (the one thing the
+   figure is about). One accent; nothing else coloured.
+3. **Type**: `font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo,
+   monospace)"` on the root. Labels are 15px on a 960 to 1080 wide diagram.
+   Covers use 26 to 30px and at most five short labels, no sentences: they
+   render at 132px wide in the list, so shapes must carry the meaning.
+4. **Marks**: 1.5px strokes for diagrams, 3 to 4px for covers; `rx` 8 to 10 on
+   boxes (18 on covers); dashed = removed, killed or hypothetical; arrows via a
+   `<marker>` per colour (`#ink`, `#acc`) with `orient="auto-start-reverse"`.
+   No drop shadows, gradients, grids, dotted backgrounds or frames.
+5. **Text is text.** Labels sit in `--ink`/`--muted`, never in the accent
+   colour unless they name the accented element. Nothing overlaps: check at
+   full width and at 375px (the SVG scales down; 15px labels stay legible to
+   about 960/375 scale).
+6. **Charts**: one hue for magnitude (accent), thin bars anchored to a
+   baseline in `--border`, direct labels on the bars that matter, no legend
+   for one series, no dual axes, no number on every point. Figures come only
+   from the post's sourced numbers.
+7. **Captions** state what the figure shows in one or two sentences and are
+   the SVG's `aria-label` too, so they must read without the picture.
+8. **Render before committing.** `/tmp/render-svg.sh file.svg out.png light`
+   and `dark` (headless Chromium with the site's variables), then look at
+   both. The exemplars are `public/img/blog/fargate.svg`,
+   `src/diagrams/fargate-stop-vs-drain.svg` and
+   `src/diagrams/fargate-scaler-loop.svg`.
+
+Raster images go under `public/img/blog/` and use standard Markdown with real
+alt text; prefer a diagram.

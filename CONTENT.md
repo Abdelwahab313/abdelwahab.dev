@@ -34,7 +34,7 @@ or titles.
 
 | Company | Location | Title | Dates |
 |---|---|---|---|
-| OnTheGoSystems (WPML — WordPress plugins) | Remote (Hong Kong) | Senior Software Engineer | Dec 2024 – Sep 2026 |
+| AI translation platform (under NDA) | Remote | Senior Software Engineer | Dec 2024 – Sep 2026 |
 | Dailymealz | Riyadh, Saudi Arabia | Senior Software Engineer | Dec 2021 – Dec 2024 |
 | Nformacy | Cairo, Egypt | Full-Stack Developer | Oct 2020 – Dec 2021 |
 | DevSquads (formerly Fikr Labs) | Cairo, Egypt | Software Engineer | Jan 2018 – Oct 2020 |
@@ -53,7 +53,7 @@ Four entries, not five. No role is current; every entry is past tense.
 | Observability | Datadog, OpenTelemetry, AWS CloudWatch, Langfuse tracing |
 | Databases | PostgreSQL, MySQL, Aurora, Redis, DynamoDB, ClickHouse |
 | Testing | TDD, Spec-driven development, RSpec, Capybara, Playwright, Cypress, Jest, VCR |
-| WordPress & Compatibility | WPML ecosystem, plugin update safety, backwards compatibility, i18n |
+| Compatibility & i18n | backwards compatibility, deprecation paths, contract tests, i18n |
 | Spoken Languages | English, Arabic (native) |
 
 Site skill icons are a subset of this table, in this order: Ruby on Rails, AWS, Terraform,
@@ -66,8 +66,8 @@ Laravel, Firebase, html-5, css3, sass).
 ## 2. Tone
 
 The CV is terse and third person. The site is first person and a little warmer. Same facts,
-same numbers, same order of emphasis: platform and backend first, LLM systems second,
-frontend last.
+same numbers. Positioning is full-stack and platform: product work across React, Next.js,
+React Native, Rails and Node.js, with the AWS platform, databases and LLM systems underneath.
 
 Rules, in priority order:
 
@@ -75,23 +75,32 @@ Rules, in priority order:
 2. **Concrete over abstract.** A bullet names a system, a change, and why. "Built full-stack
    features across the translation pipeline" says nothing. "Moved the product off a single EC2
    host onto ECS Fargate" says something.
-3. **Every number comes from the CV.** The CV is the defensible set. Do not add a number it does
-   not carry, and do not restate a CV number at a different precision.
+3. **Every number comes from the CV, said the way a person would say it.** The CV is the
+   defensible set; do not add a number it does not carry. Round to conversational precision:
+   "about a thousand calls", "7 million rows", "a two-hour job", "a year and a half". A figure
+   like 1,013 or 1h 42m reads as generated, not measured. Headline scale figures stay as the
+   CV states them (500K, ~5K, ~100K, 100K, 30%).
 4. **No template voice.** Banned: "cool stuff", "like a pro", "whipping up", "slick",
    "silky-smooth", "crush goals", "all the things", "leveling up", "tech tricks", "love affair",
    "I'm that guy". No exclamation marks.
 5. **No emoji in prose.** Emoji may remain only where the template uses them as icons
    (section headings), not inside sentences.
 6. **No em dashes in site prose.** Use a full stop or a comma. Company and product names taken
-   verbatim from the CV are exempt (for example `OnTheGoSystems (WPML — WordPress plugins)`).
+   verbatim from the CV are exempt.
 7. **No self-assessment numbers.** Proficiency bars off (`viewSkillBars: false`).
 8. **No availability signals.** No "open to work" badges or status pills anywhere. Location
-   lives in the hero quick facts. The site shows no timezone, so it does not narrow which
+   lives in the About fact card. The site shows no timezone, so it does not narrow which
    roles or regions a reader assumes.
 9. **No filler lines.** The Geophysics "leveraged strong analytical skills" sentence goes.
 10. **Company and product names exactly as in section 1.** Not "DailyMealz", "nformacy",
     "Devsquads", "Fikrlabs".
-11. **CV stays canonical until told otherwise.** Never "fix" the site by inventing a fact the
+11. **The most recent employer is under NDA.** The site never names it, its products, its
+    brands, its office location or links to them, in copy, posts, images, structured data or
+    docs. It appears only as `AI translation platform (under NDA)`. Generic domain words
+    (AI translation, LLM jobs, metered product) and public tooling names are fine. The CV
+    PDF at `/resume.pdf` and the repo history are out of scope: the author confirmed both are
+    fine as they are (2026-10-18).
+12. **CV stays canonical until told otherwise.** Never "fix" the site by inventing a fact the
     CV lacks (Shell scripting is the standing example: real, but not on the CV, so not on the
     site). The only way to add such a fact is to update the CV first.
 
@@ -101,7 +110,7 @@ Rules, in priority order:
 
 Paste-ready. Keys refer to `src/data/portfolio.ts` unless noted.
 
-### Hero (`greeting.title`, `greeting.subTitle`, `greeting.valueProp`, `greeting.chips`)
+### Hero (`greeting.title`, `greeting.subTitle`, `greeting.valueProp`, `greeting.startHere`)
 
 Title: `Abdelwahab Mahmoud`
 
@@ -109,102 +118,63 @@ Subtitle (role line): `Senior Software Engineer · Full-stack & Platform`
 
 Value line:
 
-> I build and operate production systems, mostly on AWS. Eight years across Rails, Node.js
-> and Go, lately LLM platforms over Bedrock, OpenAI and Gemini, with the reliability work
-> that keeps them boring.
+> I build and run production systems end to end, from React in the browser to AWS
+> underneath. Most recently: the LLM engine and cloud platform behind an AI translation
+> product that peaked at ~100K requests an hour.
 
-Quick facts (`greeting.chips`): `Cairo, Egypt`, `English · Arabic (native)`, `8+ years`.
+No quick-facts row in the hero: location, years and languages live once, in the About fact
+card (`Location`, `Core stack`, `Experience`, `Languages`).
 
-Actions: Resume (`/resume.pdf`), GitHub, LinkedIn, Email (`#contact`). No availability badge
-and no code card in the hero. No product card in the hero; products live only in the Products
-section.
+Actions: Resume (`/resume.pdf`), GitHub, LinkedIn, Email (`#contact`). No availability badge,
+no code card and no product card in the hero.
 
-### Meta (`public/index.html` title, description, og, twitter)
+Start here (`greeting.startHere`): links to the `fargate`, `engine` and `aurora` posts by
+title. The build fails if a slug has no post. The homepage Writing section shows the three
+newest posts that are not already in Start here.
+
+### Meta (`src/pages/index.astro` title and description)
 
 Title: `Abdelwahab Mahmoud | Senior Software Engineer, Full-stack & Platform`
 
 Description:
 
-> Abdelwahab Mahmoud, senior software engineer in Cairo. Ruby on Rails, AWS (ECS Fargate,
-> Lambda, Terraform) and LLM platforms over Bedrock, OpenAI and Gemini. Eight years building
-> and operating production systems.
+> Abdelwahab Mahmoud, senior full-stack and platform engineer in Cairo. React, Next.js and
+> React Native, Ruby on Rails and Node.js, AWS (ECS Fargate, Lambda, Terraform) and LLM
+> platforms over Bedrock, OpenAI and Gemini. Eight years building and operating production
+> systems.
 
-### Skills section (`skillsSection.title`, `skillsSection.subTitle`, `skillsSection.skills`)
+### Homepage order
 
-Title: `What I do`
-
-Subtitle:
-
-> Backend and platform first: Ruby on Rails, AWS and the database under it. LLM systems over
-> Bedrock, OpenAI and Gemini, with the reliability work that makes them boring. React and
-> Hotwire when the feature needs a front end.
-
-Bullets (replace all six):
-
-- Backend systems in Ruby on Rails, from background job internals to metered billing.
-- AWS platform work: ECS Fargate, Lambda, Terraform and CloudWatch, from capacity study to deploy pipeline.
-- LLM integration: a provider-agnostic engine over Bedrock, OpenAI and Gemini, with fallback chains, evaluation harnesses and MCP.
-- Root-cause investigation on production incidents, separating what is verified from what is inferred.
-- Frontend when it is needed: React, Hotwire, React Native.
+Hero, About, Experience, Writing, Open source, Skills, Education, Contact. Each fact is told
+once: About is how I work, Experience is what I did, Writing is the depth. There is no
+Products section and no "What I work on" grid on the homepage; products are linked from their
+Experience entry, and the challenge cards live only on `/work`.
 
 ### Work experience (`workExperiences.experience`)
 
-**OnTheGoSystems (WPML — WordPress plugins)**, Senior Software Engineer, December 2024 – September 2026
+Copy lives in `src/data/portfolio.ts`. Each entry renders, in order: company, role,
+`headline`, `story`, a link row (`product` website, and the `article` write-up by its title
+when `article` is set), `descBullets`, tags.
 
-> I worked on Private Translation Cloud (PTC), an AI translation platform from the team behind
-> WPML, the multilingual plugin that powers 1.5M+ WordPress sites. Product work in
-> Rails and React, and the AWS platform underneath it.
+- `headline` names the hardest problem of the job and its outcome, as a plain sentence. It
+  carries a CV number when the job has one. No wordplay, no label-style titles.
+- `story` tells that problem: the product, what made it hard, what I changed. It absorbs the
+  CV bullets it tells, so those bullets do not repeat below it.
+- `descBullets` hold every remaining CV bullet, hardest first. Together, story and bullets
+  carry every fact of the CV entry; nothing is dropped and nothing is added.
+- More than four bullets show three and a "Show N more" toggle; four or fewer show all.
 
-- Built the multi-provider translation LLM engine behind WPML (Bedrock, OpenAI, Gemini): fallback chains, JSON repair and rate-limit retries keep translations flowing when a provider degrades.
-- Built the guardrails agents run behind: an MCP server exposing live databases, logs and selected APIs through authenticated, monitored access, adopted as the team's standard agent integration path.
-- Owned credits and billing correctness for a metered LLM product; one authorization architecture to replace scattered permission checks.
-- Owned an agentic triage platform that handled first-line incident and support inquiries, cutting Mean Time To Resolve.
-- Cleared Aurora MySQL's worst-query backlog query by query: rewritten plans, covering indexes and restructured hot reads, until CPU pressure stopped turning into incidents.
-- Replaced ECS autoscaling with a queue-depth Lambda autoscaler (DynamoDB deployment state store) that drained long-running jobs instead of killing them, sustaining 500K jobs/hour at peak against a ~5K/hour baseline.
-- Fixed lock contention under concurrent writes: exclusive advisory locks on hot paths, batch-processing rewrites for load management, and connection-pool tuning after autoscaling exposed pooling contention on the shared database.
-- Owned the GitLab CI/CD pipelines: build, e2e test, SAST and deploy gates for every service in the product.
-- Kept plugin APIs backwards compatible across releases with deprecation paths and contract tests.
-- Migrated the product onto AWS ECS Fargate running Docker containers, and owned the platform and its Terraform; the fleet handled ~100K requests/hour at peak across background processing and LLM inference.
+| Company | headline | product | article |
+|---|---|---|---|
+| AI translation platform (under NDA) | Scaled AI translation to 500K jobs an hour at peak without killing a job mid-run | none (under NDA) | `fargate` |
+| Dailymealz | Pulled fulfillment out of a PHP monolith while 100K daily users kept ordering | Dailymealz, `https://dailymealz.com/` | `fulfillment-extraction` |
+| Nformacy | Took a two-sided marketplace from empty repo to beta launch | Nformacy, `https://nformacy.com/` | `zero-to-launch` |
+| DevSquads (formerly Fikr Labs) | Built Shapa's mobile app and backend test-first, and mentored teams adopting XP | Shapa, `https://shapahealth.com/` | none |
 
-Source: all ten bullets follow `examples/resume/experience.tex` on
-`cv/automattic-experienced-swe` (aligned 2026-10-11). The job ended September 2026, so every
-bullet is past tense.
-
-**Dailymealz**, Senior Software Engineer, December 2021 – December 2024
-
-> Built and scaled a meal subscription platform serving customers across Saudi Arabia, with a
-> React Native driver app and the Node.js services behind it.
-
-- Built the real-time order service behind a 100K daily-user delivery product: kitchen, driver and delivery status pushed to mobile and web clients over Node.js and Socket.IO.
-- Cut Mean Time To Resolve by 30% by instrumenting order, driver and kitchen flows with Datadog and OpenTelemetry.
-- Decomposed the fulfillment component out of the PHP/Laravel monolith into a standalone service in a distributed event-driven architecture, passing state changes over AWS SQS behind a REST API contract.
-- Chose incremental extraction over a full event-driven rewrite, because a team of six could not freeze features for months to run two partially consistent systems.
-- Served hot order state from Redis in a write-behind cache pattern with MySQL behind it, keeping status fan-out off the transactional path.
-- Migrated the real-time order service from JavaScript to TypeScript so event and message payload mismatches fail at compile time, not at runtime in front of customers.
-- Led a team of five building a driver location check-in system: planning, reviews and pairing across the driver app.
-
-**Nformacy**, Full-Stack Developer, October 2020 – December 2021
-
-> Built Nformacy, a knowledge marketplace that connects business advisors with companies that
-> need their expertise. Full-stack work in React and Ruby on Rails, from the first MVP to the
-> beta launch, plus the cloud infrastructure and deploy pipelines.
-
-- Led full-stack features from requirements to deployment, and moved the web apps to a SaaS model.
-- Built mentor calendar booking with Zoom, ClickUp and calendar integrations.
-- Wrote BDD tests and managed CI/CD pipelines.
-
-**DevSquads (formerly Fikr Labs)**, Software Engineer, January 2018 – October 2020
-
-> My first job in tech, at a Cairo venture studio that became DevSquads, an agile consultancy
-> that takes XP seriously: TDD, pair programming and continuous delivery. Delivered products for
-> international clients, including Shapa, a US health tech platform (React, React Native, Node.js,
-> Java Spring).
-
-- Built software in self-organizing Extreme Programming teams with TDD, thin vertical slices and test-covered refactoring of legacy code, across React Native, Ruby on Rails, Java Spring and React.
-- Mentored teams adopting XP and Agile practices: pairing, code review discipline and iterative planning.
-
-Four entries. The old separate Fikr Labs entry is gone: Fikr Labs is the earlier name inside
-the DevSquads entry, exactly as the CV states it.
+Source: facts follow `examples/resume/experience.tex` on `cv/automattic-experienced-swe`
+(aligned 2026-10-11). Order within an entry is the site's choice; the facts are the CV's.
+Four entries. Fikr Labs is the earlier name inside the DevSquads entry, exactly as the CV
+states it.
 
 #### Timeline metadata (`duration`, `location`, `tags` on each entry)
 
@@ -215,13 +185,12 @@ entry's own description or bullets.
 
 | Company | duration | location | tags |
 |---|---|---|---|
-| OnTheGoSystems (WPML — WordPress plugins) | 1 yr 9 mo | Remote (Hong Kong) | Ruby on Rails, React, ECS Fargate, Lambda, Terraform, Aurora, Bedrock, DynamoDB |
+| AI translation platform (under NDA) | 1 yr 9 mo | Remote | Ruby on Rails, React, ECS Fargate, Lambda, Terraform, Aurora, Bedrock, DynamoDB |
 | Dailymealz | 3 yrs | Riyadh | React Native, Node.js, AWS, Datadog, Redis |
 | Nformacy | 1 yr 2 mo | Cairo | React, Ruby on Rails |
 | DevSquads (formerly Fikr Labs) | 2 yrs 9 mo | Cairo | React, React Native, Node.js, Java Spring, TDD |
 
-`duration` for OnTheGoSystems is December 2024 to September 2026. Entries with more than three
-bullets show three and a "Show N more" toggle.
+`duration` for the AI translation role is December 2024 to September 2026.
 
 ### Blog posts (`src/content/blog/`, replaces the old `caseStudies` section)
 
@@ -248,67 +217,21 @@ Meta description:
 > Case studies and notes from eight years building production systems. What was there,
 > what I decided, what it cost, and what changed.
 
-The four migrated posts keep their copy verbatim from the 2026-10-05 refresh, and are
-published as `kind: note`: `fargate` (Draining, not stopping), `engine` (One engine, three
-providers), `aurora` (7.33M rows per call), `triage` (The verdict lives in code, not the
-prompt). Every post is frontmatter metadata plus a Markdown body; the `case-study` kind
+The four migrated posts keep their body copy from the 2026-10-05 refresh, and are
+published as `kind: note`: `fargate`, `engine`, `aurora`, `triage`. Titles say what
+happened, under 60 characters, the way the blog-writer agent requires: no label titles a
+reader has to decode. Post dates are spread across September and October 2026. Every post is frontmatter metadata plus a Markdown body; the `case-study` kind
 carries Situation / Decision / Trade-off / Outcome as four `##` headings in that body.
 
-Anonymized 2026-10-08: no product, company, or `*.wpml.org` link in any post.
+Anonymized 2026-10-08: no product, company, or employer link in any post.
 Bodies keep only the names of public tooling (AWS services, OpenAI, Bedrock, Gemini,
 Langfuse). Rule of posting: docs/BLOG.md rule 3.
 
 Numbers in those four trace to pre-2026-10-08 CV history; see SPEC.md section 8.
 
-### Big projects (`bigProjects.title`, `bigProjects.subtitle`, `bigProjects.projects`)
-
-Title: `Products`
-
-Subtitle: `Products I helped build`
-
-Each card is an artifact dossier: `badge`, `projectName`, `tagline` (one line, what it is),
-`projectDesc` (overview, distinct wording from Experience), `scale` (only where the CV carries
-a number), `timeframe` (the author's engagement window, not product age), `stack[]` (tech
-already in that product's story) and `footerLink` (the real product URL). Scale and timeframe
-rows render only when present.
-
-**Private Translation Cloud** (badge `PTC`)
-
-> AI translation platform from the team behind WPML. I worked on the AWS platform and the
-> multi-provider LLM engine that translates websites automatically, moving the product onto
-> ECS Fargate and keeping its database and autoscaling healthy.
-
-Scale: `1.5M+ WordPress sites`. Time: `Dec 2024 – Sep 2026`.
-Stack: Ruby on Rails, React, AWS, Terraform, Bedrock. Link: `https://ptc.wpml.org/`.
-
-**Dailymealz** (badge `DM`)
-
-> Meal subscription platform for customers across Saudi Arabia. I spent three years building
-> the real-time order service, the React Native driver app, and the move from a PHP monolith
-> to event-driven services.
-
-Scale: `100K daily users`. Time: `Dec 2021 – Dec 2024`.
-Stack: React Native, Node.js, AWS, Redis. Link: `https://dailymealz.com/`.
-
-**Shapa** (badge `SH`)
-
-> US health product built around a numberless smart scale and a behavior change program. I
-> built the mobile app and the backend behind it as part of the DevSquads XP team.
-
-Time: `2018 – 2020`. No CV scale figure, so no Scale row.
-Stack: React, React Native, Node.js, Java Spring. Link: `https://shapahealth.com/`.
-
-**Nformacy** (badge `NF`)
-
-> Knowledge marketplace connecting business advisors with companies. I built it from the first
-> MVP to the beta launch, plus the cloud infrastructure and deploy pipelines.
-
-Time: `Oct 2020 – Dec 2021`. No CV scale figure, so no Scale row.
-Stack: React, Ruby on Rails. Link: `https://nformacy.com/`.
-
 ### Open source (`openSource.projects`)
 
-Four public repositories, rendered after Products. Copy lives in
+Four public repositories, rendered after Writing. Copy lives in
 `src/data/portfolio.ts` `openSource`. Each card shows the repo name, description,
 `role · outcome`, a GitHub link and tech tags. Named repos, links and descriptions are the
 author's real repos; do not invent new ones here without a matching repository.
@@ -323,7 +246,7 @@ Title: `Contact me` (plain text, no emoji)
 
 Subtitle:
 
-> Hiring for a senior backend or platform role, or stuck on a production problem? Email me.
+> Hiring for a senior full-stack or platform role, or stuck on a production problem? Email me.
 
 Email per section 1.
 
@@ -343,8 +266,8 @@ Where each fact lives, so an edit in one place is mirrored in the others.
 | Title line | `../resume.tex` position field | `greeting.subTitle`, meta description, `CONTEXT.md` Positioning |
 | Summary | `summary.tex` | `greeting.subTitle` |
 | Jobs, titles, dates | `experience.tex` | `workExperiences.experience[]` |
-| OTGS bullets | `experience.tex` first `cventry` | `workExperiences.experience[0].descBullets` |
-| Skills | `skills.tex` | `skillsSection.skills`, `cvStack` (chip groups in the Skills section) |
+| AI translation role bullets | `experience.tex` first `cventry` | `workExperiences.experience[0].descBullets` |
+| Skills | `skills.tex` | `cvStack` (chip groups in the Skills section) |
 | Email, phone | `../resume.tex` header | `socialMediaLinks.gmail`, `contactInfo` |
 | Education | `education.tex` | `educationInfo` |
 | Years figure | `summary.tex` | `greeting.subTitle`, `CONTEXT.md` Positioning |
@@ -372,11 +295,11 @@ SPEC.md section 7 before shipping.
 
 - 2026-10-11 redesign (docs/mockup-review.md, mockup v2): availability signals, the stat band
   and the hero Code card are removed; Products became dossier cards; Skills became chip
-  groups; Writing links to `/blog`. OTGS end date moved to `Dec 2024 – Sep 2026`, so no job is
+  groups; Writing links to `/blog`. AI translation role end date moved to `Dec 2024 – Sep 2026`, so no job is
   current and every bullet is past tense. Section-7 throughput and DB-concurrency bullets were
   added from the CV.
 - 2026-10-08 alignment: CV branch `cv/automattic-experienced-swe` @ `a0103b9` is the source
-  of truth. Positioning is now `Full-stack & Platform`; OTGS is current (`Dec 2024 – Present`);
+  of truth. Positioning is now `Full-stack & Platform`; the AI translation role is current (`Dec 2024 – Present`);
   there are four entries, not five; skills are ten rows; the summary leads with AWS production
   systems and scale. Everything above mirrors it.
 - 2026-10-08 Astro rebuild (branch `astro-rebrand`, ADR 0001): the site moved from the CRA
@@ -385,7 +308,8 @@ SPEC.md section 7 before shipping.
   Blog posts are `.md` files in a content collection. URLs (`/`, `/blog`, `/blog/{slug}`),
   the domain and `/resume.pdf` are unchanged. Deploy is `FOLDER: dist` on the `gh-pages`
   branch, triggered from `main`.
-- The 2026-10-05 case-study numbers (65%, 16 months, 90% Spot, 7.33M, 1,013, 7 ms, four ADRs,
+- The 2026-10-05 case-study numbers (65%, 16 months, 90% Spot, 7.33M, 1,013, 7 ms, four ADRs;
+  rounded in site copy on 2026-10-19 per rule 3,
   ISO 27001) were retired from the CV on 2026-10-06. The four case studies keep them by
   decision; see SPEC.md section 6 and section 8.
 - Case studies moved off the homepage into `/blog` on 2026-10-08, alongside future articles.

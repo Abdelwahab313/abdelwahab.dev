@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 410" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+  </defs>
+
+  <!-- a stack of recorded incidents, one fixture each -->
+  <rect x="24" y="104" width="220" height="140" rx="10" fill="var(--surface, #161a20)" stroke="var(--muted, #949aa2)" stroke-width="1.5"/>
+  <rect x="32" y="112" width="220" height="140" rx="10" fill="var(--surface, #161a20)" stroke="var(--muted, #949aa2)" stroke-width="1.5"/>
+  <rect x="40" y="120" width="220" height="140" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="150" y="160" fill="var(--ink, #edeae3)" text-anchor="middle">past incident</text>
+  <text x="150" y="188" fill="var(--muted, #949aa2)" text-anchor="middle">findings</text>
+  <text x="150" y="210" fill="var(--muted, #949aa2)" text-anchor="middle">audit entries</text>
+  <text x="150" y="232" fill="var(--muted, #949aa2)" text-anchor="middle">actual outcome</text>
+
+  <!-- replay -->
+  <line x1="260" y1="190" x2="362" y2="190" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="315" y="178" fill="var(--muted, #949aa2)" text-anchor="middle">replay</text>
+
+  <!-- the verdict function -->
+  <rect x="370" y="135" width="200" height="110" rx="10" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="470" y="184" fill="var(--ink, #edeae3)" text-anchor="middle">verdict()</text>
+  <text x="470" y="210" fill="var(--muted, #949aa2)" text-anchor="middle">same code as prod</text>
+
+  <line x1="570" y1="190" x2="682" y2="190" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="630" y="178" fill="var(--muted, #949aa2)" text-anchor="middle">pass / fail</text>
+
+  <!-- compare -->
+  <rect x="690" y="135" width="200" height="110" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="790" y="184" fill="var(--ink, #edeae3)" text-anchor="middle">compare with</text>
+  <text x="790" y="210" fill="var(--muted, #949aa2)" text-anchor="middle">actual outcome</text>
+
+  <!-- two ways out -->
+  <line x1="730" y1="245" x2="730" y2="296" stroke="var(--muted, #949aa2)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="730" y="320" fill="var(--muted, #949aa2)" text-anchor="middle">matches</text>
+  <line x1="860" y1="245" x2="860" y2="296" stroke="var(--accent, #57c7ba)" stroke-width="1.5" marker-end="url(#acc)"/>
+  <text x="860" y="320" fill="var(--ink, #edeae3)" text-anchor="middle">differs</text>
+  <text x="860" y="348" fill="var(--ink, #edeae3)" text-anchor="middle">3 false passes</text>
+  <text x="860" y="370" fill="var(--muted, #949aa2)" text-anchor="middle">the prompt had let through</text>
+
+  <text x="40" y="396" fill="var(--muted, #949aa2)">no model call: recorded evidence in, verdict out</text>
+</svg>

@@ -1,30 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-label="A phone and a laptop both served by one backend">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)">
   <defs>
-    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
-      <circle cx="2" cy="2" r="1.5" fill="#2a2f38"/>
-    </pattern>
-  </defs>
-  <rect width="1200" height="600" fill="#0e1013"/>
-  <rect width="1200" height="600" fill="url(#dots)"/>
-  <rect x="40" y="40" width="1120" height="520" fill="none" stroke="#2a2f38" stroke-width="2"/>
-  <rect x="220" y="170" width="150" height="280" rx="20" fill="none" stroke="#edeae3" stroke-width="4"/>
-  <line x1="268" y1="428" x2="322" y2="428" stroke="#edeae3" stroke-width="3"/>
-  <g fill="none" stroke="#57c7ba" stroke-width="3">
-    <rect x="600" y="230" width="130" height="90" rx="10"/>
-    <rect x="600" y="350" width="130" height="90" rx="10"/>
-  </g>
-  <rect x="850" y="190" width="200" height="130" rx="12" fill="none" stroke="#edeae3" stroke-width="4"/>
-  <line x1="880" y1="340" x2="1020" y2="340" stroke="#edeae3" stroke-width="4"/>
-  <g stroke="#57c7ba" stroke-width="3">
-    <path d="M384 260 C 480 260 520 260 592 272" fill="none" marker-end="url(#m)"/>
-    <path d="M384 390 C 480 390 520 380 592 390" fill="none" marker-end="url(#m)"/>
-    <path d="M742 275 C 800 275 800 250 842 252" fill="none" marker-end="url(#m)"/>
-    <path d="M742 395 C 800 395 800 330 842 320" fill="none" marker-end="url(#m)"/>
-  </g>
-  <defs>
-    <marker id="m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 z" fill="#57c7ba"/>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
     </marker>
   </defs>
-  <text x="665" y="470" text-anchor="middle" font-family="monospace" font-size="22" fill="#8b9299">one api</text>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  <!-- one server -->
+  <rect x="120" y="170" width="300" height="170" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <text x="270" y="265" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">server</text>
+
+  <!-- redis under it -->
+  <rect x="120" y="430" width="300" height="100" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="270" y="490" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">redis</text>
+  <line x1="270" y1="340" x2="270" y2="430" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+
+  <!-- laptop, upper right -->
+  <rect x="780" y="70" width="260" height="160" rx="14" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <line x1="740" y1="252" x2="1080" y2="252" stroke="var(--ink, #edeae3)" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- phone, lower right -->
+  <rect x="830" y="320" width="160" height="250" rx="24" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <line x1="885" y1="540" x2="935" y2="540" stroke="var(--ink, #edeae3)" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- pushes from the server -->
+  <path d="M420 220 H600 V150 H772" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+  <path d="M420 290 H600 V400 H822" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+
+  <!-- the read on reconnect -->
+  <path d="M830 480 H428" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="4" marker-end="url(#acc)"/>
+  <text x="630" y="520" font-size="26" fill="var(--accent, #57c7ba)" text-anchor="middle">on reconnect</text>
 </svg>

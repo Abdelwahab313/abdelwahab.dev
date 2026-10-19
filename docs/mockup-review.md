@@ -4,7 +4,7 @@
 **Status:** Accepted (plan). Implementation not started.
 **Inputs:** `mockups/portfolio-v1.html` … `portfolio-v4-editorial.html`, `CONTEXT.md`,
 `CONTENT.md`, `SPEC.md`, `docs/adr/0001-astro-rebrand.md`,
-`PTC-Career-Retrospective/job-search/reviews/2026-10-month-one.md` (the month-one
+`a private career-retrospective note` (the month-one
 retrospective), and the SocialPrachar GitHub-portfolio checklist.
 
 This file records the mockup decision, the content-compliance rules the redesign must
@@ -93,7 +93,7 @@ font CDN (SPEC section 5).
 - No invented titles, no `#` placeholders.
 
 ### 4.4 Experience
-- Dates corrected: OnTheGoSystems `Dec 2024 – Sep 2026` (recompute `duration`).
+- Dates corrected: AI translation platform (under NDA) `Dec 2024 – Sep 2026` (recompute `duration`).
 - Scale is prose, not a widget. After the CV update, the retrospective's section-7
   numbers land here as bullets: autoscaler + DynamoDB state store + throughput, DB
   concurrency, ECS throughput.
@@ -121,7 +121,7 @@ Anti-duplication rule: the card must read as an artifact dossier. The labeled me
 (Overview / Scale / Time / Stack) are what separate it from the Experience timeline even
 where names repeat (`Dailymealz`, `Nformacy`).
 
-Scale availability today: PTC (`over a million WordPress sites`) and Dailymealz
+Scale availability today: AI (`over a million sites`) and Dailymealz
 (`100,000 daily users`) have CV numbers; Shapa and Nformacy do not, so they carry
 qualitative scale until the CV adds a figure.
 

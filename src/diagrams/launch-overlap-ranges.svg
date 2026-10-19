@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 400" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <!-- one mentor's hours: 10:00 at x=220, one hour = 240px -->
+  <g stroke="var(--border, #262b33)" stroke-width="1.5">
+    <line x1="200" y1="330" x2="720" y2="330"/>
+    <line x1="220" y1="324" x2="220" y2="336"/>
+    <line x1="340" y1="324" x2="340" y2="336"/>
+    <line x1="460" y1="324" x2="460" y2="336"/>
+    <line x1="580" y1="324" x2="580" y2="336"/>
+    <line x1="700" y1="324" x2="700" y2="336"/>
+  </g>
+  <g fill="var(--muted, #949aa2)" text-anchor="middle">
+    <text x="220" y="358">10:00</text>
+    <text x="340" y="358">10:30</text>
+    <text x="460" y="358">11:00</text>
+    <text x="580" y="358">11:30</text>
+    <text x="700" y="358">12:00</text>
+  </g>
+
+  <!-- 11:00 boundary shared by the first and third row -->
+  <line x1="460" y1="48" x2="460" y2="140" stroke="var(--border, #262b33)" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="460" y1="188" x2="460" y2="300" stroke="var(--border, #262b33)" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+  <!-- row 1: the committed booking -->
+  <text x="24" y="79" fill="var(--ink, #edeae3)">10:00 to 11:00</text>
+  <rect x="220" y="60" width="240" height="28" rx="6" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="340" y="79" fill="var(--ink, #edeae3)" text-anchor="middle">confirmed</text>
+  <text x="760" y="79" fill="var(--ink, #edeae3)">already in the table</text>
+
+  <!-- the overlap between row 1 and row 2 -->
+  <g stroke="var(--accent, #57c7ba)" stroke-width="1.5">
+    <line x1="340" y1="124" x2="460" y2="124"/>
+    <line x1="340" y1="118" x2="340" y2="130"/>
+    <line x1="460" y1="118" x2="460" y2="130"/>
+  </g>
+  <text x="400" y="112" fill="var(--accent, #57c7ba)" text-anchor="middle">overlap</text>
+
+  <!-- row 2: starts inside the first booking -->
+  <text x="24" y="169" fill="var(--ink, #edeae3)">10:30 to 11:30</text>
+  <rect x="340" y="150" width="240" height="28" rx="6" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <text x="460" y="169" fill="var(--muted, #949aa2)" text-anchor="middle">rejected</text>
+  <text x="760" y="162" fill="var(--ink, #edeae3)">range &amp;&amp; range: rejected</text>
+  <text x="760" y="184" fill="var(--muted, #949aa2)">unique starts_at: would pass</text>
+
+  <!-- row 3: back to back, upper bound is exclusive -->
+  <text x="24" y="259" fill="var(--ink, #edeae3)">11:00 to 12:00</text>
+  <rect x="460" y="240" width="240" height="28" rx="6" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="580" y="259" fill="var(--ink, #edeae3)" text-anchor="middle">confirmed</text>
+  <text x="760" y="252" fill="var(--ink, #edeae3)">[) bounds: 11:00 is free</text>
+  <text x="760" y="274" fill="var(--muted, #949aa2)">no gap minutes needed</text>
+</svg>

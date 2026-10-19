@@ -8,7 +8,7 @@ async page => {
     "/blog/tag/aws",
     "/work",
     "/404",
-    "/blog/zz-style-fixture"
+    "/blog/redis-lua-race-conditions"
   ];
   const WIDTHS = [375, 768, 1280];
   const THEMES = ["dark", "light"];
@@ -33,7 +33,7 @@ async page => {
           const w = window.innerWidth;
           const sw = document.documentElement.scrollWidth;
           const wide = [...document.querySelectorAll("*")]
-            .filter(e => !e.closest("pre, table"))
+            .filter(e => !e.closest("pre, table, figure.diagram"))
             .filter(e => e.getBoundingClientRect().right > w + 1)
             .map(
               e =>
@@ -42,7 +42,7 @@ async page => {
           const toc = [...document.querySelectorAll(".post-toc a")].map(a =>
             a.getAttribute("href")
           );
-          const tocMissing = toc.filter(h => !document.querySelector(h));
+          const tocMissing = toc.filter(h => !document.getElementById(decodeURIComponent(h.slice(1))));
           const hs = [...document.querySelectorAll("h1,h2,h3,h4,h5,h6")].map(h =>
             Number(h.tagName[1])
           );

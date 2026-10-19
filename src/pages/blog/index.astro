@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import Cover from "../../components/Cover.astro";
 import {getCollection} from "astro:content";
 import {
   publishedPosts,
@@ -91,12 +92,9 @@ const rowTags = (tags: string[]) => tags.join(" ");
               tabindex="-1"
               aria-hidden="true"
             >
-              <img
+              <Cover
                 src={featured.data.cover}
-                alt={featured.data.coverAlt}
-                width="1200"
-                height="600"
-                loading="eager"
+                alt={featured.data.coverAlt ?? ""}
               />
             </a>
           )}
@@ -145,13 +143,7 @@ const rowTags = (tags: string[]) => tags.join(" ");
                 tabindex="-1"
                 aria-hidden="true"
               >
-                <img
-                  src={post.data.cover}
-                  alt={post.data.coverAlt}
-                  width="1200"
-                  height="600"
-                  loading="lazy"
-                />
+                <Cover src={post.data.cover} alt={post.data.coverAlt ?? ""} />
               </a>
             )}
             <div class="row-body">

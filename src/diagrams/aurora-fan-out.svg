@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 340" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+  </defs>
+
+  <!-- the broadcast -->
+  <rect x="40" y="150" width="220" height="70" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="150" y="180" fill="var(--ink, #edeae3)" text-anchor="middle">status broadcast</text>
+  <text x="150" y="202" fill="var(--muted, #949aa2)" text-anchor="middle">runs often</text>
+
+  <!-- fan out: one point to each call -->
+  <g stroke="var(--ink, #edeae3)" stroke-width="1.5" fill="none">
+    <line x1="260" y1="185" x2="400" y2="67"/>
+    <line x1="260" y1="185" x2="400" y2="111"/>
+    <line x1="260" y1="185" x2="400" y2="155"/>
+    <line x1="260" y1="185" x2="400" y2="199"/>
+    <line x1="260" y1="185" x2="400" y2="287"/>
+  </g>
+
+  <!-- the calls -->
+  <text x="540" y="36" fill="var(--muted, #949aa2)" text-anchor="middle">about 1,000 calls per broadcast</text>
+  <g fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5">
+    <rect x="400" y="50" width="280" height="34" rx="8"/>
+    <rect x="400" y="94" width="280" height="34" rx="8"/>
+    <rect x="400" y="138" width="280" height="34" rx="8"/>
+    <rect x="400" y="182" width="280" height="34" rx="8"/>
+    <rect x="400" y="270" width="280" height="34" rx="8"/>
+  </g>
+  <g fill="var(--ink, #edeae3)" text-anchor="middle">
+    <text x="540" y="72">one call, ~7M rows scanned</text>
+    <text x="540" y="116">one call, ~7M rows scanned</text>
+    <text x="540" y="160">one call, ~7M rows scanned</text>
+    <text x="540" y="204">one call, ~7M rows scanned</text>
+    <text x="540" y="292">one call, ~7M rows scanned</text>
+  </g>
+  <text x="540" y="248" fill="var(--muted, #949aa2)" text-anchor="middle">...</text>
+  <text x="540" y="330" fill="var(--muted, #949aa2)" text-anchor="middle">rows are the EXPLAIN estimate</text>
+
+  <!-- converge on the database -->
+  <g stroke="var(--ink, #edeae3)" stroke-width="1.5" fill="none" marker-end="url(#ink)">
+    <line x1="680" y1="67" x2="812" y2="137"/>
+    <line x1="680" y1="111" x2="812" y2="161"/>
+    <line x1="680" y1="155" x2="812" y2="185"/>
+    <line x1="680" y1="199" x2="812" y2="209"/>
+    <line x1="680" y1="287" x2="812" y2="233"/>
+  </g>
+
+  <!-- Aurora -->
+  <rect x="820" y="120" width="220" height="130" rx="10" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="930" y="162" fill="var(--ink, #edeae3)" text-anchor="middle">Aurora MySQL</text>
+  <text x="930" y="188" fill="var(--accent, #57c7ba)" text-anchor="middle">100% CPU, sustained</text>
+  <rect x="860" y="206" width="140" height="10" rx="5" fill="var(--border, #262b33)"/>
+  <rect x="860" y="206" width="140" height="10" rx="5" fill="var(--accent, #57c7ba)"/>
+  <text x="930" y="238" fill="var(--muted, #949aa2)" text-anchor="middle">everything else queues</text>
+</svg>

@@ -68,7 +68,7 @@ export function assertArticlesExist(posts: Post[], slugs: string[]): void {
   const missing = slugs.filter(slug => slug.length > 0 && !known.has(slug));
   if (missing.length > 0) {
     throw new Error(
-      `workChallenges article slug(s) with no matching post: ${missing.join(", ")}`
+      `Homepage article slug(s) with no matching post: ${missing.join(", ")}`
     );
   }
 }

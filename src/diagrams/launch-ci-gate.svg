@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 320" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+    <marker id="mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--muted, #949aa2)"/>
+    </marker>
+  </defs>
+
+  <!-- trigger -->
+  <rect x="60" y="80" width="220" height="90" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="170" y="118" fill="var(--ink, #edeae3)" text-anchor="middle">push</text>
+  <text x="170" y="144" fill="var(--muted, #949aa2)" text-anchor="middle">or pull request</text>
+
+  <!-- the e2e job, the gate -->
+  <rect x="400" y="60" width="280" height="130" rx="10" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="540" y="96" fill="var(--ink, #edeae3)" text-anchor="middle">e2e job</text>
+  <text x="540" y="126" fill="var(--muted, #949aa2)" text-anchor="middle">real Postgres, pg_isready</text>
+  <text x="540" y="152" fill="var(--muted, #949aa2)" text-anchor="middle">db:prepare, Cypress specs</text>
+
+  <!-- deploy, only when e2e passed -->
+  <rect x="800" y="80" width="220" height="90" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="910" y="118" fill="var(--ink, #edeae3)" text-anchor="middle">deploy</text>
+  <text x="910" y="144" fill="var(--muted, #949aa2)" text-anchor="middle">main only</text>
+
+  <!-- trigger -> e2e -->
+  <line x1="280" y1="125" x2="392" y2="125" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+
+  <!-- e2e -> deploy -->
+  <line x1="680" y1="125" x2="792" y2="125" stroke="var(--accent, #57c7ba)" stroke-width="1.5" marker-end="url(#acc)"/>
+  <text x="736" y="114" fill="var(--muted, #949aa2)" text-anchor="middle">needs: e2e</text>
+
+  <!-- e2e fails -> deploy skipped -->
+  <path d="M540 190 V260 H792" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="6 6" marker-end="url(#mut)"/>
+  <text x="666" y="249" fill="var(--muted, #949aa2)" text-anchor="middle">a spec fails</text>
+  <rect x="800" y="230" width="220" height="60" rx="10" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <text x="910" y="265" fill="var(--muted, #949aa2)" text-anchor="middle">deploy skipped</text>
+</svg>

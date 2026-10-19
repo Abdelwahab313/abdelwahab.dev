@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 470" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+  </defs>
+
+  <!-- SQS queue -->
+  <rect x="120" y="60" width="210" height="110" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="225" y="92" fill="var(--ink, #edeae3)" text-anchor="middle">SQS queue</text>
+  <text x="225" y="120" fill="var(--muted, #949aa2)" text-anchor="middle">visible + in flight</text>
+  <text x="225" y="146" fill="var(--muted, #949aa2)" text-anchor="middle">= work</text>
+
+  <!-- scaler -->
+  <rect x="450" y="60" width="210" height="110" rx="10" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="555" y="92" fill="var(--ink, #edeae3)" text-anchor="middle">scaler (Lambda)</text>
+  <text x="555" y="120" fill="var(--muted, #949aa2)" text-anchor="middle">every minute</text>
+  <text x="555" y="146" fill="var(--muted, #949aa2)" text-anchor="middle">never stops a task</text>
+
+  <!-- ECS service -->
+  <rect x="780" y="60" width="210" height="110" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="885" y="92" fill="var(--ink, #edeae3)" text-anchor="middle">ECS service</text>
+  <text x="885" y="120" fill="var(--muted, #949aa2)" text-anchor="middle">desired count</text>
+  <text x="885" y="146" fill="var(--muted, #949aa2)" text-anchor="middle">stops idle tasks only</text>
+
+  <!-- queue -> scaler -->
+  <line x1="330" y1="115" x2="442" y2="115" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="388" y="104" fill="var(--muted, #949aa2)" text-anchor="middle">read depth</text>
+
+  <!-- scaler -> ECS -->
+  <line x1="660" y1="115" x2="772" y2="115" stroke="var(--accent, #57c7ba)" stroke-width="1.5" marker-end="url(#acc)"/>
+  <text x="716" y="104" fill="var(--muted, #949aa2)" text-anchor="middle">set desired</text>
+
+  <!-- the formula -->
+  <text x="555" y="214" fill="var(--ink, #edeae3)" text-anchor="middle">desired = max( ceil(work / target), protected )</text>
+
+  <!-- tasks row -->
+  <g fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5">
+    <rect x="210" y="300" width="130" height="70" rx="8"/>
+    <rect x="370" y="300" width="130" height="70" rx="8"/>
+    <rect x="690" y="300" width="130" height="70" rx="8"/>
+  </g>
+  <rect x="530" y="300" width="130" height="70" rx="8" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <g fill="var(--muted, #949aa2)" text-anchor="middle">
+    <text x="275" y="341">idle</text>
+    <text x="435" y="341">idle</text>
+    <text x="755" y="341">idle</text>
+  </g>
+  <text x="595" y="330" fill="var(--ink, #edeae3)" text-anchor="middle">busy</text>
+  <text x="595" y="352" fill="var(--accent, #57c7ba)" text-anchor="middle">protected</text>
+  <text x="515" y="412" fill="var(--muted, #949aa2)" text-anchor="middle">worker tasks</text>
+
+  <!-- ECS -> idle task: stop -->
+  <path d="M885 170 V250 H755 V292" fill="none" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="836" y="268" fill="var(--muted, #949aa2)" text-anchor="middle">stop</text>
+
+  <!-- protected task -> scaler: protected count -->
+  <path d="M595 300 V248 H555 V178" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="1.5" stroke-dasharray="5 5" marker-end="url(#acc)"/>
+  <text x="540" y="268" fill="var(--muted, #949aa2)" text-anchor="end">protected count</text>
+
+  <!-- task -> queue: receive, heartbeat -->
+  <path d="M275 300 V248 H225 V178" fill="none" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="210" y="268" fill="var(--muted, #949aa2)" text-anchor="end">receive, heartbeat</text>
+
+  <text x="120" y="452" fill="var(--muted, #949aa2)">protect before the job, unprotect before the next poll</text>
+</svg>

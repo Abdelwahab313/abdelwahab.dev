@@ -21,7 +21,7 @@ strictly. This file is the editor's brief and the paste-ready prompt.
   metrics, percentages, dates or counts. Do not restate a number at a new
   precision.
 - Anonymous unless agreed. No employer or product names in a post, no
-  `product`/`link` frontmatter, no `*.wpml.org` URL. Only public tooling names
+  `product`/`link` frontmatter, no `employer` URL. Only public tooling names
   survive: AWS services, Bedrock, OpenAI, Gemini, Langfuse.
 - First person, past tense for finished work. Match the site voice.
 - Schema:

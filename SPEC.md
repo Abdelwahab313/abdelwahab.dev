@@ -11,7 +11,7 @@ fact-trace table (section 8) and the case-study copies remain authoritative.
 
 **Status update 2026-10-08.** CV `cv/automattic-experienced-swe` @ `a0103b9`
 is the source of truth and has moved on from the 2026-10-05 alignment:
-positioning is `Senior Software Engineer · Full-stack & Platform`, OTGS is
+positioning is `Senior Software Engineer · Full-stack & Platform`, AI translation role is
 current (`Dec 2024 – Present`), there are four employment entries not five
 (Fikr Labs folded into `DevSquads (formerly Fikr Labs)`), skills are ten rows,
 and the summary leads with AWS production systems and scale. Section 3 below
@@ -32,11 +32,11 @@ SEO 100. Desktop preset: performance 100, accessibility 100, LCP 508 ms.
 Main JS bundle 248.37 kB → 73.66 kB gzip. Follow-ups same day: Nformacy
 link moved to `https://nformacy.com/` (old beta origin 522), og.png regenerated
 without the diagram strip (typographic only), and `public/resume.pdf` rebuilt
-from `cv/post-ptc` with the same resolved OTGS bullets so PDF and site agree
+from the September 2026 CV branch with the same resolved AI translation role bullets so PDF and site agree
 (verified by programmatic text extraction: 65%, 16 months, 90% Spot, 7.33M,
 1,013, 7 ms, four ADRs, 30-minute RTO present; 2-hour RTO, 12,500 study,
 "Present" absent; five entries; 2 pages). The CV change is committed as
-`f08eb3a` on `cv/post-ptc`. Automated layout and interaction checks (Chrome,
+`f08eb3a` on the September 2026 CV branch. Automated layout and interaction checks (Chrome,
 1280 and 375, both themes): 20/20 pass, no horizontal overflow, diagrams sized
 inside the viewport, hamburger menu opens, dark mode toggles, all anchors
 scroll, bullets toggle expands. Screenshots for human review under
@@ -77,9 +77,9 @@ Canonical inputs: `CONTEXT.md`, `CONTENT.md`, CV repo at
 
 The CV repo has several targeted branches. Two matter:
 
-| Branch | Date | OTGS bullets |
+| Branch | Date | AI translation role bullets |
 |---|---|---|
-| `cv/post-ptc` (canonical per CONTENT.md) | 2026-09-10 | 6 bullets: engine layer, EC2 to Fargate, queue-depth autoscaler, credits and billing, ISO 27001 and DR, agent triage |
+| the September 2026 CV branch (canonical per CONTENT.md) | 2026-09-10 | 6 bullets: engine layer, EC2 to Fargate, queue-depth autoscaler, credits and billing, ISO 27001 and DR, agent triage |
 | `cv/procore-senior-backend-cairo` (newest) | 2026-10-05 | 8 bullets: adds Langfuse and 65% review failures, solo 12 weeks, AI agent tooling, 90% Spot and 16 months, Aurora 7.33M rows, 4 ADRs, 30-minute RTO |
 
 Resolution (mirroring the CV, which is the source of truth for facts):
@@ -100,7 +100,7 @@ Conflicts found in the CV branches, resolved by canonical rules:
   ended Sep 2026 and no job is current. The site keeps **Dec 2024 – Sep 2026**.
 - Fikr Labs: newest branch merges it into "DevSquads (formerly Fikr Labs)".
   `CONTENT.md` lists five separate entries. The site keeps **five entries**.
-- RTO figure: `cv/post-ptc` says 2-hour RTO, newest branch says 30-minute RTO.
+- RTO figure: the September 2026 CV branch says 2-hour RTO, newest branch says 30-minute RTO.
   Open question 1 below.
 
 ## 4. Information architecture
@@ -111,7 +111,7 @@ Home page with anchor nav, plus two routes off it. Home order:
    No hamburger maze on desktop.
 2. **Hero.** Canonical `greeting.title` and `subTitle` from CONTENT.md, resume
    button, contact button, social row. Text only. The Lottie person goes.
-3. **Career history.** The existing vertical timeline, kept. OTGS bullets
+3. **Career history.** The existing vertical timeline, kept. AI translation role bullets
    resolved per section 3. Durations, locations, tags and the "Show N more"
    toggle stay.
 4. **Products I helped build.** The four cards, copy unchanged.
@@ -155,7 +155,7 @@ Diagram: broadcast fan-out to clients, database, row-scan annotation.
 Open question 2: the agent-driven triage platform (solo in 12 weeks, pass/fail
 call in code not the prompt, caught three false passes, audit log, human-only
 write gate) is a strong fourth case or an alternate for C. Default: keep the
-three above, mention the triage platform in the OTGS bullets only.
+three above, mention the triage platform in the AI translation role bullets only.
 
 ## 5. Visual direction
 
@@ -202,7 +202,7 @@ Content:
 - All copy obeys CONTENT.md tone rules: past tense, no em dashes, no template
   voice, no emoji in prose, no self-assessment percentages.
 - Names, titles, dates exactly per CONTENT.md section 1.
-- CONTENT.md is updated as part of the work: resolved OTGS bullets, a new Case
+- CONTENT.md is updated as part of the work: resolved AI translation role bullets, a new Case
   Studies section with paste-ready copy, open items list refreshed.
 
 Engineering:
@@ -226,7 +226,7 @@ Engineering:
 
 Small steps, each ending in a build and test run:
 
-1. Content model: resolve OTGS bullets, update CONTENT.md, mirror into
+1. Content model: resolve AI translation role bullets, update CONTENT.md, mirror into
    `src/data/portfolio.ts`.
 2. Case study copy: new CONTENT.md section, paste-ready.
 3. Diagram components: three inline SVGs, drawn against the verified facts.
@@ -242,7 +242,7 @@ Small steps, each ending in a build and test run:
 No commits unless asked. Deploy stays manual (`gh-pages`) and out of scope
 unless requested.
 
-## 8. Fact trace (case studies and OTGS bullets)
+## 8. Fact trace (case studies and AI translation role bullets)
 
 Every row below predates the 2026-10-08 CV alignment and none of them are in
 the current `experience.tex`. They stay on the site by the decision recorded
@@ -265,10 +265,10 @@ in section 6; `Source branch` names where they were last verified.
 
 ## 9. Open questions
 
-1. RTO figure for the ISO 27001 bullet: 2-hour (cv/post-ptc) or 30-minute
+1. RTO figure for the ISO 27001 bullet: 2-hour (the September 2026 CV branch) or 30-minute
    (newest branch)?
 2. Third case study: Aurora investigation (default) or the agent-driven triage
    platform?
-3. Enrich OTGS bullets with the newest CV detail (65%, Langfuse, solo 12 weeks,
+3. Enrich AI translation role bullets with the newest CV detail (65%, Langfuse, solo 12 weeks,
    90% Spot, 4 ADRs)? Default yes.
 4. Commits: per step, one at the end, or none until you say so?

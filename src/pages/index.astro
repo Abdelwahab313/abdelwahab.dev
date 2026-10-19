@@ -1,31 +1,27 @@
 ---
 import Base from "../layouts/Base.astro";
 import ArrowUpRight from "../components/ArrowUpRight.astro";
-import WorkGrid from "../components/WorkGrid.astro";
 import {getCollection} from "astro:content";
-import {homeGraph, productListSchema} from "../lib/schema";
+import {homeGraph} from "../lib/schema";
 import {publishedPosts, assertArticlesExist} from "../lib/blog";
 import {
   greeting,
   socialMediaLinks,
   cvStack,
-  skillsSection,
   educationInfo,
   workExperiences,
-  bigProjects,
   openSource,
-  contactInfo,
-  workChallenges
+  contactInfo
 } from "../data/portfolio";
 
 const title =
   "Abdelwahab Mahmoud | Senior Software Engineer, Full-stack & Platform";
 const description =
-  "Abdelwahab Mahmoud, senior software engineer in Cairo. Ruby on Rails, AWS (ECS Fargate, Lambda, Terraform) and LLM platforms over Bedrock, OpenAI and Gemini. Eight years building and operating production systems.";
+  "Abdelwahab Mahmoud, senior full-stack and platform engineer in Cairo. React, Next.js and React Native, Ruby on Rails and Node.js, AWS (ECS Fargate, Lambda, Terraform) and LLM platforms over Bedrock, OpenAI and Gemini. Eight years building and operating production systems.";
 
 const facts = [
   {key: "Location", value: "Cairo, Egypt"},
-  {key: "Focus", value: "Full-stack & Platform"},
+  {key: "Core stack", value: "React, Rails, Node.js, AWS"},
   {key: "Experience", value: "8+ years"},
   {key: "Languages", value: "English, Arabic"}
 ];
@@ -39,37 +35,43 @@ const skillGroups = [
   {label: "Observability", items: cvStack.observability},
   {label: "Databases", items: cvStack.databases},
   {label: "Testing", items: cvStack.testing},
-  {label: "WordPress & Compatibility", items: cvStack.wordpress},
+  {label: "Compatibility & i18n", items: cvStack.compatibility},
   {label: "Spoken Languages", items: cvStack.spoken}
 ];
 
-const jobs = workExperiences.experience.map(job => ({
-  job,
-  shown: job.descBullets.slice(0, 3),
-  rest: job.descBullets.slice(3)
-}));
+const SHOWN_BULLETS = 3;
+const jobs = workExperiences.experience.map(job => {
+  const split =
+    job.descBullets.length > SHOWN_BULLETS + 1 ? SHOWN_BULLETS : undefined;
+  return {
+    job,
+    shown: job.descBullets.slice(0, split),
+    rest: split ? job.descBullets.slice(split) : []
+  };
+});
 
 const education = educationInfo.schools[0];
 
 const KIND_LABEL = {"case-study": "Case study", note: "Note"};
 const allPosts = await getCollection("blog");
 const published = publishedPosts(allPosts);
-assertArticlesExist(
-  published,
-  workChallenges.cards.map(card => card.article)
-);
-const writing = published.slice(0, 4);
+assertArticlesExist(published, [
+  ...greeting.startHere,
+  ...workExperiences.experience.map(job => job.article)
+]);
+const postBySlug = new Map(published.map(post => [post.id, post]));
+const startHere = greeting.startHere.map(slug => postBySlug.get(slug)!);
+const writing = published
+  .filter(post => !greeting.startHere.includes(post.id))
+  .slice(0, 3);
 ---
 
-<Base {title} {description} jsonLd={[homeGraph(), productListSchema()]}>
+<Base {title} {description} jsonLd={[homeGraph()]}>
   <!-- hero -->
   <section class="container hero">
     <h1>{greeting.title}</h1>
     <p class="hero-role">{greeting.subTitle}</p>
     <p class="hero-lede">{greeting.valueProp}</p>
-    <ul class="quick-facts">
-      {greeting.chips.map(fact => <li>{fact}</li>)}
-    </ul>
     <div class="hero-actions">
       <a class="btn btn-primary" href={greeting.resumeLink} data-track="cv"
         >Resume <ArrowUpRight /></a
@@ -91,17 +93,13 @@ const writing = published.slice(0, 4);
       <a class="btn" href="#contact" data-track="contact">Email</a>
     </div>
     <div class="hero-shipped">
-      <span class="hero-shipped-label">Recently shipped</span>
+      <span class="hero-shipped-label">Start here</span>
       <ul>
         {
-          bigProjects.projects.slice(0, 3).map(product => (
+          startHere.map(post => (
             <li>
-              <a
-                href={product.footerLink[0]?.url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {product.projectName} <ArrowUpRight />
+              <a href={`/blog/${post.id}`}>
+                {post.data.title} <span class="arrow">→</span>
               </a>
             </li>
           ))
@@ -118,20 +116,22 @@ const writing = published.slice(0, 4);
     <div class="about-grid">
       <div class="about-body">
         <p class="lead">
-          I'm a senior software engineer based in Cairo. For eight years I've
-          built and operated real products end to end, with backend and platform
-          as my home ground.
+          I studied geophysics, then started in software in 2018 on Extreme
+          Programming teams: pair programming, the test written first, small
+          slices shipped continuously. Most of how I work still comes from
+          there.
         </p>
         <p>
-          Most of my work is the unglamorous kind that keeps a product standing:
-          keeping a database out of CPU saturation, replacing autoscaling that
-          killed long-running jobs, and making an LLM engine fail over cleanly
-          when a provider degrades. I like owning a system from the architecture
-          decision to the incident at 3am.
+          I work across the stack: React, Next.js and React Native in the
+          product, Rails and Node.js services behind it, and the AWS platform
+          and databases underneath. The last few years leaned toward the
+          platform half: autoscaling, database load and LLM provider failover.
         </p>
         <p>
-          I've worked on a meal subscription platform serving 100K daily users,
-          a US health product, and the AI translation platform behind WPML.
+          I like owning a system from the architecture decision to the incident
+          review. When production breaks, I write down what is verified and what
+          is only inferred before I change anything. The write-ups on this site
+          come out of that habit.
         </p>
       </div>
       <aside class="fact-card" aria-label="Quick facts">
@@ -145,36 +145,6 @@ const writing = published.slice(0, 4);
           ))
         }
       </aside>
-    </div>
-  </section>
-
-  <!-- work -->
-  <WorkGrid />
-
-  <!-- writing -->
-  <section class="container section" id="writing">
-    <div class="section-head">
-      <h2 class="section-title">Writing</h2>
-    </div>
-    <div class="write-grid">
-      {
-        writing.map(post => (
-          <a class="write-card" href={`/blog/${post.id}`}>
-            <span class="write-kind">{KIND_LABEL[post.data.kind]}</span>
-            <h3>{post.data.title}</h3>
-            <p>{post.data.lede}</p>
-            <div class="write-meta">
-              {post.data.date.toISOString().slice(0, 10)} ·{" "}
-              {post.data.tags.join(" · ")}
-            </div>
-          </a>
-        ))
-      }
-    </div>
-    <div class="section-cta">
-      <a class="link-arrow" href="/blog">
-        Read all writing <span class="arrow">→</span>
-      </a>
     </div>
   </section>
 
@@ -193,11 +163,27 @@ const writing = published.slice(0, 4);
             </p>
             <div class="job-body">
               <h3 class="job-company">
-                <img src={job.companylogo} alt="" width="26" height="26" />
+                {job.companylogo && (
+                  <img src={job.companylogo} alt="" width="26" height="26" />
+                )}
                 {job.company}
               </h3>
               <p class="job-role">{job.role}</p>
-              <p class="job-desc">{job.desc}</p>
+              <h4 class="job-headline">{job.headline}</h4>
+              <p class="job-desc">{job.story}</p>
+              <p class="job-links">
+                {job.product && (
+                  <a href={job.product.url} target="_blank" rel="noreferrer">
+                    {job.product.name} <ArrowUpRight />
+                  </a>
+                )}
+                {postBySlug.get(job.article) && (
+                  <a href={`/blog/${job.article}`}>
+                    Write-up: {postBySlug.get(job.article)!.data.title}{" "}
+                    <span class="arrow">→</span>
+                  </a>
+                )}
+              </p>
               <ul class="job-bullets">
                 {shown.map(bullet => (
                   <li>{bullet}</li>
@@ -225,56 +211,30 @@ const writing = published.slice(0, 4);
     </ol>
   </section>
 
-  <!-- products -->
-  <section class="container section" id="products">
+  <!-- writing -->
+  <section class="container section" id="writing">
     <div class="section-head">
-      <h2 class="section-title">Products</h2>
+      <h2 class="section-title">Writing</h2>
     </div>
-    <div class="card-grid">
+    <div class="write-grid">
       {
-        bigProjects.projects.map(product => (
-          <article class="card">
-            <span class="logo-badge">{product.badge}</span>
-            <h3>{product.projectName}</h3>
-            <p class="card-tagline">{product.tagline}</p>
-            <dl class="card-meta">
-              <div class="card-row">
-                <dt>Overview</dt>
-                <dd>{product.projectDesc}</dd>
-              </div>
-              {product.scale && (
-                <div class="card-row">
-                  <dt>Scale</dt>
-                  <dd>{product.scale}</dd>
-                </div>
-              )}
-              {product.timeframe && (
-                <div class="card-row">
-                  <dt>Time</dt>
-                  <dd>{product.timeframe}</dd>
-                </div>
-              )}
-              <div class="card-row">
-                <dt>Stack</dt>
-                <dd>
-                  <ul class="tags" aria-label="Product stack">
-                    {product.stack.map(tech => (
-                      <li class="tag">{tech}</li>
-                    ))}
-                  </ul>
-                </dd>
-              </div>
-            </dl>
-            <div class="card-link">
-              {product.footerLink.map(link => (
-                <a href={link.url} target="_blank" rel="noreferrer">
-                  {link.name} <ArrowUpRight />
-                </a>
-              ))}
+        writing.map(post => (
+          <a class="write-card" href={`/blog/${post.id}`}>
+            <span class="write-kind">{KIND_LABEL[post.data.kind]}</span>
+            <h3>{post.data.title}</h3>
+            <p>{post.data.lede}</p>
+            <div class="write-meta">
+              {post.data.date.toISOString().slice(0, 10)} ·{" "}
+              {post.data.tags.join(" · ")}
             </div>
-          </article>
+          </a>
         ))
       }
+    </div>
+    <div class="section-cta">
+      <a class="link-arrow" href="/blog">
+        Read all writing <span class="arrow">→</span>
+      </a>
     </div>
   </section>
 
@@ -310,7 +270,6 @@ const writing = published.slice(0, 4);
     <div class="section-head">
       <h2 class="section-title">Skills</h2>
     </div>
-    <p class="section-lede">{skillsSection.subTitle}</p>
     <div class="skills">
       {
         skillGroups.map(group => (
@@ -375,22 +334,6 @@ const writing = published.slice(0, 4);
           target="_blank"
           rel="noopener noreferrer">GitHub</a
         >
-      </div>
-      <div class="contact-facts">
-        <span>
-          github → <a
-            href={socialMediaLinks.github}
-            target="_blank"
-            rel="noopener noreferrer">{socialMediaLinks.github}</a
-          >
-        </span>
-        <span>
-          linkedin → <a
-            href={socialMediaLinks.linkedin}
-            target="_blank"
-            rel="noopener noreferrer">{socialMediaLinks.linkedin}</a
-          >
-        </span>
       </div>
     </div>
   </section>

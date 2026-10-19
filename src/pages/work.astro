@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import Cover from "../components/Cover.astro";
 import {getCollection} from "astro:content";
 import {publishedPosts, readingMinutes, assertArticlesExist} from "../lib/blog";
 import {breadcrumbSchema} from "../lib/schema";
@@ -16,7 +17,7 @@ const KIND_LABEL = {"case-study": "Case study", note: "Note"};
 
 const title = "Work | Abdelwahab Mahmoud";
 const description =
-  "The problems I'm usually brought in for, and the write-ups behind them: cloud migrations, event-driven services, LLM platforms, mobile apps and reliability.";
+  "The problems I've spent the most time on, and the write-ups behind them: cloud migrations, event-driven services, LLM platforms, mobile apps and reliability.";
 
 const jsonLd = [
   breadcrumbSchema([
@@ -34,8 +35,8 @@ const jsonLd = [
     <header class="blog-head">
       <h1 class="blog-title">Work</h1>
       <p class="blog-subtitle">
-        The problems I'm usually brought in for, and how I approached them. Each
-        card opens a write-up of real work behind it.
+        The problems I've spent the most time on, and how I approached them.
+        Each card opens a write-up of the work behind it.
       </p>
     </header>
 
@@ -86,12 +87,9 @@ const jsonLd = [
                       tabindex="-1"
                       aria-hidden="true"
                     >
-                      <img
+                      <Cover
                         src={post.data.cover}
-                        alt={post.data.coverAlt}
-                        width="1200"
-                        height="600"
-                        loading="lazy"
+                        alt={post.data.coverAlt ?? ""}
                       />
                     </a>
                   )}
@@ -124,9 +122,9 @@ const jsonLd = [
     }
 
     <p class="work-foot">
-      The artifacts behind these write-ups live on the homepage.
-      <a class="link-arrow" href="/#products">Products I helped build</a>
-      <a class="link-arrow" href="/#contact">Tell me what you're building.</a>
+      The jobs and products behind these write-ups are on the homepage.
+      <a class="link-arrow" href="/#experience">Experience</a>
+      <a class="link-arrow" href="/#contact">Get in touch</a>
     </p>
   </div>
 </Base>

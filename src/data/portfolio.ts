@@ -6,8 +6,8 @@ export const greeting = {
   title: "Abdelwahab Mahmoud",
   subTitle: "Senior Software Engineer · Full-stack & Platform",
   valueProp:
-    "I build and operate production systems, mostly on AWS. Eight years across Rails, Node.js and Go, lately LLM platforms over Bedrock, OpenAI and Gemini, with the reliability work that keeps them boring.",
-  chips: ["Cairo, Egypt", "English · Arabic (native)", "8+ years"],
+    "I build and run production systems end to end, from React in the browser to AWS underneath. Most recently: the LLM engine and cloud platform behind an AI translation product that peaked at ~100K requests an hour.",
+  startHere: ["fargate", "engine", "aurora"],
   resumeLink: "/resume.pdf",
   githubLink: "https://github.com/abdelwahab313",
   linkedinLink: "https://www.linkedin.com/in/abdelwahab313/"
@@ -89,26 +89,13 @@ export const cvStack = {
     "Jest",
     "VCR"
   ],
-  wordpress: [
-    "WPML ecosystem",
-    "plugin update safety",
+  compatibility: [
     "backwards compatibility",
+    "deprecation paths",
+    "contract tests",
     "i18n"
   ],
   spoken: ["English", "Arabic (native)"]
-};
-
-export const skillsSection = {
-  title: "What I do",
-  subTitle:
-    "Backend and platform first: Ruby on Rails, AWS and the database under it. LLM systems over Bedrock, OpenAI and Gemini, with the reliability work that makes them boring. React and Hotwire when the feature needs a front end.",
-  skills: [
-    "Backend systems in Ruby on Rails, from background job internals to metered billing.",
-    "AWS platform work: ECS Fargate, Lambda, Terraform and CloudWatch, from capacity study to deploy pipeline.",
-    "LLM integration: a provider-agnostic engine over Bedrock, OpenAI and Gemini, with fallback chains, evaluation harnesses and MCP.",
-    "Root-cause investigation on production incidents, separating what is verified from what is inferred.",
-    "Frontend when it is needed: React, Hotwire, React Native."
-  ]
 };
 
 export const educationInfo = {
@@ -122,16 +109,18 @@ export const educationInfo = {
   ]
 };
 
-// CV durations/tags. Same rows as CONTENT.md section 3.
+// CV durations/tags. Same rows as CONTENT.md section 3. Each entry leads
+// with the hardest problem of the job; `story` absorbs the CV bullets it
+// tells, so `descBullets` holds only the rest.
 export const workExperiences = {
   experience: [
     {
       role: "Senior Software Engineer",
-      company: "OnTheGoSystems (WPML — WordPress plugins)",
-      companylogo: "/img/otgsLogo.png",
+      company: "AI translation platform (under NDA)",
+      companylogo: "",
       date: "December 2024 – September 2026",
       duration: "1 yr 9 mo",
-      location: "Remote (Hong Kong)",
+      location: "Remote",
       tags: [
         "Ruby on Rails",
         "React",
@@ -142,18 +131,20 @@ export const workExperiences = {
         "Bedrock",
         "DynamoDB"
       ],
-      desc: "Worked on Private Translation Cloud (PTC), an AI translation platform from the team behind WPML, the multilingual plugin that powers 1.5M+ WordPress sites. Full-stack product work in Rails and React, with the AWS platform underneath it.",
+      article: "fargate",
+      headline:
+        "Scaled AI translation to 500K jobs an hour at peak without killing a job mid-run",
+      story:
+        "The product was an AI translation platform that ran LLM jobs on AWS. I did full-stack product work in Rails and React and owned the AWS platform under it. Load sat at ~5K jobs an hour and peaked at 500K. Jobs could run for hours, and the default ECS autoscaling stopped busy tasks on scale-in, so every peak cost work in progress. I migrated the product onto ECS Fargate with Terraform and replaced the scaler with a queue-depth autoscaler on Lambda, deployment state in DynamoDB, that drains a task before stopping it. The fleet handled ~100K requests an hour at peak across background processing and LLM inference.",
       descBullets: [
-        "Built the multi-provider translation LLM engine behind WPML (Bedrock, OpenAI, Gemini): fallback chains, JSON repair and rate-limit retries keep translations flowing when a provider degrades.",
-        "Built the guardrails agents run behind: an MCP server exposing live databases, logs and selected APIs through authenticated, monitored access, adopted as the team's standard agent integration path.",
-        "Owned credits and billing correctness for a metered LLM product; one authorization architecture to replace scattered permission checks.",
-        "Owned an agentic triage platform that handled first-line incident and support inquiries, cutting Mean Time To Resolve.",
+        "Built the multi-provider translation LLM engine with the team (Bedrock, OpenAI, Gemini): fallback chains, JSON repair and rate-limit retries kept translations flowing when a provider degraded.",
         "Cleared Aurora MySQL's worst-query backlog query by query: rewritten plans, covering indexes and restructured hot reads, until CPU pressure stopped turning into incidents.",
-        "Replaced ECS autoscaling with a queue-depth Lambda autoscaler (DynamoDB deployment state store) that drained long-running jobs instead of killing them, sustaining 500K jobs/hour at peak against a ~5K/hour baseline.",
         "Fixed lock contention under concurrent writes: exclusive advisory locks on hot paths, batch-processing rewrites for load management, and connection-pool tuning after autoscaling exposed pooling contention on the shared database.",
+        "Built the MCP server the team's agents ran behind, exposing live databases, logs and selected APIs through authenticated, monitored access. It became the team's standard agent integration path.",
+        "Owned credits and billing correctness for a metered LLM product, and replaced scattered permission checks with one authorization architecture.",
+        "Owned an agentic triage platform that handled first-line incident and support inquiries, cutting Mean Time To Resolve.",
         "Owned the GitLab CI/CD pipelines: build, e2e test, SAST and deploy gates for every service in the product.",
-        "Kept plugin APIs backwards compatible across releases with deprecation paths and contract tests.",
-        "Migrated the product onto AWS ECS Fargate running Docker containers, and owned the platform and its Terraform; the fleet handled ~100K requests/hour at peak across background processing and LLM inference."
+        "Kept public APIs backwards compatible across releases with deprecation paths and contract tests."
       ]
     },
     {
@@ -164,15 +155,17 @@ export const workExperiences = {
       duration: "3 yrs",
       location: "Riyadh",
       tags: ["React Native", "Node.js", "AWS", "Datadog", "Redis"],
-      desc: "Built and scaled a meal subscription platform serving customers across Saudi Arabia, with full-stack work across React Native and Node.js services.",
+      product: {name: "Dailymealz", url: "https://dailymealz.com/"},
+      article: "fulfillment-extraction",
+      headline:
+        "Pulled fulfillment out of a PHP monolith while 100K daily users kept ordering",
+      story:
+        "Dailymealz runs meal subscriptions across Saudi Arabia, and every order moves through kitchen, driver and delivery in real time. I built the order service that pushes that status to mobile and web clients over Node.js and Socket.IO, then took the fulfillment component out of the PHP/Laravel monolith behind it. A full rewrite was off the table: a team of six could not freeze features for months to run two partially consistent systems. So fulfillment came out piece by piece, as a standalone service passing state changes over AWS SQS behind a REST API contract.",
       descBullets: [
-        "Built the real-time order service behind a 100K daily-user delivery product: kitchen, driver and delivery status pushed to mobile and web clients over Node.js and Socket.IO.",
         "Cut Mean Time To Resolve by 30% by instrumenting order, driver and kitchen flows with Datadog and OpenTelemetry.",
-        "Decomposed the fulfillment component out of the PHP/Laravel monolith into a standalone service in a distributed event-driven architecture, passing state changes over AWS SQS behind a REST API contract.",
-        "Chose incremental extraction over a full event-driven rewrite, because a team of six could not freeze features for months to run two partially consistent systems.",
-        "Served hot order state from Redis in a write-behind cache pattern with MySQL behind it, keeping status fan-out off the transactional path.",
-        "Migrated the real-time order service from JavaScript to TypeScript so event and message payload mismatches fail at compile time, not at runtime in front of customers.",
-        "Led a team of five building a driver location check-in system: planning, reviews and pairing across the driver app."
+        "Served hot order state from Redis in a write-behind cache with MySQL behind it, keeping status fan-out off the transactional path.",
+        "Migrated the real-time order service from JavaScript to TypeScript, so event and message payload mismatches failed at compile time instead of in front of customers.",
+        "Led a team of five building a driver location check-in system in the React Native driver app: planning, reviews and pairing."
       ]
     },
     {
@@ -183,11 +176,15 @@ export const workExperiences = {
       duration: "1 yr 2 mo",
       location: "Cairo",
       tags: ["React", "Ruby on Rails"],
-      desc: "Built Nformacy, a knowledge marketplace that connects business advisors with companies that need their expertise. Full-stack work in React and Ruby on Rails, from the first MVP to the beta launch, plus the cloud infrastructure and deploy pipelines.",
+      product: {name: "Nformacy", url: "https://nformacy.com/"},
+      article: "zero-to-launch",
+      headline: "Took a two-sided marketplace from empty repo to beta launch",
+      story:
+        "Nformacy connects business advisors with companies that need their expertise. I built it full stack in React and Ruby on Rails, from the first MVP to the beta launch, along with the cloud infrastructure and deploy pipelines it ran on.",
       descBullets: [
         "Led full-stack features from requirements to deployment, and moved the web apps to a SaaS model.",
-        "Built mentor calendar booking with Zoom, ClickUp and calendar integrations.",
-        "Wrote BDD tests and managed CI/CD pipelines."
+        "Built mentor calendar booking on Zoom, ClickUp and calendar integrations.",
+        "Wrote BDD tests and owned the CI/CD pipelines."
       ]
     },
     {
@@ -198,7 +195,12 @@ export const workExperiences = {
       duration: "2 yrs 9 mo",
       location: "Cairo",
       tags: ["React", "React Native", "Node.js", "Java Spring", "TDD"],
-      desc: "First job in tech, at a Cairo venture studio that became DevSquads, an agile consultancy that takes XP seriously: TDD, pair programming and continuous delivery. Delivered products for international clients, including Shapa, a US health tech platform (React, React Native, Node.js, Java Spring).",
+      product: {name: "Shapa", url: "https://shapahealth.com/"},
+      article: "",
+      headline:
+        "Built Shapa's mobile app and backend test-first, and mentored teams adopting XP",
+      story:
+        "DevSquads started as Fikr Labs, a Cairo venture studio, and became an agile consultancy that takes Extreme Programming seriously: TDD, pair programming and continuous delivery. I delivered products for its international clients. For Shapa, a US health product built around a numberless smart scale and a behavior change program, I built the mobile app and the backend behind it in React Native, Node.js and Java Spring.",
       descBullets: [
         "Built software in self-organizing Extreme Programming teams with TDD, thin vertical slices and test-covered refactoring of legacy code, across React Native, Ruby on Rails, Java Spring and React.",
         "Mentored teams adopting XP and Agile practices: pairing, code review discipline and iterative planning."
@@ -207,61 +209,10 @@ export const workExperiences = {
   ]
 };
 
-export const bigProjects = {
-  title: "Products",
-  subtitle: "Products I helped build",
-  projects: [
-    {
-      badge: "PTC",
-      projectName: "Private Translation Cloud",
-      tagline: "AI translation platform from the team behind WPML.",
-      projectDesc:
-        "I worked on the AWS platform and the multi-provider LLM engine that translates websites automatically, moving the product onto ECS Fargate and keeping its database and autoscaling healthy.",
-      scale: "1.5M+ WordPress sites",
-      timeframe: "Dec 2024 – Sep 2026",
-      stack: ["Ruby on Rails", "React", "AWS", "Terraform", "Bedrock"],
-      footerLink: [{name: "Visit website", url: "https://ptc.wpml.org/"}]
-    },
-    {
-      badge: "DM",
-      projectName: "Dailymealz",
-      tagline: "Meal subscription platform for customers across Saudi Arabia.",
-      projectDesc:
-        "I spent three years building the real-time order service, the React Native driver app, and the move from a PHP monolith to event-driven services.",
-      scale: "100K daily users",
-      timeframe: "Dec 2021 – Dec 2024",
-      stack: ["React Native", "Node.js", "AWS", "Redis"],
-      footerLink: [{name: "Visit website", url: "https://dailymealz.com/"}]
-    },
-    {
-      badge: "SH",
-      projectName: "Shapa",
-      tagline:
-        "US health product built around a numberless smart scale and a behavior change program.",
-      projectDesc:
-        "I built the mobile app and the backend behind it as part of the DevSquads XP team.",
-      timeframe: "2018 – 2020",
-      stack: ["React", "React Native", "Node.js", "Java Spring"],
-      footerLink: [{name: "Visit website", url: "https://shapahealth.com/"}]
-    },
-    {
-      badge: "NF",
-      projectName: "Nformacy",
-      tagline:
-        "Knowledge marketplace connecting business advisors with companies.",
-      projectDesc:
-        "I built it from the first MVP to the beta launch, plus the cloud infrastructure and deploy pipelines.",
-      timeframe: "Oct 2020 – Dec 2021",
-      stack: ["React", "Ruby on Rails"],
-      footerLink: [{name: "Visit website", url: "https://nformacy.com/"}]
-    }
-  ]
-};
-
 export const contactInfo = {
   title: "Contact me",
   subtitle:
-    "Hiring for a senior backend or platform role, or stuck on a production problem? Email me.",
+    "Hiring for a senior full-stack or platform role, or stuck on a production problem? Email me.",
   email_address: "abdelwahabahmed93@gmail.com"
 };
 
@@ -271,33 +222,33 @@ export const openSource = {
     {
       name: "ecs-drain-scaler",
       url: "https://github.com/abdelwahab313/ecs-drain-scaler",
-      desc: "Lambda-based ECS autoscaler that drains long-running jobs before scale-in.",
+      desc: "Backlog-driven scaling for queue workers on ECS Fargate, with a worker protocol that keeps scale-in and deploys from killing a task mid-job.",
       role: "Author",
-      outcome: "Prevents mid-job termination on Fargate Spot/scale-in.",
-      tags: ["Go", "AWS", "Terraform"]
+      outcome: "Design stage: ADRs and the scaling policy in Go, with tests.",
+      tags: ["Go", "AWS", "SQS"]
     },
     {
       name: "focusflow",
       url: "https://github.com/abdelwahab313/focusflow",
-      desc: "Time and task focus app.",
+      desc: "Offline-first daily planner and focus timer, with an optional local agent that proposes tasks from open tickets, merge requests and parked branches.",
       role: "Author",
-      outcome: "Minimalist flow tracking.",
+      outcome: "Built for my own working day.",
       tags: ["TypeScript", "PocketBase"]
     },
     {
       name: "handoff-mcp-server",
       url: "https://github.com/abdelwahab313/handoff-mcp-server",
-      desc: "MCP server for authenticated access to logs, DB, and APIs.",
+      desc: "MCP server that saves an AI coding agent's task state and loads it back in the next session as a short briefing.",
       role: "Author",
-      outcome: "Standardized agent access path.",
+      outcome: "A briefing, not a transcript: one to two thousand tokens.",
       tags: ["TypeScript", "MCP"]
     },
     {
       name: "egy-finance-radar",
       url: "https://github.com/abdelwahab313/egy-finance-radar",
-      desc: "Egyptian finance data radar.",
+      desc: "Research tool for the Egyptian Exchange: positions in Postgres, fundamentals, technical signals and dated recommendations.",
       role: "Author",
-      outcome: "Aggregates signals for analysis.",
+      outcome: "Every number carries where it came from.",
       tags: ["Python", "PostgreSQL", "Next.js"]
     }
   ]
@@ -306,9 +257,9 @@ export const openSource = {
 export const workChallenges = {
   title: "What I work on",
   subtitle:
-    "The problems I'm usually brought in for. Each card is backed by something I shipped; open one to see how I approached it.",
+    "The problems I've spent the most time on. Each card is backed by something I shipped; open one to see how I approached it.",
   footer:
-    "More than the cards cover, when a product needs it: REST APIs, internal tools and the glue between systems.",
+    "Plus the everyday work around them: REST APIs, internal tools and the glue between systems.",
   cards: [
     {
       id: "platform-migrations",
@@ -320,10 +271,6 @@ export const workChallenges = {
         "Infrastructure as code with Terraform",
         "Kept the database and autoscaling healthy through the move"
       ],
-      project: {
-        name: "Private Translation Cloud",
-        url: "https://ptc.wpml.org/"
-      },
       article: "fargate"
     },
     {
@@ -336,7 +283,6 @@ export const workChallenges = {
         "Moved a PHP monolith to event-driven services",
         "Queues and streams with SQS and Kafka"
       ],
-      project: {name: "Dailymealz", url: "https://dailymealz.com/"},
       article: "fulfillment-extraction"
     },
     {
@@ -349,10 +295,6 @@ export const workChallenges = {
         "Agentic workflows and the Claude Agent SDK",
         "Tracing and evals with Langfuse and MCP tooling"
       ],
-      project: {
-        name: "Private Translation Cloud",
-        url: "https://ptc.wpml.org/"
-      },
       article: "engine"
     },
     {
@@ -365,7 +307,6 @@ export const workChallenges = {
         "Cloud infrastructure and deploy pipelines",
         "Full-stack delivery across React and Ruby on Rails"
       ],
-      project: {name: "Nformacy", url: "https://nformacy.com/"},
       article: "zero-to-launch"
     },
     {
@@ -378,7 +319,6 @@ export const workChallenges = {
         "Cross-platform health app built around a smart scale",
         "One backend serving both mobile and web"
       ],
-      project: {name: "Dailymealz", url: "https://dailymealz.com/"},
       article: "mobile-backend"
     },
     {
@@ -391,10 +331,6 @@ export const workChallenges = {
         "Autoscaling that respects long-running jobs",
         "Datadog and OpenTelemetry tracing"
       ],
-      project: {
-        name: "Private Translation Cloud",
-        url: "https://ptc.wpml.org/"
-      },
       article: "aurora"
     }
   ]

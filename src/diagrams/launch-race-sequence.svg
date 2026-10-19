@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 540" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+    <marker id="mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--muted, #949aa2)"/>
+    </marker>
+  </defs>
+
+  <!-- lifelines -->
+  <g stroke="var(--border, #262b33)" stroke-width="1.5">
+    <line x1="200" y1="74" x2="200" y2="520"/>
+    <line x1="540" y1="74" x2="540" y2="520"/>
+    <line x1="880" y1="74" x2="880" y2="520"/>
+  </g>
+
+  <!-- participants -->
+  <rect x="100" y="30" width="200" height="44" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="200" y="57" fill="var(--ink, #edeae3)" text-anchor="middle">session A</text>
+  <rect x="440" y="30" width="200" height="44" rx="8" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="540" y="57" fill="var(--ink, #edeae3)" text-anchor="middle">Postgres, bookings</text>
+  <rect x="780" y="30" width="200" height="44" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="880" y="57" fill="var(--ink, #edeae3)" text-anchor="middle">session B</text>
+
+  <!-- A checks -->
+  <line x1="200" y1="120" x2="532" y2="120" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="370" y="109" fill="var(--ink, #edeae3)" text-anchor="middle">SELECT overlapping rows</text>
+  <line x1="540" y1="148" x2="208" y2="148" stroke="var(--muted, #949aa2)" stroke-width="1.5" marker-end="url(#mut)"/>
+  <text x="370" y="166" fill="var(--muted, #949aa2)" text-anchor="middle">0 rows</text>
+
+  <!-- B checks -->
+  <line x1="880" y1="190" x2="548" y2="190" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="710" y="179" fill="var(--ink, #edeae3)" text-anchor="middle">SELECT overlapping rows</text>
+  <line x1="540" y1="218" x2="872" y2="218" stroke="var(--muted, #949aa2)" stroke-width="1.5" marker-end="url(#mut)"/>
+  <text x="710" y="236" fill="var(--muted, #949aa2)" text-anchor="middle">0 rows, A has not committed</text>
+
+  <!-- A inserts -->
+  <line x1="200" y1="270" x2="532" y2="270" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="370" y="259" fill="var(--ink, #edeae3)" text-anchor="middle">INSERT 10:00 to 11:00</text>
+  <line x1="540" y1="298" x2="208" y2="298" stroke="var(--muted, #949aa2)" stroke-width="1.5" marker-end="url(#mut)"/>
+  <text x="370" y="316" fill="var(--muted, #949aa2)" text-anchor="middle">1 row, uncommitted</text>
+
+  <!-- B inserts and waits -->
+  <line x1="880" y1="340" x2="548" y2="340" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="710" y="329" fill="var(--ink, #edeae3)" text-anchor="middle">INSERT 10:30 to 11:30</text>
+  <rect x="873" y="340" width="14" height="80" rx="4" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="898" y="384" fill="var(--muted, #949aa2)">waits on A</text>
+
+  <!-- what an application-only check would have done -->
+  <line x1="540" y1="368" x2="872" y2="368" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="6 6" marker-end="url(#mut)"/>
+  <text x="710" y="389" fill="var(--muted, #949aa2)" text-anchor="middle">without the constraint:</text>
+  <text x="710" y="409" fill="var(--muted, #949aa2)" text-anchor="middle">second row, double booked</text>
+
+  <!-- A commits -->
+  <line x1="200" y1="440" x2="532" y2="440" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="370" y="429" fill="var(--ink, #edeae3)" text-anchor="middle">COMMIT</text>
+
+  <!-- the constraint refuses B -->
+  <line x1="540" y1="476" x2="872" y2="476" stroke="var(--accent, #57c7ba)" stroke-width="1.5" marker-end="url(#acc)"/>
+  <text x="710" y="465" fill="var(--accent, #57c7ba)" text-anchor="middle">23P01 exclusion_violation</text>
+  <text x="710" y="500" fill="var(--muted, #949aa2)" text-anchor="middle">controller answers 409 slot_taken</text>
+</svg>

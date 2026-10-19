@@ -1,22 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-label="Three provider nodes converging into one engine">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)">
   <defs>
-    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
-      <circle cx="2" cy="2" r="1.5" fill="#2a2f38"/>
-    </pattern>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+    <marker id="mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--muted, #949aa2)"/>
+    </marker>
   </defs>
-  <rect width="1200" height="600" fill="#0e1013"/>
-  <rect width="1200" height="600" fill="url(#dots)"/>
-  <rect x="40" y="40" width="1120" height="520" fill="none" stroke="#2a2f38" stroke-width="2"/>
-  <g fill="none" stroke-width="4">
-    <circle cx="260" cy="180" r="52" stroke="#8b9299"/>
-    <circle cx="260" cy="300" r="52" stroke="#edeae3"/>
-    <circle cx="260" cy="420" r="52" stroke="#8b9299"/>
-    <circle cx="820" cy="300" r="88" stroke="#57c7ba"/>
-  </g>
-  <path d="M320 180 C 480 180 560 250 740 288" fill="none" stroke="#57c7ba" stroke-width="3"/>
-  <path d="M320 300 H 732" fill="none" stroke="#57c7ba" stroke-width="3"/>
-  <path d="M320 420 C 480 420 560 350 740 312" fill="none" stroke="#57c7ba" stroke-width="3"/>
-  <text x="820" y="308" text-anchor="middle" font-family="monospace" font-size="30" fill="#0e1013">LLM</text>
-  <text x="960" y="250" font-family="monospace" font-size="22" fill="#8b9299">failover</text>
-  <text x="960" y="380" font-family="monospace" font-size="22" fill="#8b9299">fallback</text>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  <!-- the engine -->
+  <rect x="90" y="200" width="310" height="200" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="245" y="310" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">engine</text>
+
+  <!-- primary: rate limited, the chain routes around it -->
+  <path d="M400 300 C600 300, 600 130, 790 130" fill="none" stroke="var(--muted, #949aa2)" stroke-width="4" stroke-dasharray="12 12" marker-end="url(#mut)"/>
+  <text x="600" y="176" font-size="28" fill="var(--muted, #949aa2)" text-anchor="middle">429</text>
+  <rect x="800" y="80" width="310" height="100" rx="18" fill="none" stroke="var(--muted, #949aa2)" stroke-width="4" stroke-dasharray="12 12"/>
+  <text x="955" y="140" font-size="30" fill="var(--muted, #949aa2)" text-anchor="middle">Bedrock</text>
+
+  <!-- second: takes the call -->
+  <path d="M400 300 H790" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="4" marker-end="url(#acc)"/>
+  <rect x="800" y="250" width="310" height="100" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <text x="955" y="310" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">OpenAI</text>
+
+  <!-- third: in the chain, not needed -->
+  <path d="M400 300 C600 300, 600 470, 790 470" fill="none" stroke="var(--muted, #949aa2)" stroke-width="4" marker-end="url(#mut)"/>
+  <rect x="800" y="420" width="310" height="100" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <text x="955" y="480" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">Gemini</text>
 </svg>

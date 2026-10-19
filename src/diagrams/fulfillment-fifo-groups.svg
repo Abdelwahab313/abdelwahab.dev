@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 370" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="44" fill="var(--ink, #edeae3)">one FIFO queue, two message groups</text>
+
+  <!-- group: order 41 -->
+  <text x="40" y="118" fill="var(--ink, #edeae3)">MessageGroupId</text>
+  <text x="40" y="138" fill="var(--muted, #949aa2)">order 41</text>
+
+  <rect x="260" y="96" width="140" height="48" rx="8" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="330" y="125" fill="var(--ink, #edeae3)" text-anchor="middle">preparing v1</text>
+  <text x="330" y="170" fill="var(--accent, #57c7ba)" text-anchor="middle">in flight</text>
+
+  <line x1="400" y1="120" x2="452" y2="120" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <rect x="460" y="96" width="140" height="48" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="530" y="125" fill="var(--ink, #edeae3)" text-anchor="middle">ready v2</text>
+
+  <line x1="600" y1="120" x2="652" y2="120" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <rect x="660" y="96" width="140" height="48" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="730" y="125" fill="var(--ink, #edeae3)" text-anchor="middle">picked_up v3</text>
+
+  <line x1="800" y1="120" x2="852" y2="120" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <rect x="860" y="96" width="140" height="48" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="930" y="125" fill="var(--ink, #edeae3)" text-anchor="middle">delivered v4</text>
+
+  <text x="765" y="170" fill="var(--muted, #949aa2)" text-anchor="middle">wait: strict order, one message at a time per group</text>
+
+  <!-- between groups -->
+  <text x="630" y="214" fill="var(--muted, #949aa2)" text-anchor="middle">groups have no order relative to each other, so they run in parallel</text>
+
+  <!-- group: order 42 -->
+  <text x="40" y="262" fill="var(--ink, #edeae3)">MessageGroupId</text>
+  <text x="40" y="282" fill="var(--muted, #949aa2)">order 42</text>
+
+  <rect x="260" y="240" width="140" height="48" rx="8" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="330" y="269" fill="var(--ink, #edeae3)" text-anchor="middle">preparing v1</text>
+  <text x="330" y="314" fill="var(--accent, #57c7ba)" text-anchor="middle">in flight</text>
+
+  <line x1="400" y1="264" x2="452" y2="264" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <rect x="460" y="240" width="140" height="48" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="530" y="269" fill="var(--ink, #edeae3)" text-anchor="middle">ready v2</text>
+
+  <rect x="660" y="240" width="140" height="48" rx="8" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <text x="730" y="269" fill="var(--muted, #949aa2)" text-anchor="middle">ready v2 again</text>
+  <text x="730" y="314" fill="var(--muted, #949aa2)" text-anchor="middle">same deduplication ID in 5 min: dropped</text>
+</svg>

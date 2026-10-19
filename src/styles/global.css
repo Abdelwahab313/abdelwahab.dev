@@ -13,7 +13,6 @@
   --radius: 14px;
   --radius-lg: 22px;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6.4 11.6 2.8 8l1.1-1.1 2.5 2.5 5.7-5.7 1.1 1.1z'/%3E%3C/svg%3E");
 
   --bg: #0e1013;
   --bg-2: #12151a;
@@ -319,32 +318,6 @@ img {
   color: var(--body);
 }
 
-.quick-facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.9rem;
-  margin: 1.6rem 0 0;
-  padding: 0;
-  list-style: none;
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  color: var(--muted);
-}
-
-.quick-facts li {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.quick-facts li + li::before {
-  content: "";
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--border-strong);
-}
-
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -564,7 +537,7 @@ a:hover .arrow svg {
 }
 
 .work-foot .link-arrow {
-  margin-left: 0.4rem;
+  margin-left: 1rem;
 }
 
 .cs-grid {
@@ -590,14 +563,12 @@ a:hover .arrow svg {
   background: var(--surface);
 }
 
-.cs-cover img {
+.cs-cover .cover {
   display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 2 / 1;
-  object-fit: cover;
   border: 1px solid var(--border);
   border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
   margin-bottom: 0.9rem;
 }
 
@@ -618,132 +589,6 @@ a:hover .arrow svg {
 
 .cs-card .post-lede {
   font-size: 14.5px;
-}
-
-.work-dialog {
-  width: min(42rem, calc(100vw - 2rem));
-  max-height: 85dvh;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: var(--shadow-hover);
-  overflow-y: auto;
-}
-
-.work-dialog::backdrop {
-  background: rgba(4, 8, 12, 0.62);
-  backdrop-filter: blur(4px);
-}
-
-.work-dialog[open] {
-  animation: work-dialog-in 0.16s ease-out;
-}
-
-@keyframes work-dialog-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px) scale(0.99);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.work-dialog-inner {
-  padding: 1.75rem;
-}
-
-.work-dialog-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.work-dialog-title {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-
-.work-close {
-  display: inline-flex;
-  margin: -0.4rem;
-  padding: 0.4rem;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.work-close:hover {
-  background: var(--surface-2);
-  color: var(--ink);
-}
-
-.work-dialog-lede {
-  margin: 1rem 0 0;
-  font-size: 15.5px;
-  line-height: 1.65;
-  color: var(--body);
-}
-
-.work-dialog-h {
-  margin: 1.75rem 0 0;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.work-covers {
-  display: grid;
-  gap: 0.55rem;
-  margin: 0.85rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.work-covers li {
-  position: relative;
-  padding-left: 1.5rem;
-  font-size: 15px;
-  line-height: 1.55;
-  color: var(--body);
-}
-
-.work-covers li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.32em;
-  width: 14px;
-  height: 14px;
-  background: var(--accent);
-  -webkit-mask: var(--check) center / contain no-repeat;
-  mask: var(--check) center / contain no-repeat;
-}
-
-.work-dialog-foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.7rem;
-  margin-top: 1.9rem;
-}
-
-.work-soon {
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  color: var(--muted);
 }
 
 /* ---------- about ---------- */
@@ -993,11 +838,38 @@ a:hover .arrow svg {
   color: var(--muted);
 }
 
+.job-headline {
+  margin: 1rem 0 0;
+  max-width: 40rem;
+  font-family: var(--font-serif);
+  font-size: clamp(19px, 2.2vw, 23px);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
 .job-desc {
-  margin: 0.9rem 0 0;
+  margin: 0.7rem 0 0;
+  max-width: 46rem;
   font-size: 15.5px;
   line-height: 1.72;
   color: var(--body);
+}
+
+.job-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  margin: 0.8rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.job-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .job-bullets {
@@ -1065,101 +937,6 @@ a:hover .arrow svg {
   border: 1px solid var(--border);
   border-radius: 7px;
   padding: 0.18rem 0.55rem;
-}
-
-/* ---------- products (dossier cards) ---------- */
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-}
-
-.card {
-  display: flex;
-  flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.6rem;
-  box-shadow: var(--shadow);
-  transition:
-    transform 0.16s var(--ease),
-    border-color 0.16s var(--ease);
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
-  border-color: var(--border-strong);
-}
-
-.logo-badge {
-  width: 40px;
-  height: 40px;
-  border-radius: 11px;
-  display: grid;
-  place-items: center;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent);
-  background: var(--accent-soft);
-  border: 1px solid var(--border);
-}
-
-.card h3 {
-  margin: 1rem 0 0;
-  font-family: var(--font-sans);
-  font-size: 18.5px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.card-tagline {
-  margin: 0.5rem 0 0;
-  font-size: 14.5px;
-  line-height: 1.6;
-  color: var(--muted);
-}
-
-.card-meta {
-  margin: 1.1rem 0 0;
-}
-
-.card-row {
-  display: grid;
-  grid-template-columns: 5.5rem 1fr;
-  gap: 0.75rem;
-  padding: 0.6rem 0;
-  border-top: 1px solid var(--border);
-}
-
-.card-row dt {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding-top: 0.15rem;
-}
-
-.card-row dd {
-  margin: 0;
-  font-size: 14.5px;
-  line-height: 1.65;
-  color: var(--body);
-}
-
-.card-row .tags {
-  margin: 0;
-}
-
-.card-link {
-  margin-top: auto;
-  padding-top: 1.1rem;
-  font-family: var(--font-mono);
-  font-size: 12.5px;
 }
 
 /* ---------- open source ---------- */
@@ -1352,25 +1129,6 @@ a:hover .arrow svg {
   gap: 0.7rem;
   justify-content: center;
   flex-wrap: wrap;
-}
-
-.contact-facts {
-  margin-top: 1.9rem;
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  color: var(--muted);
-  display: flex;
-  gap: 0.4rem 1.5rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.contact-facts a {
-  color: var(--muted);
-}
-
-.contact-facts a:hover {
-  color: var(--accent);
 }
 
 /* ---------- footer ---------- */
@@ -1628,15 +1386,19 @@ a:hover .arrow svg {
   display: none;
 }
 
-.featured-cover img,
-.row-cover img {
+.featured-cover .cover,
+.row-cover .cover {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.cover svg {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 2 / 1;
-  object-fit: cover;
-  border: 1px solid var(--border);
-  border-radius: 10px;
 }
 
 .featured-title {
@@ -1763,14 +1525,31 @@ a:hover .arrow svg {
   margin: 1.5rem 0 0;
 }
 
-.post-cover img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 2 / 1;
-  object-fit: cover;
+.post-cover .cover {
   border: 1px solid var(--border);
   border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.post-body .diagram {
+  margin: 2rem 0;
+  overflow-x: auto;
+}
+
+.post-body .diagram svg {
+  display: block;
+  width: 100%;
+  min-width: 40rem;
+  height: auto;
+}
+
+.post-body .diagram figcaption {
+  margin-top: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--muted);
 }
 
 .post-body {
@@ -1854,6 +1633,7 @@ html[data-theme="light"] .astro-code span {
   background: var(--surface);
   font-family: var(--font-mono);
   font-size: 0.9em;
+  overflow-wrap: anywhere;
 }
 
 .post-body table {
@@ -2016,9 +1796,6 @@ html[data-theme="light"] .astro-code span {
   }
   .cs-grid {
     grid-template-columns: 1fr;
-  }
-  .work-dialog-inner {
-    padding: 1.4rem;
   }
 }
 

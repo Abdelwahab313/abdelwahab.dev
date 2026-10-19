@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import Cover from "../../components/Cover.astro";
 import {getCollection, render} from "astro:content";
 import {
   publishedPosts,
@@ -66,13 +67,7 @@ const jsonLd = [
       {
         data.cover && (
           <figure class="post-cover">
-            <img
-              src={data.cover}
-              alt={data.coverAlt}
-              width="1200"
-              height="600"
-              loading="eager"
-            />
+            <Cover src={data.cover} alt={data.coverAlt ?? ""} />
           </figure>
         )
       }

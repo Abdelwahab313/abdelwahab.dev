@@ -1,28 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-label="Database cylinder with a heavy query hitting an index">
-  <defs>
-    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
-      <circle cx="2" cy="2" r="1.5" fill="#2a2f38"/>
-    </pattern>
-  </defs>
-  <rect width="1200" height="600" fill="#0e1013"/>
-  <rect width="1200" height="600" fill="url(#dots)"/>
-  <rect x="40" y="40" width="1120" height="520" fill="none" stroke="#2a2f38" stroke-width="2"/>
-  <g fill="none" stroke="#edeae3" stroke-width="4">
-    <path d="M620 140 H940 V420 H620"/>
-    <ellipse cx="620" cy="140" rx="52" ry="26"/>
-    <path d="M620 166 V446"/>
-    <ellipse cx="620" cy="420" rx="52" ry="26"/>
-    <ellipse cx="620" cy="290" rx="52" ry="26" stroke-dasharray="10 12"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)">
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  <!-- the broadcast -->
+  <rect x="90" y="230" width="240" height="140" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <text x="210" y="310" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">broadcast</text>
+
+  <!-- 13 of the thousand or so calls, fanning out from one point -->
+  <g stroke="var(--muted, #949aa2)" stroke-width="3" fill="none" stroke-linecap="round">
+    <line x1="330" y1="300" x2="820" y2="212"/>
+    <line x1="330" y1="300" x2="820" y2="229"/>
+    <line x1="330" y1="300" x2="820" y2="246"/>
+    <line x1="330" y1="300" x2="820" y2="263"/>
+    <line x1="330" y1="300" x2="820" y2="280"/>
+    <line x1="330" y1="300" x2="820" y2="297"/>
+    <line x1="330" y1="300" x2="820" y2="314"/>
+    <line x1="330" y1="300" x2="820" y2="331"/>
+    <line x1="330" y1="300" x2="820" y2="348"/>
+    <line x1="330" y1="300" x2="820" y2="365"/>
+    <line x1="330" y1="300" x2="820" y2="382"/>
+    <line x1="330" y1="300" x2="820" y2="399"/>
+    <line x1="330" y1="300" x2="820" y2="416"/>
   </g>
-  <g stroke="#57c7ba" stroke-width="3">
-    <path d="M200 240 H540" marker-end="url(#q)"/>
-    <path d="M200 300 H540" marker-end="url(#q)"/>
-  </g>
-  <defs>
-    <marker id="q" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
-      <path d="M0 0 L10 5 L0 10 z" fill="#57c7ba"/>
-    </marker>
-  </defs>
-  <text x="200" y="200" font-family="monospace" font-size="24" fill="#8b9299">7.33M rows</text>
-  <text x="780" y="480" font-family="monospace" font-size="22" fill="#8b9299">covering index</text>
+  <text x="575" y="200" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">~1,000 calls</text>
+
+  <!-- Aurora, pinned -->
+  <path d="M820 190 V430 A145 40 0 0 0 1110 430 V190" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <ellipse cx="965" cy="190" rx="145" ry="40" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="965" y="290" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">Aurora</text>
+  <rect x="865" y="318" width="200" height="16" rx="8" fill="var(--border, #262b33)"/>
+  <rect x="865" y="318" width="200" height="16" rx="8" fill="var(--accent, #57c7ba)"/>
+  <text x="965" y="382" font-size="28" fill="var(--accent, #57c7ba)" text-anchor="middle">100% CPU</text>
 </svg>

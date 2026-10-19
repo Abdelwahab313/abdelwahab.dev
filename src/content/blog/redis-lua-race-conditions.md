@@ -1,10 +1,12 @@
 ---
-title: Atomic commands, racy decisions
+title: Why atomic Redis commands still oversell stock
 kind: note
 status: published
-date: 2026-10-15
+date: 2026-10-07
 lede: Every Redis command is atomic. The check-then-write your app wraps around them is not, and that gap is how 100 units become 107 orders.
 tags: [redis, lua, concurrency]
+cover: /img/blog/redis.svg
+coverAlt: Two clients A and B send to one Redis box. Four interleaved dashed command slots end at minus one; two solid script blocks, one after the other, end at zero.
 ---
 
 ## 100 units, 107 orders
@@ -50,6 +52,8 @@ Between your `GET` and your `DECR`, another client's command can be scheduled. T
 Both requests passed `if (stock > 0)`, because both read `1` before either decremented. Redis executed all four commands correctly and in order. The counter ending at `-1` is the smoking gun: the check and the update were never one operation.
 
 Redis did not break a promise. It kept every individual promise you asked for, and another request slipped into the gap between two of them. On a single machine you would guard that gap with a mutex. A fleet of app servers has no cheap shared mutex. Redis can be one, if you move the whole critical section inside it.
+
+![The race as a sequence. Server A and server B each GET the stock and both receive 1. Each passes its own stock greater than zero check in application code. A's DECR brings the counter to 0, then B's DECR brings it to minus one, a unit that was never there.](diagram:redis-interleaved)
 
 ## Move the decision inside Redis
 
@@ -106,6 +110,8 @@ Redis does not wrap scripts in a mutex or a transaction log. The atomicity is a 
 
 `EVAL` routes to `evalCommand`, then `evalGenericCommand()` in `src/eval.c` (the file was `scripting.c` before the Redis 7 refactor). That function compiles or fetches the cached script, prepares the run with `scriptPrepareForRun()`, and calls `luaCallFunction()`, which does a `lua_pcall` into the interpreter. The part that matters is where this happens: `evalGenericCommand` is invoked from the normal dispatch path, `processCommand` then `call`, on the main thread. While `lua_pcall` runs, the event loop is not dispatching anything else. There is no yield point. When the script calls `redis.call('GET', ...)`, that goes through `luaRedisGenericCommand()` in `src/script_lua.c`, which builds a synthetic argv and calls `scriptCall()` in `src/script.c`. The nested command executes on the same thread, inline, with no opportunity for another client's command to appear.
 
+![The call stack for one EVAL. The event loop dispatches to processCommand, call, evalCommand, evalGenericCommand and luaCallFunction, which runs the script body under lua_pcall. Inside it, redis.call goes through luaRedisGenericCommand and scriptCall and the GET and DECRBY execute inline on the same thread. From lua_pcall down there is no yield point, and other clients wait in the queue at the top.](diagram:redis-call-path)
+
 So the guarantee reads: a script's effects have either not happened yet or have already happened. There is no observable state in between.
 
 One boundary, stated plainly because it bites later: this is isolation, not a transaction. Redis serializes scripts. It does not roll them back. If a script writes key A and then errors on key B, A stays written and the caller gets an error. Design multi-key scripts so that a failure halfway through leaves a state you can reconstruct.
@@ -114,26 +120,7 @@ Two more things fall out of the source. Scripts run against an internal client (
 
 ## The same two clicks, replayed
 
-```
-   client A                 client B
-      |                        |
-   Server A                 Server B
-      |                        |
-      +-----------+------------+
-                  |
-                Redis
-                  |
-   -- script for A --
-      GET    stock   -> 1
-      1 >= 1         -> yes
-      DECRBY stock   -> 0
-      return 1          (A: reserved)
-                  |
-   -- script for B --
-      GET    stock   -> 0
-      0 >= 1         -> no
-      return 0          (B: sold out)
-```
+![The same two clicks with the script. Client A and client B reach their servers, and both servers send the script to Redis with quantity 1. Redis runs A's script to the end: GET returns 1, 1 is at least 1, DECRBY takes the counter to 0, return 1 and A is reserved. Only then does B's script run: GET returns 0, 0 is not at least 1, return 0 and B is sold out.](diagram:redis-atomic)
 
 Redis finishes A's whole script before it starts B's. B reads `0`, fails the check, never decrements. The counter cannot go negative through this path. That is one interleaving; a real sale produces thousands of them, which is how 100 units became 107 orders in the first place.
 

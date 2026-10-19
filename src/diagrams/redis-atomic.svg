@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--muted, #949aa2)"/>
+    </marker>
+  </defs>
+
+  <!-- clients above their servers -->
+  <rect x="100" y="16" width="160" height="36" rx="10" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5"/>
+  <text x="180" y="39" fill="var(--muted, #949aa2)" text-anchor="middle">client A</text>
+  <line x1="180" y1="52" x2="180" y2="76" stroke="var(--muted, #949aa2)" stroke-width="1.5" marker-end="url(#mut)"/>
+  <rect x="700" y="16" width="160" height="36" rx="10" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5"/>
+  <text x="780" y="39" fill="var(--muted, #949aa2)" text-anchor="middle">client B</text>
+  <line x1="780" y1="52" x2="780" y2="76" stroke="var(--muted, #949aa2)" stroke-width="1.5" marker-end="url(#mut)"/>
+
+  <!-- lifelines -->
+  <g stroke="var(--border, #262b33)" stroke-width="1.5">
+    <line x1="180" y1="128" x2="180" y2="520"/>
+    <line x1="480" y1="128" x2="480" y2="520"/>
+    <line x1="780" y1="128" x2="780" y2="520"/>
+  </g>
+
+  <!-- heads -->
+  <rect x="100" y="84" width="160" height="44" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="180" y="111" fill="var(--ink, #edeae3)" text-anchor="middle">server A</text>
+  <rect x="400" y="84" width="160" height="44" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="480" y="111" fill="var(--ink, #edeae3)" text-anchor="middle">Redis</text>
+  <rect x="700" y="84" width="160" height="44" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="780" y="111" fill="var(--ink, #edeae3)" text-anchor="middle">server B</text>
+
+  <!-- both requests arrive -->
+  <line x1="180" y1="170" x2="472" y2="170" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="330" y="158" fill="var(--ink, #edeae3)" text-anchor="middle">run script, qty 1</text>
+  <line x1="780" y1="200" x2="588" y2="200" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="690" y="188" fill="var(--ink, #edeae3)" text-anchor="middle">run script, qty 1</text>
+  <text x="680" y="218" fill="var(--muted, #949aa2)" text-anchor="middle">waits for A's script</text>
+
+  <!-- script for A, indivisible -->
+  <rect x="380" y="186" width="200" height="132" rx="10" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="480" y="210" fill="var(--ink, #edeae3)" text-anchor="middle">script for A</text>
+  <text x="480" y="234" fill="var(--muted, #949aa2)" text-anchor="middle">GET stock -&gt; 1</text>
+  <text x="480" y="258" fill="var(--muted, #949aa2)" text-anchor="middle">1 &gt;= 1 -&gt; yes</text>
+  <text x="480" y="282" fill="var(--muted, #949aa2)" text-anchor="middle">DECRBY stock 1 -&gt; 0</text>
+  <text x="480" y="306" fill="var(--muted, #949aa2)" text-anchor="middle">return 1</text>
+  <line x1="480" y1="342" x2="188" y2="342" stroke="var(--muted, #949aa2)" stroke-width="1.5" marker-end="url(#mut)"/>
+  <text x="330" y="330" fill="var(--muted, #949aa2)" text-anchor="middle">1: reserved</text>
+
+  <!-- script for B, only after A's has finished -->
+  <rect x="380" y="366" width="200" height="108" rx="10" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="480" y="390" fill="var(--ink, #edeae3)" text-anchor="middle">script for B</text>
+  <text x="480" y="414" fill="var(--muted, #949aa2)" text-anchor="middle">GET stock -&gt; 0</text>
+  <text x="480" y="438" fill="var(--muted, #949aa2)" text-anchor="middle">0 &gt;= 1 -&gt; no</text>
+  <text x="480" y="462" fill="var(--muted, #949aa2)" text-anchor="middle">return 0</text>
+  <line x1="480" y1="498" x2="772" y2="498" stroke="var(--muted, #949aa2)" stroke-width="1.5" marker-end="url(#mut)"/>
+  <text x="630" y="486" fill="var(--muted, #949aa2)" text-anchor="middle">0: sold out</text>
+</svg>

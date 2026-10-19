@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 350" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+  </defs>
+
+  <!-- lifelines -->
+  <text x="24" y="115" fill="var(--ink, #edeae3)">server</text>
+  <line x1="150" y1="110" x2="1040" y2="110" stroke="var(--border, #262b33)" stroke-width="1.5"/>
+
+  <text x="24" y="245" fill="var(--ink, #edeae3)">driver phone</text>
+  <line x1="150" y1="240" x2="400" y2="240" stroke="var(--border, #262b33)" stroke-width="1.5"/>
+  <line x1="400" y1="240" x2="620" y2="240" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="4 6"/>
+  <line x1="620" y1="240" x2="1040" y2="240" stroke="var(--border, #262b33)" stroke-width="1.5"/>
+
+  <!-- signal lost -->
+  <line x1="400" y1="232" x2="400" y2="248" stroke="var(--muted, #949aa2)" stroke-width="1.5"/>
+  <text x="392" y="274" fill="var(--muted, #949aa2)" text-anchor="end">signal lost</text>
+  <text x="510" y="298" fill="var(--muted, #949aa2)" text-anchor="middle">no socket, no room</text>
+
+  <!-- the push nobody receives -->
+  <text x="470" y="80" fill="var(--muted, #949aa2)" text-anchor="middle">order:status v4</text>
+  <line x1="470" y1="112" x2="470" y2="190" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="470" y="212" fill="var(--muted, #949aa2)" text-anchor="middle">dropped: at most once</text>
+
+  <!-- reconnect -->
+  <line x1="620" y1="232" x2="620" y2="248" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="628" y="274" fill="var(--ink, #edeae3)" text-anchor="start">connect fires</text>
+
+  <!-- watch -->
+  <line x1="700" y1="236" x2="700" y2="118" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="710" y="180" fill="var(--ink, #edeae3)" text-anchor="start">order:watch</text>
+
+  <!-- server work -->
+  <rect x="740" y="92" width="190" height="36" rx="8" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="835" y="115" fill="var(--ink, #edeae3)" text-anchor="middle">join, read Redis</text>
+
+  <!-- snapshot back -->
+  <line x1="950" y1="128" x2="950" y2="232" stroke="var(--accent, #57c7ba)" stroke-width="1.5" marker-end="url(#acc)"/>
+  <text x="960" y="180" fill="var(--accent, #57c7ba)" text-anchor="start">snapshot v4</text>
+  <text x="950" y="274" fill="var(--ink, #edeae3)" text-anchor="middle">current again</text>
+
+  <!-- one round trip -->
+  <path d="M700 300 V308 H950 V300" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="825" y="334" fill="var(--accent, #57c7ba)" text-anchor="middle">one round trip</text>
+</svg>

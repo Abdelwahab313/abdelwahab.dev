@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <text x="120" y="36" fill="var(--muted, #949aa2)">database calls per broadcast</text>
+
+  <!-- bars -->
+  <rect x="336" y="80" width="48" height="170" fill="var(--accent, #57c7ba)"/>
+  <text x="360" y="68" fill="var(--ink, #edeae3)" text-anchor="middle">~1,000</text>
+
+  <rect x="576" y="233" width="48" height="17" fill="var(--accent, #57c7ba)"/>
+  <text x="600" y="221" fill="var(--ink, #edeae3)" text-anchor="middle">about 100</text>
+
+  <!-- baseline -->
+  <line x1="120" y1="250" x2="840" y2="250" stroke="var(--border, #262b33)" stroke-width="1.5"/>
+
+  <g fill="var(--muted, #949aa2)" text-anchor="middle">
+    <text x="360" y="280">before</text>
+    <text x="600" y="280">after throttling</text>
+  </g>
+</svg>

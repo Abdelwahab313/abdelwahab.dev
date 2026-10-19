@@ -1,0 +1,25 @@
+---
+// Inlines a cover SVG from public/ so it can use the page's CSS variables.
+// The same file is served standalone (og:image, feeds) and falls back to the
+// dark palette baked into each var(--x, #hex).
+import {readFileSync} from "node:fs";
+import {resolve} from "node:path";
+
+interface Props {
+  src: string;
+  alt: string;
+  class?: string;
+}
+
+const {src, alt, class: className} = Astro.props;
+
+const svg = readFileSync(resolve(`public${src}`), "utf8")
+  .replace(/<\?xml[^>]*\?>\s*/, "")
+  .replace(/<!--[\s\S]*?-->/g, "")
+  .replace(/\s(role|aria-label)="[^"]*"/g, "")
+  .trim();
+const open = svg.indexOf(">");
+const labelled = `${svg.slice(0, open)} role="img" aria-label="${alt.replaceAll('"', "&quot;")}"${svg.slice(open)}`;
+---
+
+<div class:list={["cover", className]} set:html={labelled} />

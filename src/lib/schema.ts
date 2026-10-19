@@ -3,8 +3,7 @@ import {
   greeting,
   socialMediaLinks,
   cvStack,
-  contactInfo,
-  bigProjects
+  contactInfo
 } from "../data/portfolio";
 
 const SITE = "https://abdelwahab.dev";
@@ -22,7 +21,7 @@ function knowsAbout(): string[] {
     ...cvStack.observability,
     ...cvStack.databases,
     ...cvStack.testing,
-    ...cvStack.wordpress
+    ...cvStack.compatibility
   ];
 }
 
@@ -89,20 +88,5 @@ export function blogPostingSchema(post: CollectionEntry<"blog">): JsonLd {
     publisher: {"@id": PERSON_ID},
     keywords: data.tags,
     inLanguage: "en"
-  };
-}
-
-export function productListSchema(): JsonLd {
-  return {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: bigProjects.subtitle,
-    itemListElement: bigProjects.projects.map((product, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: product.projectName,
-      description: product.tagline,
-      url: product.footerLink[0]?.url
-    }))
   };
 }

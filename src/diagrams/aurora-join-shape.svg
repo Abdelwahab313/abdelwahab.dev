@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 330" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+  </defs>
+
+  <!-- before -->
+  <text x="40" y="30" fill="var(--ink, #edeae3)">before: joined to the history table</text>
+
+  <rect x="40" y="120" width="140" height="60" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <text x="110" y="145" fill="var(--ink, #edeae3)" text-anchor="middle">batches</text>
+  <text x="110" y="167" fill="var(--muted, #949aa2)" text-anchor="middle">const, 1 row</text>
+
+  <line x1="180" y1="150" x2="292" y2="150" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="236" y="176" fill="var(--muted, #949aa2)" text-anchor="middle">nested loop</text>
+
+  <text x="460" y="58" fill="var(--muted, #949aa2)" text-anchor="middle">~7M rows examined per call, estimated</text>
+  <rect x="300" y="70" width="320" height="180" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"/>
+  <g stroke="var(--border, #262b33)" stroke-width="1.5">
+    <line x1="318" y1="92" x2="602" y2="92"/>
+    <line x1="318" y1="106" x2="602" y2="106"/>
+    <line x1="318" y1="120" x2="602" y2="120"/>
+    <line x1="318" y1="134" x2="602" y2="134"/>
+    <line x1="318" y1="148" x2="602" y2="148"/>
+    <line x1="318" y1="162" x2="602" y2="162"/>
+    <line x1="318" y1="176" x2="602" y2="176"/>
+    <line x1="318" y1="190" x2="602" y2="190"/>
+  </g>
+  <text x="460" y="216" fill="var(--ink, #edeae3)" text-anchor="middle">batch_events</text>
+  <text x="460" y="238" fill="var(--muted, #949aa2)" text-anchor="middle">type: ALL, key: NULL</text>
+
+  <line x1="460" y1="250" x2="460" y2="290" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"/>
+  <text x="460" y="316" fill="var(--ink, #edeae3)" text-anchor="middle">1 row sent</text>
+
+  <!-- after -->
+  <text x="680" y="30" fill="var(--ink, #edeae3)">after: the join dropped</text>
+
+  <rect x="680" y="120" width="160" height="60" rx="8" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"/>
+  <text x="760" y="145" fill="var(--ink, #edeae3)" text-anchor="middle">batches</text>
+  <text x="760" y="167" fill="var(--muted, #949aa2)" text-anchor="middle">const, 1 row</text>
+
+  <line x1="760" y1="180" x2="760" y2="290" stroke="var(--accent, #57c7ba)" stroke-width="1.5" marker-end="url(#acc)"/>
+  <text x="760" y="316" fill="var(--ink, #edeae3)" text-anchor="middle">1 row sent</text>
+
+  <rect x="880" y="70" width="160" height="180" rx="8" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <text x="960" y="154" fill="var(--muted, #949aa2)" text-anchor="middle">batch_events</text>
+  <text x="960" y="176" fill="var(--muted, #949aa2)" text-anchor="middle">not read</text>
+</svg>
