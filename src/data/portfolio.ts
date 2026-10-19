@@ -7,7 +7,6 @@ export const greeting = {
   subTitle: "Senior Software Engineer · Full-stack & Platform",
   valueProp:
     "I build and run production systems end to end, from React in the browser to AWS underneath. Most recently: the LLM engine and cloud platform behind an AI translation product that peaked at ~100K requests an hour.",
-  startHere: ["fargate", "engine", "aurora"],
   resumeLink: "/resume.pdf",
   githubLink: "https://github.com/abdelwahab313",
   linkedinLink: "https://www.linkedin.com/in/abdelwahab313/"

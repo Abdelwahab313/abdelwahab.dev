@@ -110,7 +110,7 @@ Rules, in priority order:
 
 Paste-ready. Keys refer to `src/data/portfolio.ts` unless noted.
 
-### Hero (`greeting.title`, `greeting.subTitle`, `greeting.valueProp`, `greeting.startHere`)
+### Hero (`greeting.title`, `greeting.subTitle`, `greeting.valueProp`)
 
 Title: `Abdelwahab Mahmoud`
 
@@ -128,9 +128,8 @@ card (`Location`, `Core stack`, `Experience`, `Languages`).
 Actions: Resume (`/resume.pdf`), GitHub, LinkedIn, Email (`#contact`). No availability badge,
 no code card and no product card in the hero.
 
-Start here (`greeting.startHere`): links to the `fargate`, `engine` and `aurora` posts by
-title. The build fails if a slug has no post. The homepage Writing section shows the three
-newest posts that are not already in Start here.
+No post links in the hero: the front page brands a senior engineer, not a blog. The
+homepage Writing section further down shows the three newest posts.
 
 ### Meta (`src/pages/index.astro` title and description)
 

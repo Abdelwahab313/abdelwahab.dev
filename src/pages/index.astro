@@ -55,15 +55,12 @@ const education = educationInfo.schools[0];
 const KIND_LABEL = {"case-study": "Case study", note: "Note"};
 const allPosts = await getCollection("blog");
 const published = publishedPosts(allPosts);
-assertArticlesExist(published, [
-  ...greeting.startHere,
-  ...workExperiences.experience.map(job => job.article)
-]);
+assertArticlesExist(
+  published,
+  workExperiences.experience.map(job => job.article)
+);
 const postBySlug = new Map(published.map(post => [post.id, post]));
-const startHere = greeting.startHere.map(slug => postBySlug.get(slug)!);
-const writing = published
-  .filter(post => !greeting.startHere.includes(post.id))
-  .slice(0, 3);
+const writing = published.slice(0, 3);
 ---
 
 <Base {title} {description} jsonLd={[homeGraph()]}>
@@ -91,20 +88,6 @@ const writing = published
         data-track="linkedin">LinkedIn</a
       >
       <a class="btn" href="#contact" data-track="contact">Email</a>
-    </div>
-    <div class="hero-shipped">
-      <span class="hero-shipped-label">Start here</span>
-      <ul>
-        {
-          startHere.map(post => (
-            <li>
-              <a href={`/blog/${post.id}`}>
-                {post.data.title} <span class="arrow">→</span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
     </div>
   </section>
 

@@ -325,43 +325,6 @@ img {
   margin-top: 2rem;
 }
 
-.hero-shipped {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 1.1rem;
-  margin-top: 1.9rem;
-}
-
-.hero-shipped-label {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.hero-shipped ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1.1rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.hero-shipped a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 14px;
-  color: var(--body);
-}
-
-.hero-shipped a:hover {
-  color: var(--accent);
-}
-
 .btn {
   display: inline-flex;
   align-items: center;
