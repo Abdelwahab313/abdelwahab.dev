@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 380" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="40" fill="var(--muted, #949aa2)">bytes flow right</text>
+
+  <!-- six stages -->
+  <g fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5">
+    <rect x="20" y="70" width="140" height="80" rx="10"/>
+    <rect x="192" y="70" width="140" height="80" rx="10"/>
+    <rect x="364" y="70" width="140" height="80" rx="10"/>
+    <rect x="536" y="70" width="140" height="80" rx="10"/>
+    <rect x="708" y="70" width="140" height="80" rx="10"/>
+    <rect x="880" y="70" width="140" height="80" rx="10"/>
+  </g>
+  <g fill="var(--ink, #edeae3)" text-anchor="middle">
+    <text x="90" y="104">client</text>
+    <text x="262" y="104">kernel</text>
+    <text x="434" y="104">req</text>
+    <text x="606" y="104">gzip</text>
+    <text x="778" y="104">file stream</text>
+    <text x="950" y="104">disk</text>
+  </g>
+  <g fill="var(--muted, #949aa2)" text-anchor="middle">
+    <text x="90" y="128">its kernel</text>
+    <text x="262" y="128">receive buffer</text>
+    <text x="434" y="128">Readable</text>
+    <text x="606" y="128">Transform</text>
+    <text x="778" y="128">Writable</text>
+    <text x="950" y="128">slow</text>
+  </g>
+
+  <!-- forward arrows -->
+  <g stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)">
+    <line x1="160" y1="110" x2="186" y2="110"/>
+    <line x1="332" y1="110" x2="358" y2="110"/>
+    <line x1="504" y1="110" x2="530" y2="110"/>
+    <line x1="676" y1="110" x2="702" y2="110"/>
+    <line x1="848" y1="110" x2="874" y2="110"/>
+  </g>
+
+  <!-- pressure travels left -->
+  <g stroke="var(--accent, #57c7ba)" stroke-width="1.5" fill="none" marker-end="url(#acc)">
+    <path d="M950 150 L950 210 L786 210"/>
+    <path d="M778 230 L614 230"/>
+    <path d="M606 250 L442 250"/>
+    <path d="M434 270 L270 270"/>
+    <path d="M262 290 L90 290 L90 158"/>
+  </g>
+  <g fill="var(--muted, #949aa2)" text-anchor="middle">
+    <text x="868" y="200">callback late</text>
+    <text x="696" y="220">write() false</text>
+    <text x="524" y="240">write() false</text>
+    <text x="352" y="260">socket paused</text>
+    <text x="180" y="280">window 0</text>
+  </g>
+  <text x="1020" y="350" fill="var(--accent, #57c7ba)" text-anchor="end">pressure travels left</text>
+</svg>
