@@ -1,5 +1,5 @@
 ---
-title: The triage agent that almost shipped a false pass
+title: "Making LLM triage verdicts testable in code"
 kind: note
 status: published
 date: 2026-09-12

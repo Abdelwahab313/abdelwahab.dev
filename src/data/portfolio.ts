@@ -130,7 +130,7 @@ export const workExperiences = {
         "Bedrock",
         "DynamoDB"
       ],
-      article: "fargate",
+      article: "scaling-ecs-workers-on-queue-depth-without-killing-long-jobs",
       headline:
         "Scaled AI translation to 500K jobs an hour at peak without killing a job mid-run",
       story:
@@ -155,7 +155,7 @@ export const workExperiences = {
       location: "Riyadh",
       tags: ["React Native", "Node.js", "AWS", "Datadog", "Redis"],
       product: {name: "Dailymealz", url: "https://dailymealz.com/"},
-      article: "fulfillment-extraction",
+      article: "extracting-fulfillment-from-a-php-monolith-over-sqs",
       headline:
         "Pulled fulfillment out of a PHP monolith while 100K daily users kept ordering",
       story:
@@ -176,7 +176,7 @@ export const workExperiences = {
       location: "Cairo",
       tags: ["React", "Ruby on Rails"],
       product: {name: "Nformacy", url: "https://nformacy.com/"},
-      article: "zero-to-launch",
+      article: "building-a-booking-marketplace-from-empty-repo-to-beta",
       headline: "Took a two-sided marketplace from empty repo to beta launch",
       story:
         "Nformacy connects business advisors with companies that need their expertise. I built it full stack in React and Ruby on Rails, from the first MVP to the beta launch, along with the cloud infrastructure and deploy pipelines it ran on.",
@@ -270,7 +270,7 @@ export const workChallenges = {
         "Infrastructure as code with Terraform",
         "Kept the database and autoscaling healthy through the move"
       ],
-      article: "fargate"
+      article: "scaling-ecs-workers-on-queue-depth-without-killing-long-jobs"
     },
     {
       id: "event-driven-services",
@@ -282,7 +282,7 @@ export const workChallenges = {
         "Moved a PHP monolith to event-driven services",
         "Queues and streams with SQS and Kafka"
       ],
-      article: "fulfillment-extraction"
+      article: "extracting-fulfillment-from-a-php-monolith-over-sqs"
     },
     {
       id: "llm-platforms",
@@ -294,7 +294,7 @@ export const workChallenges = {
         "Agentic workflows and the Claude Agent SDK",
         "Tracing and evals with Langfuse and MCP tooling"
       ],
-      article: "engine"
+      article: "handling-llm-rate-limits-as-reschedules-not-errors"
     },
     {
       id: "zero-to-launch",
@@ -306,7 +306,7 @@ export const workChallenges = {
         "Cloud infrastructure and deploy pipelines",
         "Full-stack delivery across React and Ruby on Rails"
       ],
-      article: "zero-to-launch"
+      article: "building-a-booking-marketplace-from-empty-repo-to-beta"
     },
     {
       id: "mobile-apps",
@@ -318,7 +318,7 @@ export const workChallenges = {
         "Cross-platform health app built around a smart scale",
         "One backend serving both mobile and web"
       ],
-      article: "mobile-backend"
+      article: "live-order-status-over-socket-io-and-redis"
     },
     {
       id: "reliability",
@@ -330,7 +330,7 @@ export const workChallenges = {
         "Autoscaling that respects long-running jobs",
         "Datadog and OpenTelemetry tracing"
       ],
-      article: "aurora"
+      article: "fixing-aurora-mysql-100-percent-cpu-by-removing-a-join"
     }
   ]
 };

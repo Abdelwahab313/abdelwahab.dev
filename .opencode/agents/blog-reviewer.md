@@ -52,7 +52,7 @@ The writer's agent file has a section "One person wrote this". Lint against ever
 - Scaffolding: any body TOC, numbered or `Step N:` headings, FAQ, bulleted recap or "takeaways" at the end, bold `Key insight` callouts. Each is a blocker.
 - Connective filler and brochure vocabulary: grep the draft for the lists in the writer file and quote every hit.
 - Bold count per section. More than one is a Should-fix.
-- Title: under 60 characters, no colon-list formula, reads as a claim or image, not a topic.
+- Title: under 60 characters, no colon-list formula, says plainly what the post does or fixes, no wordplay; filename is the title in kebab case.
 - Opinion: quote the sentence a reader could disagree with. If you cannot find one, that is a blocker.
 - Invented first person: quote every first-person *event* ("I hit", "we saw", "when I migrated") and trace each to a CV fact or dossier author-experience line. An untraceable one is a blocker: it is a fabricated anecdote.
 - Hedges: quote adverb hedges ("typically", "generally", "in most cases") and ask for first-person hedges instead.

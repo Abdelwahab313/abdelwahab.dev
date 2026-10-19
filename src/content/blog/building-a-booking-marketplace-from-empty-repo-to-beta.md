@@ -1,5 +1,5 @@
 ---
-title: From empty repo to beta, with CI from the first week
+title: "Building a booking marketplace from empty repo to beta"
 kind: case-study
 status: published
 date: 2026-10-13
@@ -124,7 +124,7 @@ The trap is the third parties. `cy.intercept` only intercepts requests made by t
 
 ### Double booking is a database problem
 
-The obvious booking endpoint checks whether the slot is free and then inserts. That is check-then-write, the same gap as the Redis stock counter in [a different post](/blog/redis-lua-race-conditions). Two requests both check, both see a free slot, both insert. A uniqueness validation in the model has the same gap, because underneath it is the same `SELECT` followed by the same `INSERT`.
+The obvious booking endpoint checks whether the slot is free and then inserts. That is check-then-write, the same gap as the Redis stock counter in [a different post](/blog/preventing-stock-overselling-in-redis-with-lua-scripts). Two requests both check, both see a free slot, both insert. A uniqueness validation in the model has the same gap, because underneath it is the same `SELECT` followed by the same `INSERT`.
 
 A unique index on `(mentor_id, starts_at)` closes part of it. It stops two bookings at exactly 10:00 and lets one at 10:00 and one at 10:30 through. The rule is overlap, not equality, and Postgres can enforce overlap directly with an exclusion constraint:
 

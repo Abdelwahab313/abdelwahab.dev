@@ -165,9 +165,9 @@ when `article` is set), `descBullets`, tags.
 
 | Company | headline | product | article |
 |---|---|---|---|
-| AI translation platform (under NDA) | Scaled AI translation to 500K jobs an hour at peak without killing a job mid-run | none (under NDA) | `fargate` |
-| Dailymealz | Pulled fulfillment out of a PHP monolith while 100K daily users kept ordering | Dailymealz, `https://dailymealz.com/` | `fulfillment-extraction` |
-| Nformacy | Took a two-sided marketplace from empty repo to beta launch | Nformacy, `https://nformacy.com/` | `zero-to-launch` |
+| AI translation platform (under NDA) | Scaled AI translation to 500K jobs an hour at peak without killing a job mid-run | none (under NDA) | `scaling-ecs-workers-on-queue-depth-without-killing-long-jobs` |
+| Dailymealz | Pulled fulfillment out of a PHP monolith while 100K daily users kept ordering | Dailymealz, `https://dailymealz.com/` | `extracting-fulfillment-from-a-php-monolith-over-sqs` |
+| Nformacy | Took a two-sided marketplace from empty repo to beta launch | Nformacy, `https://nformacy.com/` | `building-a-booking-marketplace-from-empty-repo-to-beta` |
 | DevSquads (formerly Fikr Labs) | Built Shapa's mobile app and backend test-first, and mentored teams adopting XP | Shapa, `https://shapahealth.com/` | none |
 
 Source: facts follow `examples/resume/experience.tex` on `cv/automattic-experienced-swe`
@@ -217,7 +217,7 @@ Meta description:
 > what I decided, what it cost, and what changed.
 
 The four migrated posts keep their body copy from the 2026-10-05 refresh, and are
-published as `kind: note`: `fargate`, `engine`, `aurora`, `triage`. Titles say what
+published as `kind: note`: `scaling-ecs-workers-on-queue-depth-without-killing-long-jobs`, `handling-llm-rate-limits-as-reschedules-not-errors`, `fixing-aurora-mysql-100-percent-cpu-by-removing-a-join`, `making-llm-triage-verdicts-testable-in-code`. Titles say plainly what
 happened, under 60 characters, the way the blog-writer agent requires: no label titles a
 reader has to decode. Post dates are spread across September and October 2026. Every post is frontmatter metadata plus a Markdown body; the `case-study` kind
 carries Situation / Decision / Trade-off / Outcome as four `##` headings in that body.
@@ -284,9 +284,9 @@ SPEC.md section 7 before shipping.
 
 - 2026-10-15 blog and work expansion: `/blog` gained tag chips with counts, a
   client-side search and filter, cover thumbnails and the featured card
-  (`fargate` carries `featured: true`). New frontmatter: `featured`, `cover`,
+  (`scaling-ecs-workers-on-queue-depth-without-killing-long-jobs` carries `featured: true`). New frontmatter: `featured`, `cover`,
   `coverAlt` (docs/BLOG.md). Three case studies shipped
-  (`fulfillment-extraction`, `zero-to-launch`, `mobile-backend`), all six
+  (`extracting-fulfillment-from-a-php-monolith-over-sqs`, `building-a-booking-marketplace-from-empty-repo-to-beta`, `live-order-status-over-socket-io-and-redis`), all six
   challenge cards' `article` fields are filled, `/work` is a real route, the
   nav's Work item points there, and `/atom.xml` joins `/rss.xml`. Case-study
   copy comes from the Dailymealz, Nformacy and DevSquads bullets above, with

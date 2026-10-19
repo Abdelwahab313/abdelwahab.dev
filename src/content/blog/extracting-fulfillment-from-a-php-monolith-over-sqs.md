@@ -1,5 +1,5 @@
 ---
-title: Splitting a PHP monolith without a feature freeze
+title: "Extracting fulfillment from a PHP monolith over SQS"
 kind: case-study
 status: published
 date: 2026-09-24

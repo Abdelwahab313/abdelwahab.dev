@@ -1,19 +1,19 @@
 ---
-title: Why atomic Redis commands still oversell stock
+title: "Preventing stock overselling in Redis with Lua scripts"
 kind: note
 status: published
 date: 2026-10-07
-lede: Every Redis command is atomic. The check-then-write your app wraps around them is not, and that gap is how 100 units become 107 orders.
+lede: Every Redis command is atomic. The check-then-write your app wraps around them is not, and that gap is how 100 units become 121 orders.
 tags: [redis, lua, concurrency]
 cover: /img/blog/redis.svg
 coverAlt: Two clients A and B send to one Redis box. Four interleaved dashed command slots end at minus one; two solid script blocks, one after the other, end at zero.
 ---
 
-## 100 units, 107 orders
+## 100 units, 121 orders
 
 A Black Friday flash sale. One phone model, 100 units at the sale price, at most two per order. The stock counter lives in Redis under `sale:phone:stock`, and a fleet of app servers behind a load balancer decrements it.
 
-The sale closes. You had 100 phones. The system accepted 107 reservations. Seven people paid for a phone that does not exist, and finance finds out three days later.
+The sale closes. You had 100 phones. The system accepted 121 reservations. Twenty-one people paid for a phone that does not exist, and finance finds out three days later.
 
 Here is the code that did it:
 
@@ -122,7 +122,7 @@ Two more things fall out of the source. Scripts run against an internal client (
 
 ![The same two clicks with the script. Client A and client B reach their servers, and both servers send the script to Redis with quantity 1. Redis runs A's script to the end: GET returns 1, 1 is at least 1, DECRBY takes the counter to 0, return 1 and A is reserved. Only then does B's script run: GET returns 0, 0 is not at least 1, return 0 and B is sold out.](diagram:redis-atomic)
 
-Redis finishes A's whole script before it starts B's. B reads `0`, fails the check, never decrements. The counter cannot go negative through this path. That is one interleaving; a real sale produces thousands of them, which is how 100 units became 107 orders in the first place.
+Redis finishes A's whole script before it starts B's. B reads `0`, fails the check, never decrements. The counter cannot go negative through this path. That is one interleaving; a real sale produces thousands of them, which is how 100 units became 121 orders in the first place.
 
 ## One phone, many phones, a whole cart
 

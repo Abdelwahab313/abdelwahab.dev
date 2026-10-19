@@ -42,8 +42,8 @@ headings at `##` and `###`, never `#` (the title is the `h1`).
 
 | Field | Required | Notes |
 |---|---|---|
-| Filename | yes | Becomes `/blog/<slug>`. Must match the frontmatter contract: no space, no uppercase. |
-| `title` | yes | Page heading and index row. |
+| Filename | yes | Becomes `/blog/<slug>`. Must match the frontmatter contract: no space, no uppercase. The slug is the title in kebab case, so the URL says what the post does (`handling-backpressure-in-node-js-streams`, not `streams`). Renaming a published post needs an entry in `redirects` in `astro.config.mjs`. |
+| `title` | yes | Page heading and index row. A plain statement of what the post does or fixes, under 60 characters. No wordplay and no story hook a reader has to decode. |
 | `kind` | yes | `"case-study"` or `"note"`. |
 | `status` | yes | `"draft"` or `"published"`. |
 | `date` | yes | `YYYY-MM-DD`. Index sorts by this, newest first. |
@@ -68,8 +68,8 @@ Outcome. The body must carry exactly those four `##` headings, in that order
 otherwise (`assertCaseStudyHeadings` in `src/lib/blog.ts`). Other headings may
 sit between or after them.
 
-**`note`** - any set of `##` headings. The four migrated posts (`fargate`,
-`engine`, `aurora`, `triage`) are notes: they carry the case-study arc across
+**`note`** - any set of `##` headings. The four migrated posts (`scaling-ecs-workers-on-queue-depth-without-killing-long-jobs`,
+`handling-llm-rate-limits-as-reschedules-not-errors`, `fixing-aurora-mysql-100-percent-cpu-by-removing-a-join`, `making-llm-triage-verdicts-testable-in-code`) are notes: they carry the case-study arc across
 their own headings. Read one of them before writing the next.
 
 Reading time is computed from the body plus the lede at 200 words per minute.

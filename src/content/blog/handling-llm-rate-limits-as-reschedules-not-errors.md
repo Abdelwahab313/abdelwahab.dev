@@ -1,5 +1,5 @@
 ---
-title: Rate limits caused most of our LLM review failures
+title: "Handling LLM rate limits as reschedules, not errors"
 kind: note
 status: published
 date: 2026-09-05
@@ -158,7 +158,7 @@ The detail I would defend in a review is that a 429 does not count against the b
 
 When every provider in the chain refused, the request did not fail. Rate limits stopped being exceptions and became reschedule signals. The job went back on the queue with a delay, honoring retry-after where the provider sent one, with jitter to avoid synchronized retries.
 
-This works because translation already ran as queued jobs on a worker fleet (the one in [the Fargate post](/blog/fargate)), anywhere from 30 seconds to 2 hours long. Nobody was holding an HTTP connection open waiting for an answer, so "later" was an acceptable answer.
+This works because translation already ran as queued jobs on a worker fleet (the one in [the Fargate post](/blog/scaling-ecs-workers-on-queue-depth-without-killing-long-jobs)), anywhere from 30 seconds to 2 hours long. Nobody was holding an HTTP connection open waiting for an answer, so "later" was an acceptable answer.
 
 The delay needs two parts. `Retry-After` is a floor: the provider has said when it expects capacity, and waking up earlier wastes a call against the limit. Jitter goes on top of it. Without jitter, every job that got the same header in the same second wakes up in the same second and throttles again. The AWS Architecture Blog post on backoff and jitter showed this with simulations in 2015: un-jittered exponential backoff was "the clear loser," and full jitter, a uniformly random delay between zero and the capped exponential value, "uses less work, but slightly more time."
 
@@ -316,7 +316,7 @@ charged = CreditAccount
 raise InsufficientCredit if charged.zero?
 ```
 
-`SELECT ... FOR UPDATE` (`lock!` or `with_lock` in Rails) also closes the gap, by locking the row before the check. I would reach for the conditional update first. It is one statement and one round trip, it needs no explicit transaction around it, and it cannot be broken by someone later adding a slow call between the check and the charge. This is the same read, decide, write gap as [atomic Redis commands that still oversell stock](/blog/redis-lua-race-conditions), in a different store.
+`SELECT ... FOR UPDATE` (`lock!` or `with_lock` in Rails) also closes the gap, by locking the row before the check. I would reach for the conditional update first. It is one statement and one round trip, it needs no explicit transaction around it, and it cannot be broken by someone later adding a slow call between the check and the charge. This is the same read, decide, write gap as [atomic Redis commands that still oversell stock](/blog/preventing-stock-overselling-in-redis-with-lua-scripts), in a different store.
 
 The race was a symptom of a wider shape. Credit checks were scattered across the code, and every place that checked credit was a place that could check and act in its own way. Later I replaced the scattered credit checks with one authorization path, written up across four ADRs, and the first step of it merged. One path means one place where the check and the charge are a single operation, and one place to read when someone asks why a job paused.
 

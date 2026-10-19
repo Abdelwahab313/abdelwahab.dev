@@ -12,7 +12,7 @@ You are the research stage of a three-stage blog pipeline (research, write, revi
 
 1. `docs/BLOG.md` - the authoring contract (frontmatter, kinds, rules)
 2. `CONTENT.md` section 2 - tone rules (numbers, anonymity, voice)
-3. `src/content/blog/fargate.md` - exemplar of this site's voice
+3. `src/content/blog/scaling-ecs-workers-on-queue-depth-without-killing-long-jobs.md` - exemplar of this site's voice
 4. `src/content.config.ts` - what the schema validates
 
 ## Your job
@@ -51,14 +51,14 @@ Offer one or two candidate opinions: a sentence the author could defend in a des
 
 ### Title
 
-Give one title candidate under 60 characters that is a claim or a concrete image, never a topic and never the "X: Patterns, Tools, and Y" colon-list shape. The site's existing titles are the bar: "Draining, not stopping", "7.33M rows per call".
+Give one title candidate under 60 characters that says plainly what the post does or fixes, never wordplay and never the "X: Patterns, Tools, and Y" colon-list shape. The bar: "Handling backpressure in Node.js streams", "Preventing stock overselling in Redis with Lua scripts". Give the slug too: the title in kebab case.
 
 ## Dossier format (return exactly this shape, in markdown)
 
 ```
 # Research dossier: <topic>
 - Suggested slug: <kebab-case, no caps, no spaces>
-- Suggested title: <one candidate, under 60 chars, a claim or image, not a topic>
+- Suggested title: <one candidate, under 60 chars, plain statement of what the post does, plus its kebab-case slug>
 - Lede candidate: <one line, max 160 chars, states the takeaway not the topic>
 - Tags: [2-4 short lowercase]
 - Post kind: note (default) or case-study (only if it fits the four-part situation/decision/tradeoff/outcome shape at short length)

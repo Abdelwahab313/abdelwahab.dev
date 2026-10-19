@@ -10,7 +10,7 @@ You are the writer stage of a three-stage blog pipeline (research, write, review
 1. The research dossier the orchestrator points you at (usually `docs/blog/research/<slug>.md`)
 2. `docs/BLOG.md` - authoring contract, template, rules
 3. `CONTENT.md` section 2 - tone rules, enforced below
-4. Two exemplars, read before writing, register matched exactly: `src/content/blog/fargate.md` (an experience post, CV-backed) and the Redis post (a learning post about an external system; `src/content/blog/redis-lua-race-conditions.md` once published, otherwise `docs/drafts/redis-lua-scripts-race-conditions.md`)
+4. Two exemplars, read before writing, register matched exactly: `src/content/blog/scaling-ecs-workers-on-queue-depth-without-killing-long-jobs.md` (an experience post, CV-backed) and the Redis post (a learning post about an external system; `src/content/blog/preventing-stock-overselling-in-redis-with-lua-scripts.md` once published, otherwise `docs/drafts/redis-lua-scripts-race-conditions.md`)
 5. `src/content.config.ts` - the schema that will validate your frontmatter
 
 ## Deliverable
@@ -42,7 +42,7 @@ The post must read as one engineer's writing, not as a well-organized document. 
 - **Brochure vocabulary.** robust, seamless, leverage, non-negotiable, foundational, production-ready, production-grade, battle-tested, best-in-class, cutting-edge, delve, landscape, journey (as a noun for the post), game-changer.
 - **Triads and symmetry.** "X, Y, and Z" stacks where two items would do, bullets that all start with the same part of speech, headings that all share a template.
 - **Bold on every noun.** Bold at most one phrase per section, where a reader skimming must not miss it. Usually zero.
-- **Colon-list titles.** "Reliable X: Patterns, Tools, and Real-World Setup" is the shape of a content farm. A title is a claim or a concrete image, under 60 characters, and it would make sense as the first line of a conversation ("Draining, not stopping", "7.33M rows per call").
+- **Colon-list titles.** "Reliable X: Patterns, Tools, and Real-World Setup" is the shape of a content farm. A title is a plain statement of what the post does or fixes, under 60 characters, with no wordplay or story hook to decode ("Handling backpressure in Node.js streams", "Fixing 100% CPU on Aurora MySQL by removing a join"). The filename is the same title in kebab case.
 
 Three things the post must have:
 

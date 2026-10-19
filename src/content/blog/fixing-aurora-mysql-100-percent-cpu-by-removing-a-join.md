@@ -1,5 +1,5 @@
 ---
-title: The status broadcast that pinned Aurora at 100% CPU
+title: "Fixing 100% CPU on Aurora MySQL by removing a join"
 kind: note
 status: published
 date: 2026-09-17

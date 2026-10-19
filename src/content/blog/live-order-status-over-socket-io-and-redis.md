@@ -1,5 +1,5 @@
 ---
-title: Pushing live order status to phones and web over Socket.IO
+title: "Live order status over Socket.IO and Redis"
 kind: case-study
 status: published
 date: 2026-09-28
@@ -16,7 +16,7 @@ An order in this product passed through three pairs of hands before anyone ate i
 
 That was the system I built: the real-time order service behind a delivery product with 100K daily users, on Node.js and Socket.IO, pushing kitchen preparation, driver pickup and delivery status to mobile and web clients. The clients were React Native apps for the kitchen, the driver and admin, plus a Next.js web app. I built the mobile apps and maintained the web one, so I sat on both ends of every event the service sent.
 
-Order state did not start in my service. It came out of the Laravel monolith as state changes over SQS, and the service consumed them and fanned them out to subscribed clients. Taking fulfillment itself out of that monolith is [a separate story](/blog/fulfillment-extraction).
+Order state did not start in my service. It came out of the Laravel monolith as state changes over SQS, and the service consumed them and fanned them out to subscribed clients. Taking fulfillment itself out of that monolith is [a separate story](/blog/extracting-fulfillment-from-a-php-monolith-over-sqs).
 
 Two things had to hold. Whatever a driver saw had to match what the kitchen and the customer saw. And telling everyone about a change could not slow down the write that made it.
 
@@ -132,7 +132,7 @@ Hot order state lived in Redis as the service's read source, in a write-behind c
 
 The reason this mattered is in the reconnect path above. Every watch reads a snapshot, and reconnects arrive in bursts. The Socket.IO client reconnects by default with no attempt limit, starting at a 1000 ms delay and doubling to a 5000 ms ceiling, with a randomization factor of 0.5 "so that the clients do not reconnect at the exact same time". Jitter spreads a herd over a few seconds. It does not shrink it. When a server process restarts, every client it held comes back inside that window and asks for state. I would much rather that burst hit memory than the database taking order writes.
 
-The version has to be enforced where the state is written too, not only on the screen. If an old or repeated change could overwrite a newer one in Redis, every snapshot after that is wrong. Reading the stored version and then writing is a check-then-act gap, the one [the Redis post](/blog/redis-lua-race-conditions) is about, so the compare and the write need to be one atomic step.
+The version has to be enforced where the state is written too, not only on the screen. If an old or repeated change could overwrite a newer one in Redis, every snapshot after that is wrong. Reading the stored version and then writing is a check-then-act gap, the one [the Redis post](/blog/preventing-stock-overselling-in-redis-with-lua-scripts) is about, so the compare and the write need to be one atomic step.
 
 ### Moving the service to TypeScript
 

@@ -1,5 +1,5 @@
 ---
-title: Scaling ECS workers without killing two-hour jobs
+title: "Scaling ECS workers on queue depth without killing long jobs"
 kind: note
 status: published
 date: 2026-09-02
