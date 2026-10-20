@@ -1,0 +1,368 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Live order status over Socket.IO and Redis | Abdelwahab Mahmoud</title><meta name="title" content="Live order status over Socket.IO and Redis | Abdelwahab Mahmoud"><meta name="description" content="Socket.IO delivers at most once by default, so live order status on a driver's phone is only as good as the Redis read it makes on reconnect."><meta name="theme-color" id="theme-color" content="#0e1013"><link rel="canonical" href="https://abdelwahab.dev/blog/live-order-status-over-socket-io-and-redis/"><link rel="alternate" type="application/rss+xml" title="Blog | Abdelwahab Mahmoud" href="/rss.xml"><link rel="alternate" type="application/atom+xml" title="Blog | Abdelwahab Mahmoud" href="/atom.xml"><meta property="og:type" content="article"><meta property="og:url" content="https://abdelwahab.dev/blog/live-order-status-over-socket-io-and-redis/"><meta property="og:title" content="Live order status over Socket.IO and Redis | Abdelwahab Mahmoud"><meta property="og:description" content="Socket.IO delivers at most once by default, so live order status on a driver's phone is only as good as the Redis read it makes on reconnect."><meta property="og:image" content="https://abdelwahab.dev/og.png"><meta property="og:image:alt" content="Live order status over Socket.IO and Redis | Abdelwahab Mahmoud"><meta property="article:published_time" content="2026-09-28T00:00:00.000Z"><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://abdelwahab.dev/blog/live-order-status-over-socket-io-and-redis/"><meta property="twitter:title" content="Live order status over Socket.IO and Redis | Abdelwahab Mahmoud"><meta property="twitter:description" content="Socket.IO delivers at most once by default, so live order status on a driver's phone is only as good as the Redis read it makes on reconnect."><meta property="twitter:image" content="https://abdelwahab.dev/og.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="shortcut icon" href="/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.json"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Live order status over Socket.IO and Redis","description":"Socket.IO delivers at most once by default, so live order status on a driver's phone is only as good as the Redis read it makes on reconnect.","url":"https://abdelwahab.dev/blog/live-order-status-over-socket-io-and-redis","mainEntityOfPage":{"@type":"WebPage","@id":"https://abdelwahab.dev/blog/live-order-status-over-socket-io-and-redis"},"datePublished":"2026-09-28T00:00:00.000Z","dateModified":"2026-09-28T00:00:00.000Z","author":{"@id":"https://abdelwahab.dev/#person"},"publisher":{"@id":"https://abdelwahab.dev/#person"},"keywords":["react-native","node","realtime"],"inLanguage":"en"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://abdelwahab.dev/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://abdelwahab.dev/blog"},{"@type":"ListItem","position":3,"name":"Live order status over Socket.IO and Redis","item":"https://abdelwahab.dev/blog/live-order-status-over-socket-io-and-redis"}]}</script><script>
+      (function () {
+        var theme = localStorage.getItem("theme");
+        if (theme !== "light" && theme !== "dark") theme = "dark";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script><script async src="https://www.googletagmanager.com/gtag/js?id=G-PNVK2LGZM4"></script><script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-PNVK2LGZM4");
+    </script><link rel="stylesheet" href="/_astro/_slug_.zg9CucUM.css"></head> <body> <header class="site-header"> <div class="container"> <a class="cwd" href="/"><span class="cwd-dot"></span><span class="path">~/</span>abdelwahab</a> <nav class="site-nav" aria-label="Primary"> <a class="nav-primary" href="/#about">About</a> <a href="/work">Work</a> <a href="/#experience">Experience</a> <a href="/#skills">Skills</a> <a class="nav-blog" href="/blog">Blog</a> <a href="/#contact">Contact</a> <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" data-track="theme-toggle"> <span class="toggle-dark">dark</span> <span class="toggle-light">light</span> </button> </nav> </div> </header> <main>  <article class="post"> <nav class="post-crumbs" aria-label="Breadcrumb"> <a href="/blog">Blog</a>  <span class="crumb-sep">/</span> <a href="/blog/tag/react-native">#react-native</a>  </nav> <header class="post-head"> <div class="post-meta"> <time datetime="2026-09-28">2026-09-28</time> <span class="post-kind">Case study</span>  <span class="post-read">14 min read</span> </div> <h1 class="post-title">Live order status over Socket.IO and Redis</h1> <figure class="post-cover"> <div class="cover"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" role="img" aria-label="One server box pushing to a laptop and a phone, with the phone's reconnect read going straight to Redis.">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  
+  <rect x="120" y="170" width="300" height="170" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <text x="270" y="265" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">server</text>
+
+  
+  <rect x="120" y="430" width="300" height="100" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="270" y="490" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">redis</text>
+  <line x1="270" y1="340" x2="270" y2="430" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+
+  
+  <rect x="780" y="70" width="260" height="160" rx="14" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <line x1="740" y1="252" x2="1080" y2="252" stroke="var(--ink, #edeae3)" stroke-width="4" stroke-linecap="round"/>
+
+  
+  <rect x="830" y="320" width="160" height="250" rx="24" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <line x1="885" y1="540" x2="935" y2="540" stroke="var(--ink, #edeae3)" stroke-width="3" stroke-linecap="round"/>
+
+  
+  <path d="M420 220 H600 V150 H772" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+  <path d="M420 290 H600 V400 H822" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+
+  
+  <path d="M830 480 H428" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="4" marker-end="url(#acc)"/>
+  <text x="630" y="520" font-size="26" fill="var(--accent, #57c7ba)" text-anchor="middle">on reconnect</text>
+</svg></div> </figure> <p class="post-lede">Socket.IO delivers at most once by default, so live order status on a driver&#39;s phone is only as good as the Redis read it makes on reconnect.</p> <ul class="post-tags"> <li class="post-tag"> <a href="/blog/tag/react-native">react-native</a> </li><li class="post-tag"> <a href="/blog/tag/node">node</a> </li><li class="post-tag"> <a href="/blog/tag/realtime">realtime</a> </li> </ul> </header> <nav class="post-toc" aria-label="On this page"> <span class="post-toc-label">On this page</span> <ol> <li> <a href="#situation">Situation</a> </li><li> <a href="#decision">Decision</a> </li><li> <a href="#trade-off">Trade-off</a> </li><li> <a href="#outcome">Outcome</a> </li><li> <a href="#sources">Sources</a> </li> </ol> </nav> <div class="post-body"> <h2 id="situation">Situation</h2>
+<p>An order in this product passed through three pairs of hands before anyone ate it. A kitchen prepared it, a driver picked it up, a customer waited for it, and each of them watched the same order on a different screen. When the status moved, every one of those screens had to move with it, including the phone in a driver's pocket that lost signal two streets ago.</p>
+<p>That was the system I built: the real-time order service behind a delivery product with 100K daily users, on Node.js and Socket.IO, pushing kitchen preparation, driver pickup and delivery status to mobile and web clients. The clients were React Native apps for the kitchen, the driver and admin, plus a Next.js web app. I built the mobile apps and maintained the web one, so I sat on both ends of every event the service sent.</p>
+<p>Order state did not start in my service. It came out of the Laravel monolith as state changes over SQS, and the service consumed them and fanned them out to subscribed clients. Taking fulfillment itself out of that monolith is <a href="/blog/extracting-fulfillment-from-a-php-monolith-over-sqs">a separate story</a>.</p>
+<p>Two things had to hold. Whatever a driver saw had to match what the kitchen and the customer saw. And telling everyone about a change could not slow down the write that made it.</p>
+<p>The second one is easy to lose. One status change becomes many screen updates, and every phone that reconnects wants to know where its orders stand right now. If those reads land on the same database that takes the order writes, the screens start competing with the orders.</p>
+<h2 id="decision">Decision</h2>
+<h3 id="a-room-per-order-typed-on-both-ends">A room per order, typed on both ends</h3>
+<p>Socket.IO gives you two ways to group sockets. A room is, in the docs' words, "an arbitrary channel that sockets can join and leave", and it is a server-only concept: the client never sees which rooms it is in. <code>io.to(room).emit(...)</code> reaches every socket in the room, and a socket in several targeted rooms still gets the event once. A namespace is coarser, a way to split logic over one shared connection, each with its own handlers, rooms and middleware. I think of namespaces as the place to separate audiences whose access rules differ, and rooms as the place to separate orders.</p>
+<p>A room per order maps straight onto the problem. The kitchen app, the driver's phone and the customer's browser each join <code>order:&#x3C;id></code>, and a status change is one emit to that room.</p>
+<figure class="diagram" data-diagram="mobile-fanout"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 490" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15" role="img" aria-label="One state change fans out from one place. The service consumes the change from the queue, writes the new state to Redis, and emits once to the order&#x27;s room, which reaches the kitchen app, the driver app and the customer web client. Redis is the read source for snapshots; MySQL is updated behind it asynchronously.">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"></path>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"></path>
+    </marker>
+  </defs>
+
+  
+  <rect x="30" y="190" width="200" height="80" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="130" y="222" fill="var(--ink, #edeae3)" text-anchor="middle">SQS FIFO</text>
+  <text x="130" y="248" fill="var(--muted, #949aa2)" text-anchor="middle">state changes</text>
+
+  <line x1="230" y1="230" x2="322" y2="230" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></line>
+  <text x="276" y="219" fill="var(--muted, #949aa2)" text-anchor="middle">consume</text>
+
+  
+  <rect x="330" y="160" width="240" height="140" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="450" y="192" fill="var(--ink, #edeae3)" text-anchor="middle">real-time order service</text>
+  <text x="450" y="216" fill="var(--muted, #949aa2)" text-anchor="middle">Node.js, Socket.IO</text>
+  <rect x="350" y="240" width="200" height="40" rx="8" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"></rect>
+  <text x="450" y="265" fill="var(--ink, #edeae3)" text-anchor="middle">room order:42</text>
+
+  
+  <g fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5">
+    <rect x="800" y="40" width="240" height="70" rx="10"></rect>
+    <rect x="800" y="160" width="240" height="70" rx="10"></rect>
+    <rect x="800" y="280" width="240" height="70" rx="10"></rect>
+  </g>
+  <text x="920" y="70" fill="var(--ink, #edeae3)" text-anchor="middle">kitchen app</text>
+  <text x="920" y="94" fill="var(--muted, #949aa2)" text-anchor="middle">React Native</text>
+  <text x="920" y="190" fill="var(--ink, #edeae3)" text-anchor="middle">driver app</text>
+  <text x="920" y="214" fill="var(--muted, #949aa2)" text-anchor="middle">React Native</text>
+  <text x="920" y="310" fill="var(--ink, #edeae3)" text-anchor="middle">customer web</text>
+  <text x="920" y="334" fill="var(--muted, #949aa2)" text-anchor="middle">Next.js</text>
+
+  
+  <g fill="none" stroke="var(--accent, #57c7ba)" stroke-width="1.5" marker-end="url(#acc)">
+    <path d="M550 260 H680 V75 H792"></path>
+    <path d="M550 260 H680 V195 H792"></path>
+    <path d="M550 260 H680 V315 H792"></path>
+  </g>
+  <text x="640" y="28" fill="var(--accent, #57c7ba)" text-anchor="middle">one emit, every socket in the room</text>
+
+  
+  <rect x="330" y="390" width="240" height="70" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="450" y="420" fill="var(--ink, #edeae3)" text-anchor="middle">Redis</text>
+  <text x="450" y="444" fill="var(--muted, #949aa2)" text-anchor="middle">read source</text>
+
+  <line x1="410" y1="300" x2="410" y2="382" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></line>
+  <text x="398" y="346" fill="var(--muted, #949aa2)" text-anchor="end">write state</text>
+  <line x1="490" y1="382" x2="490" y2="308" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></line>
+  <text x="502" y="346" fill="var(--muted, #949aa2)" text-anchor="start">snapshot on watch</text>
+
+  
+  <rect x="800" y="390" width="240" height="70" rx="10" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5"></rect>
+  <text x="920" y="420" fill="var(--muted, #949aa2)" text-anchor="middle">MySQL</text>
+  <text x="920" y="444" fill="var(--muted, #949aa2)" text-anchor="middle">behind the cache</text>
+
+  <line x1="570" y1="425" x2="792" y2="425" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="6 6" marker-end="url(#ink)"></line>
+  <text x="681" y="414" fill="var(--muted, #949aa2)" text-anchor="middle">write-behind, async</text>
+</svg><figcaption>One state change fans out from one place. The service consumes the change from the queue, writes the new state to Redis, and emits once to the order's room, which reaches the kitchen app, the driver app and the customer web client. Redis is the read source for snapshots; MySQL is updated behind it asynchronously.</figcaption></figure>
+<p>The code below is a sketch of the approach, written the way I would write it today, not the production code. It starts with the file both sides import:</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="ts"><code><span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#768390">// shared/order-events.ts: imported by the Node.js service and by every client</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">export</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> type</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> OrderStatus</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> "preparing"</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> |</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> "ready"</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> |</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> "picked_up"</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> |</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> "delivered"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">export</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> interface</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> OrderState</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> {</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">  orderId</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> string</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">  status</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> OrderStatus</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">  version</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> number</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">; </span><span style="--shiki-light:#6A737D;--shiki-dark:#768390">// increases on every change to this order</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">export</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> interface</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> ServerToClientEvents</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> {</span></span>
+<span class="line"><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">  "order:status"</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> (</span><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">state</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> OrderState</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">=></span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> void</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">export</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> interface</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> ClientToServerEvents</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> {</span></span>
+<span class="line"><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">  "order:watch"</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> (</span><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">orderId</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> string</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">ack</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> (</span><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">state</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> OrderState</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> |</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> null</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">=></span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> void</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">=></span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> void</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">  "order:unwatch"</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> (</span><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">orderId</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> string</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">=></span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> void</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">}</span></span></code></pre>
+<p>The server joins the socket to the order's room and answers with a snapshot:</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="ts"><code><span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> { createServer } </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">from</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> "node:http"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> { Server } </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">from</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> "socket.io"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">import</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> type</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> { ClientToServerEvents, ServerToClientEvents, OrderState } </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">from</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> "../shared/order-events"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> { canWatch, readOrderState } </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">from</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> "./orders"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">; </span><span style="--shiki-light:#6A737D;--shiki-dark:#768390">// access check, Redis read</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">const</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> httpServer</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB"> createServer</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">();</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">const</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> io</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> new</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB"> Server</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">&#x3C;</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50">ClientToServerEvents</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50">ServerToClientEvents</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">>(httpServer);</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">io.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">on</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"connection"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, (</span><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">socket</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">=></span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> {</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">  socket.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">on</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"order:watch"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">async</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> (</span><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">orderId</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">ack</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">=></span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> {</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">    if</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> (</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">!</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">await</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB"> canWatch</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(socket, orderId))) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">return</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB"> ack</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">null</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">);</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">    await</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> socket.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">join</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">`order:${</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">orderId</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">}`</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">); </span><span style="--shiki-light:#6A737D;--shiki-dark:#768390">// join first, then read</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">    ack</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">await</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB"> readOrderState</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(orderId));</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">  });</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">  socket.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">on</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"order:unwatch"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, (</span><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">orderId</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">=></span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> {</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">    socket.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">leave</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">`order:${</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">orderId</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">}`</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">);</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">  });</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">});</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#768390">// called once for every state change consumed from the queue</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">export</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> function</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB"> publish</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">state</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> OrderState</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">) {</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">  io.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">to</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">`order:${</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">state</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">.</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">orderId</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">}`</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">).</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">emit</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"order:status"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, state);</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">httpServer.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">listen</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">3000</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">);</span></span></code></pre>
+<p>And the React Native client, with <code>API_URL</code>, <code>orderId</code> and <code>render</code> coming from the app:</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="ts"><code><span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">import</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> { io, Socket } </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">from</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> "socket.io-client"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">import</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> type</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> { ClientToServerEvents, ServerToClientEvents, OrderState } </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">from</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> "../shared/order-events"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#768390">// the type parameters are reversed on the client</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">const</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> socket</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> Socket</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">&#x3C;</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50">ServerToClientEvents</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50">ClientToServerEvents</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">> </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">=</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB"> io</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">API_URL</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, {</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">  transports: [</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"websocket"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">],</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">});</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">let</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> current</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> OrderState</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> |</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> null</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> null</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">function</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB"> apply</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">next</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">:</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> OrderState</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> |</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> null</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">) {</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">  if</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> (next </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">&#x26;&#x26;</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> (</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">!</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">current </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">||</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> next.version </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">></span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> current.version)) {</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">    current </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">=</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> next;</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">    render</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(current);</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">  }</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#768390">// handlers are registered outside "connect", or each reconnect adds another copy</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">socket.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">on</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"order:status"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, apply);</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#768390">// "connect" also fires on every reconnection: the old rooms are gone, so watch again</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">socket.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">on</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"connect"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, () </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">=></span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> {</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">  socket.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">emit</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"order:watch"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, orderId, apply);</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">});</span></span></code></pre>
+<p>Most of the design sits in four lines of that.</p>
+<p><code>join</code> comes before the read. Read first and join second, and a change published between the two is lost for good: the snapshot is already old and the socket was not in the room to hear the update. Join first and the change arrives as a live event, inside the snapshot, or both.</p>
+<figure class="diagram" data-diagram="mobile-join-before-read"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 360" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15" role="img" aria-label="Why join comes before read. Reading the snapshot first leaves a gap in which a published change reaches nobody, and the screen stays stale. Joining first means the change arrives as a live event, and the version check discards a snapshot that turns out to be older.">
+  
+  <text x="24" y="92" fill="var(--ink, #edeae3)">read, then join</text>
+  <text x="24" y="112" fill="var(--muted, #949aa2)">a change is lost</text>
+
+  <line x1="230" y1="98" x2="1020" y2="98" stroke="var(--border, #262b33)" stroke-width="1.5"></line>
+
+  <rect x="260" y="80" width="190" height="36" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="355" y="103" fill="var(--ink, #edeae3)" text-anchor="middle">read snapshot v3</text>
+
+  <rect x="530" y="80" width="190" height="36" rx="8" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="6 6"></rect>
+  <text x="625" y="103" fill="var(--muted, #949aa2)" text-anchor="middle">v4 published</text>
+  <text x="625" y="142" fill="var(--muted, #949aa2)" text-anchor="middle">not in the room yet: missed</text>
+
+  <rect x="800" y="80" width="190" height="36" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="895" y="103" fill="var(--ink, #edeae3)" text-anchor="middle">join room</text>
+  <text x="990" y="142" fill="var(--muted, #949aa2)" text-anchor="end">screen stays at v3</text>
+
+  
+  <text x="24" y="242" fill="var(--ink, #edeae3)">join, then read</text>
+  <text x="24" y="262" fill="var(--muted, #949aa2)">nothing is lost</text>
+
+  <line x1="230" y1="248" x2="1020" y2="248" stroke="var(--border, #262b33)" stroke-width="1.5"></line>
+
+  <rect x="260" y="230" width="190" height="36" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="355" y="253" fill="var(--ink, #edeae3)" text-anchor="middle">join room</text>
+
+  <rect x="530" y="230" width="190" height="36" rx="8" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"></rect>
+  <text x="625" y="253" fill="var(--ink, #edeae3)" text-anchor="middle">v4 published</text>
+  <text x="625" y="292" fill="var(--accent, #57c7ba)" text-anchor="middle">in the room: arrives live</text>
+
+  <rect x="800" y="230" width="190" height="36" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="895" y="253" fill="var(--ink, #edeae3)" text-anchor="middle">read snapshot</text>
+  <text x="990" y="292" fill="var(--muted, #949aa2)" text-anchor="end">v3 or v4</text>
+
+  <text x="24" y="340" fill="var(--muted, #949aa2)">the snapshot may be older than the live event; the version check keeps v4</text>
+</svg><figcaption>Why join comes before read. Reading the snapshot first leaves a gap in which a published change reaches nobody, and the screen stays stale. Joining first means the change arrives as a live event, and the version check discards a snapshot that turns out to be older.</figcaption></figure>
+<p>The <code>version</code> check is what makes "both" harmless. Socket.IO guarantees ordering on a connection, but the snapshot and the live event are produced at different moments. If a change is published after the server read the snapshot and before it sent the ack, the newer live event arrives first and the older snapshot second. Without a version, the screen moves backwards.</p>
+<p>The watch is re-sent on every <code>connect</code>. The client docs say that event fires "upon connection and reconnection", that <code>socket.id</code> is regenerated after each reconnection, and the rooms page says a disconnecting socket leaves every room it was in. A reconnected phone is a new socket in no rooms. Unless it asks again, it hears nothing.</p>
+<p>And handlers live outside <code>connect</code>, because the same docs warn that registering them inside adds a fresh copy on every reconnect. On a phone that drops signal many times in one shift, that is a slow leak of duplicate renders.</p>
+<h3 id="redis-as-the-read-source-mysql-behind-it">Redis as the read source, MySQL behind it</h3>
+<p>Hot order state lived in Redis as the service's read source, in a write-behind cache with MySQL behind it. That kept status fan-out off the transactional path. The Redis docs describe write-behind plainly: the application uses the cache for reads and writes, and the cache syncs changed data to the backing database asynchronously.</p>
+<p>The reason this mattered is in the reconnect path above. Every watch reads a snapshot, and reconnects arrive in bursts. The Socket.IO client reconnects by default with no attempt limit, starting at a 1000 ms delay and doubling to a 5000 ms ceiling, with a randomization factor of 0.5 "so that the clients do not reconnect at the exact same time". Jitter spreads a herd over a few seconds. It does not shrink it. When a server process restarts, every client it held comes back inside that window and asks for state. I would much rather that burst hit memory than the database taking order writes.</p>
+<p>The version has to be enforced where the state is written too, not only on the screen. If an old or repeated change could overwrite a newer one in Redis, every snapshot after that is wrong. Reading the stored version and then writing is a check-then-act gap, the one <a href="/blog/preventing-stock-overselling-in-redis-with-lua-scripts">the Redis post</a> is about, so the compare and the write need to be one atomic step.</p>
+<h3 id="moving-the-service-to-typescript">Moving the service to TypeScript</h3>
+<p>I migrated the real-time order service from JavaScript to TypeScript, so event and message payload mismatches failed at compile time instead of in front of customers.</p>
+<p>With one backend serving phones and browsers, a renamed field in a JavaScript emit is a runtime surprise for every client at once. Socket.IO's typed events turn the event names and payloads into interfaces: the server passes <code>ClientToServerEvents</code> and <code>ServerToClientEvents</code> to <code>new Server&#x3C;...>()</code>, and the client reuses the same two interfaces with the order reversed. Shared in one file, a change to <code>OrderState</code> breaks the build of whichever side has not caught up.</p>
+<p>The docs add a caution I agree with: "These type hints do not replace proper validation/sanitization of the input." The compiler checks my code against my declaration. It does not check what a client actually sent over the wire, and it cannot check what the PHP monolith put on the queue. On the consumer side, the TypeScript type for an incoming message is a claim about the other side, not a proof. Runtime validation still belongs at both edges.</p>
+<p>If I could keep only one, I would keep the shared types file over a suite of socket integration tests. The types catch the mistake at the moment it is typed, on both sides, for free.</p>
+<h3 id="five-people-on-driver-check-ins">Five people on driver check-ins</h3>
+<p>I led a team of five building a background location check-in system for the driver app, which improved route efficiency. My part was planning, reviews and pairing across the driver app.</p>
+<p>This was the same problem facing the other way: data leaving a phone that is often in the background and often offline. The distinction I think matters most in that kind of system is that a position sample is replaceable and a check-in is a fact. If samples travel over a socket, Socket.IO's default is to buffer every emit made while disconnected and send them all on reconnection, which the docs warn "could result in a huge spike of events". A volatile emit drops instead, and for a position only the newest one counts. A check-in wants the opposite: the client's <code>retries</code> and <code>ackTimeout</code> options resend an event until the server acknowledges it.</p>
+<h2 id="trade-off">Trade-off</h2>
+<h3 id="at-most-once-is-the-default-and-it-is-honest">At most once is the default, and it is honest</h3>
+<p>The delivery guarantees page is blunt: by default Socket.IO provides an at most once guarantee, and "any event that was missed by a disconnected client will not be transmitted to that client upon reconnection". The server keeps no buffer for a client that is away. That is the whole reason the sketch treats a push as a hint and the snapshot as the truth.</p>
+<figure class="diagram" data-diagram="mobile-reconnect"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 350" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15" role="img" aria-label="A driver&#x27;s phone loses signal, misses a status push that is never resent, then reconnects. The connect handler sends order:watch, the server joins the room and reads Redis, and one snapshot brings the screen back to the current state in a single round trip.">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"></path>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"></path>
+    </marker>
+  </defs>
+
+  
+  <text x="24" y="115" fill="var(--ink, #edeae3)">server</text>
+  <line x1="150" y1="110" x2="1040" y2="110" stroke="var(--border, #262b33)" stroke-width="1.5"></line>
+
+  <text x="24" y="245" fill="var(--ink, #edeae3)">driver phone</text>
+  <line x1="150" y1="240" x2="400" y2="240" stroke="var(--border, #262b33)" stroke-width="1.5"></line>
+  <line x1="400" y1="240" x2="620" y2="240" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="4 6"></line>
+  <line x1="620" y1="240" x2="1040" y2="240" stroke="var(--border, #262b33)" stroke-width="1.5"></line>
+
+  
+  <line x1="400" y1="232" x2="400" y2="248" stroke="var(--muted, #949aa2)" stroke-width="1.5"></line>
+  <text x="392" y="274" fill="var(--muted, #949aa2)" text-anchor="end">signal lost</text>
+  <text x="510" y="298" fill="var(--muted, #949aa2)" text-anchor="middle">no socket, no room</text>
+
+  
+  <text x="470" y="80" fill="var(--muted, #949aa2)" text-anchor="middle">order:status v4</text>
+  <line x1="470" y1="112" x2="470" y2="190" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="4 4"></line>
+  <text x="470" y="212" fill="var(--muted, #949aa2)" text-anchor="middle">dropped: at most once</text>
+
+  
+  <line x1="620" y1="232" x2="620" y2="248" stroke="var(--ink, #edeae3)" stroke-width="1.5"></line>
+  <text x="628" y="274" fill="var(--ink, #edeae3)" text-anchor="start">connect fires</text>
+
+  
+  <line x1="700" y1="236" x2="700" y2="118" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></line>
+  <text x="710" y="180" fill="var(--ink, #edeae3)" text-anchor="start">order:watch</text>
+
+  
+  <rect x="740" y="92" width="190" height="36" rx="8" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"></rect>
+  <text x="835" y="115" fill="var(--ink, #edeae3)" text-anchor="middle">join, read Redis</text>
+
+  
+  <line x1="950" y1="128" x2="950" y2="232" stroke="var(--accent, #57c7ba)" stroke-width="1.5" marker-end="url(#acc)"></line>
+  <text x="960" y="180" fill="var(--accent, #57c7ba)" text-anchor="start">snapshot v4</text>
+  <text x="950" y="274" fill="var(--ink, #edeae3)" text-anchor="middle">current again</text>
+
+  
+  <path d="M700 300 V308 H950 V300" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="1.5"></path>
+  <text x="825" y="334" fill="var(--accent, #57c7ba)" text-anchor="middle">one round trip</text>
+</svg><figcaption>A driver's phone loses signal, misses a status push that is never resent, then reconnects. The connect handler sends order:watch, the server joins the room and reads Redis, and one snapshot brings the screen back to the current state in a single round trip.</figcaption></figure>
+<p>Connection state recovery narrows the gap. It restores a client's state after a temporary disconnection, rooms and missed packets included, but it comes with two catches. It does not work with the Redis adapter, because persisting packets "is not compatible with the Redis PUB/SUB mechanism"; the in-memory, Redis Streams and MongoDB adapters support it. And the docs say recovery will not always succeed, so you still need a way to resynchronize. The snapshot path is the floor either way. Recovery is an optimization on top of it.</p>
+<p>The docs also show how to get at-least-once from server to client: give every event a unique ID, persist events, have the client send the offset of the last one it saw. That is an event log with replay. For order status I think it is the wrong tool. The client does not need the history of an order, it needs the latest state, and a snapshot read is one round trip where a replay is many.</p>
+<h3 id="the-write-behind-window">The write-behind window</h3>
+<p>Write-behind buys a fast write path and pays for it with a window: Redis has the change, MySQL does not yet. Anything reading MySQL inside that window sees older state, so the read source has to be Redis for everything that cares about now.</p>
+<p>If Redis loses data inside the window, the change is gone unless something upstream can replay it. Redis's own durability sets the size of that hole. With AOF on the default <code>appendfsync everysec</code>, the persistence docs say "you may lose 1 second of data if there is a disaster". With RDB snapshots alone, you should be prepared to lose the latest minutes.</p>
+<p>When state arrives from a queue, the replay lives in the queue, and the order of operations decides whether it works. The queue carrying state changes out of the monolith was SQS FIFO. A received message stays in the queue until the consumer deletes it, and if it is not deleted before the visibility timeout expires (30 seconds by default), it becomes visible again. Delete only after the Redis write has landed, and a crash in between is covered. On a FIFO queue that has a price: no further messages from the same message group ID are returned until the first one is deleted or becomes visible again, so a consumer that dies mid-message holds its group back for up to the timeout.</p>
+<p>FIFO also changes what the version check is for. Within a message group ID, messages are sent and received in strict order; messages in different groups may be processed out of order relative to one another. If every change to one order shares a group, the queue keeps that order's changes in sequence. The 5-minute deduplication interval covers the producer: a retried <code>SendMessage</code> inside it does not put a second copy in the queue. It does not cover the consumer. A message whose visibility timeout runs out mid-processing is delivered again, and the visibility timeout docs say that for FIFO queues too there is no absolute guarantee a message will not be delivered more than once. So the version check in the Redis write stays. On FIFO it guards against a replay rather than a reordering.</p>
+<h3 id="many-processes-one-room">Many processes, one room</h3>
+<p>Rooms are local to a process. Once the service runs as more than one, a phone joined to <code>order:42</code> on one process does not hear an emit from another. The Redis adapter fixes that with Redis Pub/Sub: a broadcast goes to matching clients on the current server and is published on a Redis channel for the others. It stores no keys in Redis, and if Redis is unavailable, packets reach only the clients on the current server. The docs recommend the sharded adapter, built on Redis 7.0 sharded Pub/Sub, for new work.</p>
+<p>Load balancing has its own catch. HTTP long-polling sends many requests per session, so every request has to reach the process that owns the session, which means sticky sessions. A WebSocket-only client keeps one connection and removes that requirement, which is why the client sketch sets <code>transports: ["websocket"]</code>. The cost is no long-polling fallback for a network that blocks WebSockets.</p>
+<h3 id="one-codebase-one-blast-radius">One codebase, one blast radius</h3>
+<p>React Native over two native apps meant one codebase and one hiring pool, at the cost of living inside the layer's constraints when a platform feature lands late. One backend for mobile and web meant they moved together, and a payload mistake hit both audiences at once. The types file narrows that blast radius. It does not remove it: a wrong value with the right shape still reaches every screen.</p>
+<h2 id="outcome">Outcome</h2>
+<p>The driver app shipped with live orders, reading the same service as the web clients, and status fan-out reached every client from one place. The team of five delivered the check-in system, which improved route efficiency. The service ran on TypeScript, with payload mismatches caught at compile time. Separately, instrumenting the order, driver and kitchen flows with Datadog and OpenTelemetry cut Mean Time To Resolve by 30%.</p>
+<p>What I would carry into any real-time system is the order of work. Write the reconnect path first: a client that has been gone for a minute has to get back to the truth in one round trip, from a store that can take the burst. Once that exists, a lost push costs a few seconds of staleness. Without it, no delivery setting on the live path will keep a driver's screen honest.</p>
+<h2 id="sources">Sources</h2>
+<ul>
+<li>Socket.IO docs, Delivery guarantees (at most once by default, ordering, server-to-client offsets): <a href="https://socket.io/docs/v4/delivery-guarantees">https://socket.io/docs/v4/delivery-guarantees</a></li>
+<li>Socket.IO docs, Connection state recovery (<code>socket.recovered</code>, adapter compatibility): <a href="https://socket.io/docs/v4/connection-state-recovery">https://socket.io/docs/v4/connection-state-recovery</a></li>
+<li>Socket.IO docs, TypeScript (<code>ServerToClientEvents</code>, <code>ClientToServerEvents</code>, reversed client types): <a href="https://socket.io/docs/v4/typescript/">https://socket.io/docs/v4/typescript/</a></li>
+<li>Socket.IO docs, Rooms: <a href="https://socket.io/docs/v4/rooms/">https://socket.io/docs/v4/rooms/</a></li>
+<li>Socket.IO docs, Namespaces: <a href="https://socket.io/docs/v4/namespaces/">https://socket.io/docs/v4/namespaces/</a></li>
+<li>Socket.IO docs, Emitting events (acknowledgements, timeouts, volatile events): <a href="https://socket.io/docs/v4/emitting-events/">https://socket.io/docs/v4/emitting-events/</a></li>
+<li>Socket.IO docs, Using multiple nodes (sticky sessions, WebSocket-only transport): <a href="https://socket.io/docs/v4/using-multiple-nodes/">https://socket.io/docs/v4/using-multiple-nodes/</a></li>
+<li>Socket.IO docs, Redis adapter (Pub/Sub, sharded adapter): <a href="https://socket.io/docs/v4/redis-adapter/">https://socket.io/docs/v4/redis-adapter/</a></li>
+<li>Socket.IO docs, Client offline behavior (buffered events): <a href="https://socket.io/docs/v4/client-offline-behavior/">https://socket.io/docs/v4/client-offline-behavior/</a></li>
+<li>Socket.IO docs, Client options (reconnection defaults, <code>retries</code>, <code>ackTimeout</code>): <a href="https://socket.io/docs/v4/client-options/">https://socket.io/docs/v4/client-options/</a></li>
+<li>Socket.IO docs, The Socket instance, client side (<code>connect</code> on reconnection, disconnect reasons): <a href="https://socket.io/docs/v4/client-socket-instance/">https://socket.io/docs/v4/client-socket-instance/</a></li>
+<li>Redis docs, Redis persistence (AOF fsync policies, RDB data loss): <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/">https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/</a></li>
+<li>Redis docs, Write-behind caching: <a href="https://github.com/redis/docs/blob/main/content/operate/oss_and_stack/stack-with-enterprise/deprecated-features/gears-v1/python/recipes/write-behind.md">https://github.com/redis/docs/blob/main/content/operate/oss_and_stack/stack-with-enterprise/deprecated-features/gears-v1/python/recipes/write-behind.md</a></li>
+<li>AWS docs, Amazon SQS FIFO queues: <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fifo-queues.html">https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fifo-queues.html</a></li>
+<li>AWS docs, FIFO queue delivery logic (per message group ordering, in-flight messages): <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues-understanding-logic.html">https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues-understanding-logic.html</a></li>
+<li>AWS docs, Exactly-once processing (5-minute deduplication interval): <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues-exactly-once-processing.html">https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues-exactly-once-processing.html</a></li>
+<li>AWS docs, Amazon SQS visibility timeout: <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html">https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html</a></li>
+</ul> </div> <nav class="post-nav"> <a class="post-nav-prev" href="/blog/preventing-stock-overselling-in-redis-with-lua-scripts" rel="prev">
+← Preventing stock overselling in Redis with Lua scripts </a> <a class="post-nav-next" href="/blog/extracting-fulfillment-from-a-php-monolith-over-sqs" rel="next"> Extracting fulfillment from a PHP monolith over SQS →
+</a> </nav> </article>  </main> <footer class="site-footer"> <div class="container"> <span>© 2026 Abdelwahab Mahmoud</span> <span>built with astro · hosted on github pages</span> </div> </footer> <script data-track-target="theme-toggle">
+      function applyThemeColor(theme) {
+        var meta = document.getElementById("theme-color");
+        if (meta)
+          meta.setAttribute(
+            "content",
+            theme === "dark" ? "#0e1013" : "#faf8f3"
+          );
+      }
+      applyThemeColor(document.documentElement.dataset.theme);
+      var toggle = document.getElementById("theme-toggle");
+      if (toggle) {
+        toggle.addEventListener("click", function () {
+          var theme =
+            document.documentElement.dataset.theme === "dark"
+              ? "light"
+              : "dark";
+          document.documentElement.dataset.theme = theme;
+          localStorage.setItem("theme", theme);
+          applyThemeColor(theme);
+        });
+      }
+      document.addEventListener("click", function (event) {
+        var el = event.target.closest("[data-track]");
+        if (!el) return;
+        window.gtag &&
+          window.gtag("event", "click", {
+            hitType: "event",
+            event_category: "Reached",
+            event_label: el.getAttribute("data-track")
+          });
+      });
+    </script> </body> </html>

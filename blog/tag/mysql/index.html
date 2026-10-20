@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>#mysql | Writing | Abdelwahab Mahmoud</title><meta name="title" content="#mysql | Writing | Abdelwahab Mahmoud"><meta name="description" content="Posts tagged #mysql on Abdelwahab Mahmoud's writing archive."><meta name="theme-color" id="theme-color" content="#0e1013"><link rel="canonical" href="https://abdelwahab.dev/blog/tag/mysql/"><link rel="alternate" type="application/rss+xml" title="Blog | Abdelwahab Mahmoud" href="/rss.xml"><link rel="alternate" type="application/atom+xml" title="Blog | Abdelwahab Mahmoud" href="/atom.xml"><meta property="og:type" content="article"><meta property="og:url" content="https://abdelwahab.dev/blog/tag/mysql/"><meta property="og:title" content="#mysql | Writing | Abdelwahab Mahmoud"><meta property="og:description" content="Posts tagged #mysql on Abdelwahab Mahmoud's writing archive."><meta property="og:image" content="https://abdelwahab.dev/og.png"><meta property="og:image:alt" content="#mysql | Writing | Abdelwahab Mahmoud"><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://abdelwahab.dev/blog/tag/mysql/"><meta property="twitter:title" content="#mysql | Writing | Abdelwahab Mahmoud"><meta property="twitter:description" content="Posts tagged #mysql on Abdelwahab Mahmoud's writing archive."><meta property="twitter:image" content="https://abdelwahab.dev/og.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="shortcut icon" href="/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.json"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://abdelwahab.dev/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://abdelwahab.dev/blog"},{"@type":"ListItem","position":3,"name":"#mysql","item":"https://abdelwahab.dev/blog/tag/mysql"}]}</script><script>
+      (function () {
+        var theme = localStorage.getItem("theme");
+        if (theme !== "light" && theme !== "dark") theme = "dark";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script><script async src="https://www.googletagmanager.com/gtag/js?id=G-PNVK2LGZM4"></script><script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-PNVK2LGZM4");
+    </script><link rel="stylesheet" href="/_astro/_slug_.zg9CucUM.css"></head> <body> <header class="site-header"> <div class="container"> <a class="cwd" href="/"><span class="cwd-dot"></span><span class="path">~/</span>abdelwahab</a> <nav class="site-nav" aria-label="Primary"> <a class="nav-primary" href="/#about">About</a> <a href="/work">Work</a> <a href="/#experience">Experience</a> <a href="/#skills">Skills</a> <a class="nav-blog" href="/blog">Blog</a> <a href="/#contact">Contact</a> <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" data-track="theme-toggle"> <span class="toggle-dark">dark</span> <span class="toggle-light">light</span> </button> </nav> </div> </header> <main>  <div class="blog-main"> <a class="post-back" href="/blog">← All posts</a> <header class="blog-head"> <h1 class="blog-title">#mysql</h1> <p class="blog-subtitle"> 1 post tagged #mysql.
+</p> </header> <ul class="post-list"> <li class="post-row"> <div class="post-meta"> <time datetime="2026-09-17"> 2026-09-17 </time> <span class="post-kind">Note</span> <span class="post-read">17 min read</span> </div> <a class="post-row-title" href="/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join"> Fixing 100% CPU on Aurora MySQL by removing a join </a> <p class="post-lede">A status broadcast made about a thousand database calls, each scanning 7 million rows, and pinned Aurora at 100% CPU. The fix was a dropped join, not an index.</p> <ul class="post-tags"> <li class="post-tag">aurora</li><li class="post-tag">mysql</li><li class="post-tag">performance</li> </ul> </li> </ul> </div>  </main> <footer class="site-footer"> <div class="container"> <span>© 2026 Abdelwahab Mahmoud</span> <span>built with astro · hosted on github pages</span> </div> </footer> <script data-track-target="theme-toggle">
+      function applyThemeColor(theme) {
+        var meta = document.getElementById("theme-color");
+        if (meta)
+          meta.setAttribute(
+            "content",
+            theme === "dark" ? "#0e1013" : "#faf8f3"
+          );
+      }
+      applyThemeColor(document.documentElement.dataset.theme);
+      var toggle = document.getElementById("theme-toggle");
+      if (toggle) {
+        toggle.addEventListener("click", function () {
+          var theme =
+            document.documentElement.dataset.theme === "dark"
+              ? "light"
+              : "dark";
+          document.documentElement.dataset.theme = theme;
+          localStorage.setItem("theme", theme);
+          applyThemeColor(theme);
+        });
+      }
+      document.addEventListener("click", function (event) {
+        var el = event.target.closest("[data-track]");
+        if (!el) return;
+        window.gtag &&
+          window.gtag("event", "click", {
+            hitType: "event",
+            event_category: "Reached",
+            event_label: el.getAttribute("data-track")
+          });
+      });
+    </script> </body> </html>

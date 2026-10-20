@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Blog | Abdelwahab Mahmoud</title>
+  <subtitle>Case studies and notes from building production systems.</subtitle>
+  <id>https://abdelwahab.dev/atom.xml</id>
+  <link href="https://abdelwahab.dev/atom.xml" rel="self"/>
+  <link href="https://abdelwahab.dev/blog"/>
+  <updated>2026-10-19T00:00:00.000Z</updated>
+  <author>
+    <name>Abdelwahab Mahmoud</name>
+  </author>
+  <entry>
+    <title>Handling backpressure in Node.js streams</title>
+    <link href="https://abdelwahab.dev/blog/handling-backpressure-in-node-js-streams/"/>
+    <id>https://abdelwahab.dev/blog/handling-backpressure-in-node-js-streams/</id>
+    <published>2026-10-19T00:00:00.000Z</published>
+    <updated>2026-10-19T00:00:00.000Z</updated>
+    <summary>A Node.js stream says slow down with one boolean. Ignore it and a single stalled client parks 200 MiB in your process. Here is how the signal travels.</summary>
+  </entry>
+  <entry>
+    <title>Building a booking marketplace from empty repo to beta</title>
+    <link href="https://abdelwahab.dev/blog/building-a-booking-marketplace-from-empty-repo-to-beta/"/>
+    <id>https://abdelwahab.dev/blog/building-a-booking-marketplace-from-empty-repo-to-beta/</id>
+    <published>2026-10-13T00:00:00.000Z</published>
+    <updated>2026-10-13T00:00:00.000Z</updated>
+    <summary>A booking marketplace from empty repo to beta. Why CI came in week one, and why double booking is a database problem, not a UI check.</summary>
+  </entry>
+  <entry>
+    <title>Preventing stock overselling in Redis with Lua scripts</title>
+    <link href="https://abdelwahab.dev/blog/preventing-stock-overselling-in-redis-with-lua-scripts/"/>
+    <id>https://abdelwahab.dev/blog/preventing-stock-overselling-in-redis-with-lua-scripts/</id>
+    <published>2026-10-07T00:00:00.000Z</published>
+    <updated>2026-10-07T00:00:00.000Z</updated>
+    <summary>Every Redis command is atomic. The check-then-write your app wraps around them is not, and that gap is how 100 units become 121 orders.</summary>
+  </entry>
+  <entry>
+    <title>Live order status over Socket.IO and Redis</title>
+    <link href="https://abdelwahab.dev/blog/live-order-status-over-socket-io-and-redis/"/>
+    <id>https://abdelwahab.dev/blog/live-order-status-over-socket-io-and-redis/</id>
+    <published>2026-09-28T00:00:00.000Z</published>
+    <updated>2026-09-28T00:00:00.000Z</updated>
+    <summary>Socket.IO delivers at most once by default, so live order status on a driver&apos;s phone is only as good as the Redis read it makes on reconnect.</summary>
+  </entry>
+  <entry>
+    <title>Extracting fulfillment from a PHP monolith over SQS</title>
+    <link href="https://abdelwahab.dev/blog/extracting-fulfillment-from-a-php-monolith-over-sqs/"/>
+    <id>https://abdelwahab.dev/blog/extracting-fulfillment-from-a-php-monolith-over-sqs/</id>
+    <published>2026-09-24T00:00:00.000Z</published>
+    <updated>2026-09-24T00:00:00.000Z</updated>
+    <summary>Fulfillment came out of a PHP monolith piece by piece, over SQS, so six people never froze features. The price was a contract both sides had to keep.</summary>
+  </entry>
+  <entry>
+    <title>Fixing 100% CPU on Aurora MySQL by removing a join</title>
+    <link href="https://abdelwahab.dev/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join/"/>
+    <id>https://abdelwahab.dev/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join/</id>
+    <published>2026-09-17T00:00:00.000Z</published>
+    <updated>2026-09-17T00:00:00.000Z</updated>
+    <summary>A status broadcast made about a thousand database calls, each scanning 7 million rows, and pinned Aurora at 100% CPU. The fix was a dropped join, not an index.</summary>
+  </entry>
+  <entry>
+    <title>Making LLM triage verdicts testable in code</title>
+    <link href="https://abdelwahab.dev/blog/making-llm-triage-verdicts-testable-in-code/"/>
+    <id>https://abdelwahab.dev/blog/making-llm-triage-verdicts-testable-in-code/</id>
+    <published>2026-09-12T00:00:00.000Z</published>
+    <updated>2026-09-12T00:00:00.000Z</updated>
+    <summary>Prompting an LLM to be careful never made pass/fail testable. Moving the verdict into code did, and replaying old incidents caught three false passes.</summary>
+  </entry>
+  <entry>
+    <title>Handling LLM rate limits as reschedules, not errors</title>
+    <link href="https://abdelwahab.dev/blog/handling-llm-rate-limits-as-reschedules-not-errors/"/>
+    <id>https://abdelwahab.dev/blog/handling-llm-rate-limits-as-reschedules-not-errors/</id>
+    <published>2026-09-05T00:00:00.000Z</published>
+    <updated>2026-09-05T00:00:00.000Z</updated>
+    <summary>Rate limits caused 65% of our LLM review failures. Treating them as reschedules, not errors, kept provider throttling from becoming our outage.</summary>
+  </entry>
+  <entry>
+    <title>Scaling ECS workers on queue depth without killing long jobs</title>
+    <link href="https://abdelwahab.dev/blog/scaling-ecs-workers-on-queue-depth-without-killing-long-jobs/"/>
+    <id>https://abdelwahab.dev/blog/scaling-ecs-workers-on-queue-depth-without-killing-long-jobs/</id>
+    <published>2026-09-02T00:00:00.000Z</published>
+    <updated>2026-09-02T00:00:00.000Z</updated>
+    <summary>ECS scale-in was killing translation jobs up to two hours into their run. Scaling on queue depth and letting busy tasks finish before they stop fixed it.</summary>
+  </entry>
+</feed>

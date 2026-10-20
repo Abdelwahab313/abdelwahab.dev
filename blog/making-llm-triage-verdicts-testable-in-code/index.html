@@ -1,0 +1,326 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Making LLM triage verdicts testable in code | Abdelwahab Mahmoud</title><meta name="title" content="Making LLM triage verdicts testable in code | Abdelwahab Mahmoud"><meta name="description" content="Prompting an LLM to be careful never made pass/fail testable. Moving the verdict into code did, and replaying old incidents caught three false passes."><meta name="theme-color" id="theme-color" content="#0e1013"><link rel="canonical" href="https://abdelwahab.dev/blog/making-llm-triage-verdicts-testable-in-code/"><link rel="alternate" type="application/rss+xml" title="Blog | Abdelwahab Mahmoud" href="/rss.xml"><link rel="alternate" type="application/atom+xml" title="Blog | Abdelwahab Mahmoud" href="/atom.xml"><meta property="og:type" content="article"><meta property="og:url" content="https://abdelwahab.dev/blog/making-llm-triage-verdicts-testable-in-code/"><meta property="og:title" content="Making LLM triage verdicts testable in code | Abdelwahab Mahmoud"><meta property="og:description" content="Prompting an LLM to be careful never made pass/fail testable. Moving the verdict into code did, and replaying old incidents caught three false passes."><meta property="og:image" content="https://abdelwahab.dev/og.png"><meta property="og:image:alt" content="Making LLM triage verdicts testable in code | Abdelwahab Mahmoud"><meta property="article:published_time" content="2026-09-12T00:00:00.000Z"><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://abdelwahab.dev/blog/making-llm-triage-verdicts-testable-in-code/"><meta property="twitter:title" content="Making LLM triage verdicts testable in code | Abdelwahab Mahmoud"><meta property="twitter:description" content="Prompting an LLM to be careful never made pass/fail testable. Moving the verdict into code did, and replaying old incidents caught three false passes."><meta property="twitter:image" content="https://abdelwahab.dev/og.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="shortcut icon" href="/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.json"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Making LLM triage verdicts testable in code","description":"Prompting an LLM to be careful never made pass/fail testable. Moving the verdict into code did, and replaying old incidents caught three false passes.","url":"https://abdelwahab.dev/blog/making-llm-triage-verdicts-testable-in-code","mainEntityOfPage":{"@type":"WebPage","@id":"https://abdelwahab.dev/blog/making-llm-triage-verdicts-testable-in-code"},"datePublished":"2026-09-12T00:00:00.000Z","dateModified":"2026-09-12T00:00:00.000Z","author":{"@id":"https://abdelwahab.dev/#person"},"publisher":{"@id":"https://abdelwahab.dev/#person"},"keywords":["agents","llm","rails"],"inLanguage":"en"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://abdelwahab.dev/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://abdelwahab.dev/blog"},{"@type":"ListItem","position":3,"name":"Making LLM triage verdicts testable in code","item":"https://abdelwahab.dev/blog/making-llm-triage-verdicts-testable-in-code"}]}</script><script>
+      (function () {
+        var theme = localStorage.getItem("theme");
+        if (theme !== "light" && theme !== "dark") theme = "dark";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script><script async src="https://www.googletagmanager.com/gtag/js?id=G-PNVK2LGZM4"></script><script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-PNVK2LGZM4");
+    </script><link rel="stylesheet" href="/_astro/_slug_.zg9CucUM.css"></head> <body> <header class="site-header"> <div class="container"> <a class="cwd" href="/"><span class="cwd-dot"></span><span class="path">~/</span>abdelwahab</a> <nav class="site-nav" aria-label="Primary"> <a class="nav-primary" href="/#about">About</a> <a href="/work">Work</a> <a href="/#experience">Experience</a> <a href="/#skills">Skills</a> <a class="nav-blog" href="/blog">Blog</a> <a href="/#contact">Contact</a> <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" data-track="theme-toggle"> <span class="toggle-dark">dark</span> <span class="toggle-light">light</span> </button> </nav> </div> </header> <main>  <article class="post"> <nav class="post-crumbs" aria-label="Breadcrumb"> <a href="/blog">Blog</a>  <span class="crumb-sep">/</span> <a href="/blog/tag/agents">#agents</a>  </nav> <header class="post-head"> <div class="post-meta"> <time datetime="2026-09-12">2026-09-12</time> <span class="post-kind">Note</span>  <span class="post-read">13 min read</span> </div> <h1 class="post-title">Making LLM triage verdicts testable in code</h1> <figure class="post-cover"> <div class="cover"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" role="img" aria-label="An agent box hands evidence to a small solid verdict box, while its dashed write path is blocked by a human gate.">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--muted, #949aa2)"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  
+  <rect x="90" y="110" width="360" height="200" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+  <text x="270" y="222" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">agent</text>
+
+  
+  <line x1="450" y1="210" x2="766" y2="210" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+  <text x="610" y="192" font-size="26" fill="var(--muted, #949aa2)" text-anchor="middle">evidence</text>
+
+  
+  <rect x="780" y="150" width="330" height="120" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="945" y="221" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">verdict</text>
+
+  
+  <path d="M270 310 V430 H630" fill="none" stroke="var(--muted, #949aa2)" stroke-width="3" stroke-dasharray="10 10"/>
+  <line x1="645" y1="398" x2="645" y2="462" stroke="var(--ink, #edeae3)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M660 430 H766" fill="none" stroke="var(--muted, #949aa2)" stroke-width="3" stroke-dasharray="10 10" marker-end="url(#mut)"/>
+  <text x="645" y="506" font-size="26" fill="var(--muted, #949aa2)" text-anchor="middle">human gate</text>
+  <rect x="780" y="380" width="330" height="100" rx="18" fill="none" stroke="var(--muted, #949aa2)" stroke-width="3" stroke-dasharray="10 10"/>
+  <text x="945" y="440" font-size="26" fill="var(--muted, #949aa2)" text-anchor="middle">write</text>
+</svg></div> </figure> <p class="post-lede">Prompting an LLM to be careful never made pass/fail testable. Moving the verdict into code did, and replaying old incidents caught three false passes.</p> <ul class="post-tags"> <li class="post-tag"> <a href="/blog/tag/agents">agents</a> </li><li class="post-tag"> <a href="/blog/tag/llm">llm</a> </li><li class="post-tag"> <a href="/blog/tag/rails">rails</a> </li> </ul> </header> <nav class="post-toc" aria-label="On this page"> <span class="post-toc-label">On this page</span> <ol> <li> <a href="#an-answer-that-felt-right">An answer that felt right</a> </li><li> <a href="#a-false-pass-costs-more-than-a-false-alarm">A false pass costs more than a false alarm</a> </li><li> <a href="#asking-the-model-to-be-careful">Asking the model to be careful</a> </li><li> <a href="#read-only-is-a-property-of-the-credential">Read-only is a property of the credential</a> </li><li> <a href="#the-model-gathers-code-decides">The model gathers, code decides</a> </li><li> <a href="#replaying-old-incidents-as-tests">Replaying old incidents as tests</a> </li><li> <a href="#what-the-narrow-verdict-cost">What the narrow verdict cost</a> </li><li> <a href="#the-human-starts-from-a-draft">The human starts from a draft</a> </li><li> <a href="#make-the-gono-go-a-function">Make the go/no-go a function</a> </li><li> <a href="#sources">Sources</a> </li> </ol> </nav> <div class="post-body"> <h2 id="an-answer-that-felt-right">An answer that felt right</h2>
+<p>I was looking at production incidents and wanted to triage them before pulling a human in. An LLM could read the logs, summarize what happened, and sound convincing.</p>
+<p>That was the whole problem. A convincing summary is not a correct one, and the platform was about to treat 'convincing' as 'correct'.</p>
+<p>The platform took first-line incident and support inquiries. I built it alone over three months, and the part that took longest to get right was not the investigating. It was deciding who gets to say "this is fine".</p>
+<h2 id="a-false-pass-costs-more-than-a-false-alarm">A false pass costs more than a false alarm</h2>
+<p>The failure mode I cared about was not a bad summary. It was a confident pass.</p>
+<p>Triage can be wrong in two directions, and they do not cost the same. A false fail sends something harmless to a person, who confirms it is harmless and closes it. A false pass closes something that was not fine, and nobody looks again, because the system said nobody needed to. The problem comes back later from somewhere else, with the logs older and the trail colder.</p>
+<p>Mean Time To Resolve was the number I wanted to move, but not by making the wrong call faster. An agent that closes everything instantly has an excellent MTTR right up until someone audits what it closed.</p>
+<p>So the target was lopsided on purpose. A fail is cheap: it means a human looks. A pass has to be earned.</p>
+<h2 id="asking-the-model-to-be-careful">Asking the model to be careful</h2>
+<p>My first attempt was prompt-only. I asked the agent to be cautious and explain its reasoning. The reasoning got better. The boundary between a real pass and a hopeful one stayed fuzzy.</p>
+<p>I could tune the words, but I could not point at the exact check that decided pass or fail, and I could not test it. When the agent passed an incident, the reason was somewhere inside a paragraph of prose. When I changed the prompt to fix one case, I had no way to know which other cases had moved with it. That is a bad place to stand when the cost of being wrong is high.</p>
+<p>The obvious next move is to ask the model for a confidence score and put a threshold on it. I think that moves the fuzziness into a number without removing it. The cleanest evidence I know is in OpenAI's GPT-4 technical report. The pre-trained model was "highly calibrated (its predicted confidence in an answer generally matches the probability of being correct)". After post-training, "the calibration is reduced", and the figure caption is blunter: "The post-training hurts calibration significantly." That was measured on the model's token probabilities for multiple-choice questions from MMLU. A confidence number the model writes into its own answer is one step further from anything measured, and the report does not test it. I would not hang a decision boundary on either.</p>
+<h2 id="read-only-is-a-property-of-the-credential">Read-only is a property of the credential</h2>
+<p>Before the verdict could move anywhere, the agent needed a way to investigate that could not hurt production. That became its own piece of work: an MCP server that exposed live databases, logs and selected APIs to the team's agents through authenticated, monitored access. Access was read-only. Data access ran behind a rollback wrapper, every action was written to an audit log, and any write stayed behind a gate only a human could open.</p>
+<p>MCP's value here is that the tool surface is explicit. A client asks the server for <code>tools/list</code>, and each tool comes back as a name, a description, a JSON Schema for its input and, optionally, a schema for its output. The agent can call what is listed, with arguments that validate, and nothing else. A narrow tool looks like this, as a sketch with illustrative names:</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">{</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">  "name"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: </span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"find_job"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">,</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">  "title"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: </span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"Look up one job by id"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">,</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">  "description"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: </span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"Returns the current state and last error of a single job. Read-only."</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">,</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">  "inputSchema"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: {</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">    "type"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: </span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"object"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">,</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">    "properties"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: {</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">      "job_id"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: { </span><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">"type"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: </span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"string"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">"description"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: </span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"The id from the exception payload"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> }</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">    },</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">    "required"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: [</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"job_id"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">]</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">  },</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">  "annotations"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: {</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">    "readOnlyHint"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">true</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">,</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#8DDB8C">    "openWorldHint"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">: </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">false</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">  }</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">}</span></span></code></pre>
+<p>The <code>annotations</code> block is the part people over-read. <code>readOnlyHint: true</code> does not make a tool read-only. The MCP schema says every property of <code>ToolAnnotations</code> is a hint, "not guaranteed to provide a faithful description of tool behavior", and that clients should never make tool-use decisions based on annotations from untrusted servers. The default for <code>readOnlyHint</code> is <code>false</code>. The annotation tells a client how to present the tool. It enforces nothing.</p>
+<p>So read-only has to live below the protocol. The spec's security section puts the burden on the server: it must validate all tool inputs, implement proper access controls, rate limit invocations and sanitize outputs. Clients should log tool usage for audit. In a Rails app it is tempting to reach for the framework's own guard, something like this sketch:</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="ruby"><code><span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#768390"># A sketch of the approach, not the production code.</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">module</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> ReadOnlyGate</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">  def</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB"> self.call</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(tool, args)</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">    result</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> nil</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">    ActiveRecord</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">::</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">Base</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">while_preventing_writes</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> do</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">      ActiveRecord</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">::</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">Base</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">transaction</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> do</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">        result</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> TOOLS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">fetch</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(tool).</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">call</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">**</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">args)</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">        raise</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> ActiveRecord</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">::</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">Rollback</span><span style="--shiki-light:#6A737D;--shiki-dark:#768390"> # undo what the tool did, where the database can undo it</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">      end</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">    end</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">    result</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">  ensure</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">    AuditLog</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">append</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">tool:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> tool, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">args:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> args, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">result:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> result, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">at:</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> Time</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">current</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">)</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">  end</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">end</span></span></code></pre>
+<p>Both layers in that sketch are weaker than they look. The Rails API docs say <code>while_preventing_writes</code> "does not provide the same protection as a readonly user" and "is meant to be a safeguard against accidental writes". <code>raise ActiveRecord::Rollback</code> rolls the transaction back and <code>transaction</code> swallows the exception, which is what you want, but a rollback only undoes what the database is able to roll back. On MySQL, which is what Aurora ran for this product, DDL such as <code>CREATE TABLE</code>, <code>ALTER TABLE</code> and <code>DROP TABLE</code> ends the open transaction "as if you had done a COMMIT before executing the statement". A rollback wrapper is the second line. The first line is a database user that cannot write at all.</p>
+<p>The client side has a layer too, and it is worth having. The Claude Agent SDK documents the order it checks a tool call in: hooks first, then deny rules, ask rules, the permission mode, allow rules, and last a <code>canUseTool</code> callback. A <code>PreToolUse</code> hook that returns <code>permissionDecision: "deny"</code> blocks the call even in <code>bypassPermissions</code> mode, and so does a matching deny rule. Explicit refusals running first is the right order. It is still configuration on the client, though. A credential that cannot write does not depend on anyone having configured the client correctly.</p>
+<p>The human-only write gate is the MCP spec's own advice taken literally. The spec says there "SHOULD always be a human in the loop with the ability to deny tool invocations". For writes to production I treated that SHOULD as a must.</p>
+<h2 id="the-model-gathers-code-decides">The model gathers, code decides</h2>
+<p>I kept the agent for what it is good at: reading, reasoning, and collecting evidence. I moved the pass/fail decision itself into code, into checks I could test and replay.</p>
+<figure class="diagram" data-diagram="triage-gather-decide"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 610" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15" role="img" aria-label="The split. An inquiry goes to the agent, which calls read-only tools through an MCP server that logs every call. The agent returns a hypothesis and findings that cite audit ids, never a verdict. A tested verdict function reads the tool results from the audit log and answers pass or fail, and any write to production sits behind a gate only a human can open.">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"></path>
+    </marker>
+    <marker id="mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--muted, #949aa2)"></path>
+    </marker>
+  </defs>
+
+  
+  <rect x="20" y="130" width="140" height="100" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="90" y="168" fill="var(--ink, #edeae3)" text-anchor="middle">inquiry</text>
+  <text x="90" y="192" fill="var(--muted, #949aa2)" text-anchor="middle">incident or</text>
+  <text x="90" y="214" fill="var(--muted, #949aa2)" text-anchor="middle">support</text>
+  <line x1="160" y1="180" x2="192" y2="180" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></line>
+
+  
+  <rect x="200" y="100" width="210" height="160" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="305" y="135" fill="var(--ink, #edeae3)" text-anchor="middle">agent</text>
+  <text x="305" y="165" fill="var(--muted, #949aa2)" text-anchor="middle">reads, reasons,</text>
+  <text x="305" y="189" fill="var(--muted, #949aa2)" text-anchor="middle">collects evidence</text>
+  <text x="305" y="219" fill="var(--muted, #949aa2)" text-anchor="middle">returns findings,</text>
+  <text x="305" y="243" fill="var(--muted, #949aa2)" text-anchor="middle">never a verdict</text>
+
+  
+  <line x1="410" y1="180" x2="642" y2="180" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></line>
+  <text x="526" y="168" fill="var(--muted, #949aa2)" text-anchor="middle">hypothesis + findings</text>
+  <text x="526" y="202" fill="var(--muted, #949aa2)" text-anchor="middle">each cites an audit id</text>
+
+  
+  <rect x="650" y="100" width="200" height="160" rx="10" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"></rect>
+  <text x="750" y="135" fill="var(--ink, #edeae3)" text-anchor="middle">verdict()</text>
+  <text x="750" y="165" fill="var(--muted, #949aa2)" text-anchor="middle">tested code</text>
+  <text x="750" y="189" fill="var(--muted, #949aa2)" text-anchor="middle">rule per hypothesis</text>
+  <text x="750" y="219" fill="var(--muted, #949aa2)" text-anchor="middle">no rule: fail</text>
+  <text x="750" y="243" fill="var(--muted, #949aa2)" text-anchor="middle">no confidence input</text>
+
+  
+  <line x1="850" y1="150" x2="932" y2="150" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></line>
+  <text x="940" y="155" fill="var(--ink, #edeae3)">pass</text>
+  <text x="940" y="177" fill="var(--muted, #949aa2)">must be earned</text>
+  <line x1="850" y1="220" x2="932" y2="220" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></line>
+  <text x="940" y="225" fill="var(--ink, #edeae3)">fail</text>
+  <text x="940" y="247" fill="var(--muted, #949aa2)">a human looks</text>
+
+  
+  <rect x="200" y="340" width="210" height="130" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="305" y="368" fill="var(--ink, #edeae3)" text-anchor="middle">MCP server</text>
+  <text x="305" y="396" fill="var(--muted, #949aa2)" text-anchor="middle">read-only credential</text>
+  <text x="305" y="420" fill="var(--muted, #949aa2)" text-anchor="middle">rollback wrapper</text>
+  <text x="305" y="444" fill="var(--muted, #949aa2)" text-anchor="middle">audit log</text>
+
+  
+  <line x1="305" y1="268" x2="305" y2="332" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-start="url(#ink)" marker-end="url(#ink)"></line>
+  <text x="317" y="304" fill="var(--muted, #949aa2)">tool calls</text>
+
+  
+  <path d="M410 444 H750 V268" fill="none" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></path>
+  <text x="580" y="432" fill="var(--muted, #949aa2)" text-anchor="middle">tool results, read by audit id</text>
+
+  
+  <path d="M305 470 V540 H638" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="5 5"></path>
+  <text x="470" y="528" fill="var(--muted, #949aa2)" text-anchor="middle">any write</text>
+  <line x1="650" y1="515" x2="650" y2="565" stroke="var(--ink, #edeae3)" stroke-width="3" stroke-linecap="round"></line>
+  <text x="650" y="592" fill="var(--muted, #949aa2)" text-anchor="middle">human-only gate</text>
+  <path d="M662 540 H742" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="5 5" marker-end="url(#mut)"></path>
+  <rect x="750" y="505" width="200" height="70" rx="10" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="5 5"></rect>
+  <text x="850" y="545" fill="var(--muted, #949aa2)" text-anchor="middle">production write</text>
+</svg><figcaption>The split. An inquiry goes to the agent, which calls read-only tools through an MCP server that logs every call. The agent returns a hypothesis and findings that cite audit ids, never a verdict. A tested verdict function reads the tool results from the audit log and answers pass or fail, and any write to production sits behind a gate only a human can open.</figcaption></figure>
+<p>What changes is the agent's output. It no longer says "pass". It returns a hypothesis and a list of findings, and each finding points at the audit-log entry of the tool call that shows it. The verdict function never reads the agent's prose. It reads the tool results the agent cited, straight from the audit log, and runs a fixed check against each one. Here is the shape as a sketch; the rule and its checks are illustrative, not the real ones:</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="ruby"><code><span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#768390"># A sketch of the shape, not the production code. Rule names and fields are illustrative.</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">module</span><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50"> Triage</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">  Finding</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">    =</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> Data</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">define</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">:fact</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">:audit_id</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">)</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">  AuditEntry</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> Data</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">define</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">:result</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">  RULES</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> {</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">    transient_upstream_timeout:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> {</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">      job_completed_on_retry:</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> -></span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(result) { result.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">dig</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"job"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"state"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">==</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> "completed"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> },</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">      no_recurrence_since:</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">    -></span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(result) { result.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">fetch</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"match_count"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">nil</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">)</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">&#x26;.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">zero?</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> }</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">    }</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">  }.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">freeze</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">  def</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB"> self.verdict</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">hypothesis:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">findings:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">audit_log:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">)</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">    rule</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> RULES</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">[hypothesis]</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">    return</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> :fail</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> unless</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> rule</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">    earned</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> rule.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">all?</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> do</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> |fact, check|</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">      finding</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> findings.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">find</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> { |f| f.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">fact</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> ==</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> fact }</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">      entry</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">   =</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> finding </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">&#x26;&#x26;</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> audit_log[finding.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">audit_id</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">]</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">      entry </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">&#x26;&#x26;</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> check.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">call</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(entry.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">result</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">)</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">    end</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">    earned </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">?</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> :pass</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> : </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">:fail</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">  end</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">end</span></span></code></pre>
+<p>The rules matter less than the defaults around them. A hypothesis with no rule fails, so the agent cannot pass an incident by inventing a new kind of explanation. A missing finding fails, so "it has not happened again" counts only if the search that came back empty is in the audit log. The checks run against what the tool returned, not the agent's description of what it returned, so a paraphrase that drifted from the data cannot carry the verdict. There is no confidence input anywhere. The model's certainty has nowhere to go.</p>
+<p>Support claims went through the same platform, with a second agent added: an investigator that builds the case on a claim, and a critic whose job is to find the hole in it. Two agents arguing is better than one agent agreeing with itself. It is still two opinions, which is why I would keep the verdict out of both of them.</p>
+<h2 id="replaying-old-incidents-as-tests">Replaying old incidents as tests</h2>
+<p>A verdict function is ordinary code, so it gets ordinary tests. The useful ones are not invented cases. They are past incidents whose real outcome is already known: the findings the agent produced, the audit entries those findings cite, and how the incident actually ended. Replay them through the function and compare.</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="ruby"><code><span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#768390"># spec/triage/replay_spec.rb, a sketch. One JSON fixture per past incident.</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">RSpec</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">describe</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> "Triage.verdict replay"</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> do</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">  Dir</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">[</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">Rails</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">root</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">join</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"spec/fixtures/incidents/*.json"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">).</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">to_s</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">].</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">sort</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">each</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> do</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> |path|</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">    incident</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> JSON</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">parse</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">File</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">read</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(path))</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">    it </span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"</span><span style="--shiki-light:#032F62;--shiki-dark:#F47067">#{</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">File</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">basename</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">(path, </span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">".json"</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">)</span><span style="--shiki-light:#032F62;--shiki-dark:#F47067">}</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> ends as </span><span style="--shiki-light:#032F62;--shiki-dark:#F47067">#{</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">incident[</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"actual"</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">]</span><span style="--shiki-light:#032F62;--shiki-dark:#F47067">}</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> do</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">      findings</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> incident[</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"findings"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">].</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">map</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> do</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> |f|</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">        Triage</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">::</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">Finding</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">new</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">fact:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> f[</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"fact"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">].</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">to_sym</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">audit_id:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> f[</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"audit_id"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">])</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">      end</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">      audit_log</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> incident[</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"audit"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">].</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">to_h</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> do</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> |e|</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">        [e[</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"id"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">], </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">Triage</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">::</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">AuditEntry</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">new</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">result:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> e[</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"result"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">])]</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">      end</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#F69D50">      verdict</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> Triage</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">verdict</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">        hypothesis:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> incident[</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"hypothesis"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">].</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">to_sym</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">,</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">        findings:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> findings,</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">        audit_log:</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> audit_log</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">      )</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">      expect</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(verdict).</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">to</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB"> eq</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(incident[</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF">"actual"</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">].</span><span style="--shiki-light:#6F42C1;--shiki-dark:#DCBDFB">to_sym</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">)</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">    end</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">  end</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">end</span></span></code></pre>
+<p>Replaying old incidents through the checks caught three false passes that a prompt had let through. Three times, the prompt-only agent had called an incident fine and the real outcome said otherwise. Those three are the most valuable fixtures in a suite like this. Any later change to a rule that would let one of them pass again turns its example red.</p>
+<figure class="diagram" data-diagram="triage-replay"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 410" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15" role="img" aria-label="The replay. Each past incident is a fixture of findings, audit entries and the real outcome. It runs through the same verdict function as production, with no model call, and the result is compared with what actually happened. A mismatch turns the example red, which is how the three false passes surfaced.">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"></path>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"></path>
+    </marker>
+  </defs>
+
+  
+  <rect x="24" y="104" width="220" height="140" rx="10" fill="var(--surface, #161a20)" stroke="var(--muted, #949aa2)" stroke-width="1.5"></rect>
+  <rect x="32" y="112" width="220" height="140" rx="10" fill="var(--surface, #161a20)" stroke="var(--muted, #949aa2)" stroke-width="1.5"></rect>
+  <rect x="40" y="120" width="220" height="140" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="150" y="160" fill="var(--ink, #edeae3)" text-anchor="middle">past incident</text>
+  <text x="150" y="188" fill="var(--muted, #949aa2)" text-anchor="middle">findings</text>
+  <text x="150" y="210" fill="var(--muted, #949aa2)" text-anchor="middle">audit entries</text>
+  <text x="150" y="232" fill="var(--muted, #949aa2)" text-anchor="middle">actual outcome</text>
+
+  
+  <line x1="260" y1="190" x2="362" y2="190" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></line>
+  <text x="315" y="178" fill="var(--muted, #949aa2)" text-anchor="middle">replay</text>
+
+  
+  <rect x="370" y="135" width="200" height="110" rx="10" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"></rect>
+  <text x="470" y="184" fill="var(--ink, #edeae3)" text-anchor="middle">verdict()</text>
+  <text x="470" y="210" fill="var(--muted, #949aa2)" text-anchor="middle">same code as prod</text>
+
+  <line x1="570" y1="190" x2="682" y2="190" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></line>
+  <text x="630" y="178" fill="var(--muted, #949aa2)" text-anchor="middle">pass / fail</text>
+
+  
+  <rect x="690" y="135" width="200" height="110" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="790" y="184" fill="var(--ink, #edeae3)" text-anchor="middle">compare with</text>
+  <text x="790" y="210" fill="var(--muted, #949aa2)" text-anchor="middle">actual outcome</text>
+
+  
+  <line x1="730" y1="245" x2="730" y2="296" stroke="var(--muted, #949aa2)" stroke-width="1.5" marker-end="url(#ink)"></line>
+  <text x="730" y="320" fill="var(--muted, #949aa2)" text-anchor="middle">matches</text>
+  <line x1="860" y1="245" x2="860" y2="296" stroke="var(--accent, #57c7ba)" stroke-width="1.5" marker-end="url(#acc)"></line>
+  <text x="860" y="320" fill="var(--ink, #edeae3)" text-anchor="middle">differs</text>
+  <text x="860" y="348" fill="var(--ink, #edeae3)" text-anchor="middle">3 false passes</text>
+  <text x="860" y="370" fill="var(--muted, #949aa2)" text-anchor="middle">the prompt had let through</text>
+
+  <text x="40" y="396" fill="var(--muted, #949aa2)">no model call: recorded evidence in, verdict out</text>
+</svg><figcaption>The replay. Each past incident is a fixture of findings, audit entries and the real outcome. It runs through the same verdict function as production, with no model call, and the result is compared with what actually happened. A mismatch turns the example red, which is how the three false passes surfaced.</figcaption></figure>
+<p>There are two different replays here, and I would keep them apart. The spec above is deterministic. It tests the code against recorded evidence, so it is fast and gives the same answer every time. It says nothing about whether the agent would find that evidence again. Re-running the agent itself on the same incidents is the other replay, and it is an evaluation, not a unit test. The model is not deterministic, so the useful question is how often it gathers the findings a rule needs, not whether a single run matches.</p>
+<p>If your traces already live in Langfuse, its datasets fit that second replay. A dataset is "a collection of inputs and expected outputs", <code>create_dataset_item()</code> accepts a <code>source_trace_id</code> so an item links back to the production trace it came from, and <code>run_experiment()</code> runs a task function over the items. A red RSpec example means the rules changed. A drop in the experiment means the agent did. Mixing the two makes both signals harder to read.</p>
+<h2 id="what-the-narrow-verdict-cost">What the narrow verdict cost</h2>
+<p>The verdict function is narrow on purpose, and narrow has a price. Every kind of pass needs a rule someone wrote by hand. When the agent finds a real, harmless cause that no rule describes, the answer is still fail, and a human reads a correct draft and closes it. The automation covers exactly as much ground as the rules do, and on a solo build the rules grow at the speed of one person.</p>
+<p>Rules also encode how the system looks today. A renamed job state or a changed log format can make a check stop matching. Written like the sketch, where a missing field is falsy, that drift turns into more fails and more human work, never into a false pass. Written carelessly, with a check that treats a missing count as zero, it drifts the other way. That is the bug in this design I would look for first in a code review.</p>
+<p>The agent cannot fix anything, either. Every remediation went through the human-only write gate, which is slower than letting an agent restart a job itself. For production data I would keep it that way.</p>
+<p>And all of this is the wrong design when being wrong is cheap. If an agent only routes or labels inquiries and a person reads every one anyway, a prompt is enough and a rule table is overhead. The cost of a wrong answer decides how much of the decision has to leave the prompt.</p>
+<h2 id="the-human-starts-from-a-draft">The human starts from a draft</h2>
+<p>The platform handled the first pass, so a human started from a drafted answer and its evidence instead of an empty screen. That is where the time savings came from, not from removing the human. It cut Mean Time To Resolve across both incident and support inquiries.</p>
+<p>The MCP server underneath outlived the triage use. It became the team's standard agent integration path. I think that happened because once one server held the authentication, the monitoring and the audit log, the next agent did not need to rebuild any of it.</p>
+<h2 id="make-the-gono-go-a-function">Make the go/no-go a function</h2>
+<p>If the cost of a wrong answer is high, make the go/no-go a unit-testable function, not a sentence. A confidence score is not that function, however carefully you prompt for it. Let the model gather and explain. Let tested code decide.</p>
+<p>Pick the one decision in your agent pipeline that closes something without a person looking. If you cannot write the RSpec example that goes red when that decision is wrong, the model should not be making it alone.</p>
+<h2 id="sources">Sources</h2>
+<ul>
+<li>Model Context Protocol, Tools (2025-06-18): tool definition fields, error handling, human in the loop, security considerations: <a href="https://modelcontextprotocol.io/specification/2025-06-18/server/tools">https://modelcontextprotocol.io/specification/2025-06-18/server/tools</a></li>
+<li>Model Context Protocol, Schema reference (2025-06-18), <code>ToolAnnotations</code> and its defaults: <a href="https://modelcontextprotocol.io/specification/2025-06-18/schema">https://modelcontextprotocol.io/specification/2025-06-18/schema</a></li>
+<li>Claude Agent SDK, Configure permissions (evaluation order, deny rules, permission modes): <a href="https://code.claude.com/docs/en/agent-sdk/permissions">https://code.claude.com/docs/en/agent-sdk/permissions</a></li>
+<li>Claude Agent SDK, Hooks (<code>PreToolUse</code>, <code>permissionDecision</code>): <a href="https://code.claude.com/docs/en/agent-sdk/hooks">https://code.claude.com/docs/en/agent-sdk/hooks</a></li>
+<li>OpenAI, GPT-4 Technical Report, calibration and Figure 8: <a href="https://cdn.openai.com/papers/gpt-4.pdf">https://cdn.openai.com/papers/gpt-4.pdf</a></li>
+<li>Rails API 8.1.3, <code>ActiveRecord::ConnectionHandling#while_preventing_writes</code>: <a href="https://api.rubyonrails.org/v8.1.3/classes/ActiveRecord/ConnectionHandling.html">https://api.rubyonrails.org/v8.1.3/classes/ActiveRecord/ConnectionHandling.html</a></li>
+<li>Rails API 8.1.3, <code>ActiveRecord::Rollback</code>: <a href="https://api.rubyonrails.org/v8.1.3/classes/ActiveRecord/Rollback.html">https://api.rubyonrails.org/v8.1.3/classes/ActiveRecord/Rollback.html</a></li>
+<li>MySQL 8.0 Reference Manual, Statements That Cause an Implicit Commit: <a href="https://dev.mysql.com/doc/refman/8.0/en/implicit-commit.html">https://dev.mysql.com/doc/refman/8.0/en/implicit-commit.html</a></li>
+<li>Langfuse, Datasets: <a href="https://langfuse.com/docs/evaluation/dataset-runs/datasets">https://langfuse.com/docs/evaluation/dataset-runs/datasets</a></li>
+</ul> </div> <nav class="post-nav"> <a class="post-nav-prev" href="/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join" rel="prev">
+← Fixing 100% CPU on Aurora MySQL by removing a join </a> <a class="post-nav-next" href="/blog/handling-llm-rate-limits-as-reschedules-not-errors" rel="next"> Handling LLM rate limits as reschedules, not errors →
+</a> </nav> </article>  </main> <footer class="site-footer"> <div class="container"> <span>© 2026 Abdelwahab Mahmoud</span> <span>built with astro · hosted on github pages</span> </div> </footer> <script data-track-target="theme-toggle">
+      function applyThemeColor(theme) {
+        var meta = document.getElementById("theme-color");
+        if (meta)
+          meta.setAttribute(
+            "content",
+            theme === "dark" ? "#0e1013" : "#faf8f3"
+          );
+      }
+      applyThemeColor(document.documentElement.dataset.theme);
+      var toggle = document.getElementById("theme-toggle");
+      if (toggle) {
+        toggle.addEventListener("click", function () {
+          var theme =
+            document.documentElement.dataset.theme === "dark"
+              ? "light"
+              : "dark";
+          document.documentElement.dataset.theme = theme;
+          localStorage.setItem("theme", theme);
+          applyThemeColor(theme);
+        });
+      }
+      document.addEventListener("click", function (event) {
+        var el = event.target.closest("[data-track]");
+        if (!el) return;
+        window.gtag &&
+          window.gtag("event", "click", {
+            hitType: "event",
+            event_category: "Reached",
+            event_label: el.getAttribute("data-track")
+          });
+      });
+    </script> </body> </html>

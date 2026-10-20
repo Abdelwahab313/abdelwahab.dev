@@ -1,0 +1,392 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Fixing 100% CPU on Aurora MySQL by removing a join | Abdelwahab Mahmoud</title><meta name="title" content="Fixing 100% CPU on Aurora MySQL by removing a join | Abdelwahab Mahmoud"><meta name="description" content="A status broadcast made about a thousand database calls, each scanning 7 million rows, and pinned Aurora at 100% CPU. The fix was a dropped join, not an index."><meta name="theme-color" id="theme-color" content="#0e1013"><link rel="canonical" href="https://abdelwahab.dev/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join/"><link rel="alternate" type="application/rss+xml" title="Blog | Abdelwahab Mahmoud" href="/rss.xml"><link rel="alternate" type="application/atom+xml" title="Blog | Abdelwahab Mahmoud" href="/atom.xml"><meta property="og:type" content="article"><meta property="og:url" content="https://abdelwahab.dev/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join/"><meta property="og:title" content="Fixing 100% CPU on Aurora MySQL by removing a join | Abdelwahab Mahmoud"><meta property="og:description" content="A status broadcast made about a thousand database calls, each scanning 7 million rows, and pinned Aurora at 100% CPU. The fix was a dropped join, not an index."><meta property="og:image" content="https://abdelwahab.dev/og.png"><meta property="og:image:alt" content="Fixing 100% CPU on Aurora MySQL by removing a join | Abdelwahab Mahmoud"><meta property="article:published_time" content="2026-09-17T00:00:00.000Z"><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://abdelwahab.dev/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join/"><meta property="twitter:title" content="Fixing 100% CPU on Aurora MySQL by removing a join | Abdelwahab Mahmoud"><meta property="twitter:description" content="A status broadcast made about a thousand database calls, each scanning 7 million rows, and pinned Aurora at 100% CPU. The fix was a dropped join, not an index."><meta property="twitter:image" content="https://abdelwahab.dev/og.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="shortcut icon" href="/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.json"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Fixing 100% CPU on Aurora MySQL by removing a join","description":"A status broadcast made about a thousand database calls, each scanning 7 million rows, and pinned Aurora at 100% CPU. The fix was a dropped join, not an index.","url":"https://abdelwahab.dev/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join","mainEntityOfPage":{"@type":"WebPage","@id":"https://abdelwahab.dev/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join"},"datePublished":"2026-09-17T00:00:00.000Z","dateModified":"2026-09-17T00:00:00.000Z","author":{"@id":"https://abdelwahab.dev/#person"},"publisher":{"@id":"https://abdelwahab.dev/#person"},"keywords":["aurora","mysql","performance"],"inLanguage":"en"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://abdelwahab.dev/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://abdelwahab.dev/blog"},{"@type":"ListItem","position":3,"name":"Fixing 100% CPU on Aurora MySQL by removing a join","item":"https://abdelwahab.dev/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join"}]}</script><script>
+      (function () {
+        var theme = localStorage.getItem("theme");
+        if (theme !== "light" && theme !== "dark") theme = "dark";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script><script async src="https://www.googletagmanager.com/gtag/js?id=G-PNVK2LGZM4"></script><script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-PNVK2LGZM4");
+    </script><link rel="stylesheet" href="/_astro/_slug_.zg9CucUM.css"></head> <body> <header class="site-header"> <div class="container"> <a class="cwd" href="/"><span class="cwd-dot"></span><span class="path">~/</span>abdelwahab</a> <nav class="site-nav" aria-label="Primary"> <a class="nav-primary" href="/#about">About</a> <a href="/work">Work</a> <a href="/#experience">Experience</a> <a href="/#skills">Skills</a> <a class="nav-blog" href="/blog">Blog</a> <a href="/#contact">Contact</a> <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" data-track="theme-toggle"> <span class="toggle-dark">dark</span> <span class="toggle-light">light</span> </button> </nav> </div> </header> <main>  <article class="post"> <nav class="post-crumbs" aria-label="Breadcrumb"> <a href="/blog">Blog</a>  <span class="crumb-sep">/</span> <a href="/blog/tag/aurora">#aurora</a>  </nav> <header class="post-head"> <div class="post-meta"> <time datetime="2026-09-17">2026-09-17</time> <span class="post-kind">Note</span>  <span class="post-read">17 min read</span> </div> <h1 class="post-title">Fixing 100% CPU on Aurora MySQL by removing a join</h1> <figure class="post-cover"> <div class="cover"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" role="img" aria-label="One broadcast box fanning about a thousand calls into an Aurora database cylinder whose CPU bar is full at 100%.">
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  
+  <rect x="90" y="230" width="240" height="140" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <text x="210" y="310" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">broadcast</text>
+
+  
+  <g stroke="var(--muted, #949aa2)" stroke-width="3" fill="none" stroke-linecap="round">
+    <line x1="330" y1="300" x2="820" y2="212"/>
+    <line x1="330" y1="300" x2="820" y2="229"/>
+    <line x1="330" y1="300" x2="820" y2="246"/>
+    <line x1="330" y1="300" x2="820" y2="263"/>
+    <line x1="330" y1="300" x2="820" y2="280"/>
+    <line x1="330" y1="300" x2="820" y2="297"/>
+    <line x1="330" y1="300" x2="820" y2="314"/>
+    <line x1="330" y1="300" x2="820" y2="331"/>
+    <line x1="330" y1="300" x2="820" y2="348"/>
+    <line x1="330" y1="300" x2="820" y2="365"/>
+    <line x1="330" y1="300" x2="820" y2="382"/>
+    <line x1="330" y1="300" x2="820" y2="399"/>
+    <line x1="330" y1="300" x2="820" y2="416"/>
+  </g>
+  <text x="575" y="200" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">~1,000 calls</text>
+
+  
+  <path d="M820 190 V430 A145 40 0 0 0 1110 430 V190" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <ellipse cx="965" cy="190" rx="145" ry="40" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="965" y="290" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">Aurora</text>
+  <rect x="865" y="318" width="200" height="16" rx="8" fill="var(--border, #262b33)"/>
+  <rect x="865" y="318" width="200" height="16" rx="8" fill="var(--accent, #57c7ba)"/>
+  <text x="965" y="382" font-size="28" fill="var(--accent, #57c7ba)" text-anchor="middle">100% CPU</text>
+</svg></div> </figure> <p class="post-lede">A status broadcast made about a thousand database calls, each scanning 7 million rows, and pinned Aurora at 100% CPU. The fix was a dropped join, not an index.</p> <ul class="post-tags"> <li class="post-tag"> <a href="/blog/tag/aurora">aurora</a> </li><li class="post-tag"> <a href="/blog/tag/mysql">mysql</a> </li><li class="post-tag"> <a href="/blog/tag/performance">performance</a> </li> </ul> </header> <nav class="post-toc" aria-label="On this page"> <span class="post-toc-label">On this page</span> <ol> <li> <a href="#aurora-at-100-cpu-and-everything-queued-behind-it">Aurora at 100% CPU, and everything queued behind it</a> </li><li> <a href="#a-broadcast-that-looked-harmless">A broadcast that looked harmless</a> </li><li> <a href="#three-fixes-that-were-all-guesses">Three fixes that were all guesses</a> </li><li> <a href="#fast-queries-never-reach-the-slow-log">Fast queries never reach the slow log</a> </li><li> <a href="#an-estimated-7-million-rows-per-call">An estimated 7 million rows per call</a> </li><li> <a href="#an-index-makes-the-scan-cheaper-not-smaller">An index makes the scan cheaper, not smaller</a> </li><li> <a href="#dropping-the-join">Dropping the join</a> </li><li> <a href="#throttling-the-caller-at-the-price-of-freshness">Throttling the caller, at the price of freshness</a> </li><li> <a href="#before-and-after">Before and after</a> </li><li> <a href="#when-the-index-or-the-bigger-box-is-right">When the index or the bigger box is right</a> </li><li> <a href="#read-the-plan-before-you-buy-the-instance">Read the plan before you buy the instance</a> </li><li> <a href="#sources">Sources</a> </li> </ol> </nav> <div class="post-body"> <h2 id="aurora-at-100-cpu-and-everything-queued-behind-it">Aurora at 100% CPU, and everything queued behind it</h2>
+<p>Aurora MySQL sat at 100% CPU and stayed there. Requests that had been fine started queuing, and the whole product felt it, not just the feature behind the load.</p>
+<p>One endpoint was behind it: a status broadcast that pushed state out to a lot of clients. Each time it ran, it called the database about a thousand times, and <code>EXPLAIN</code> estimated that each call would examine about 7 million rows.</p>
+<p>The fix was two changes and no new hardware. Getting there meant refusing three fixes that looked faster.</p>
+<h2 id="a-broadcast-that-looked-harmless">A broadcast that looked harmless</h2>
+<p>The broadcast read the current state and fanned it out. Nothing about that sounds expensive. A read, a fan-out, a payload per client.</p>
+<p>The cost was in the multiplication, and multiplication is hard to see in application code. A query that reads a bit more than it needs looks fine in review. A caller that issues one query per unit of work looks fine in review. Put them together and run them on every broadcast, and the database pays the product of the two.</p>
+<figure class="diagram" data-diagram="aurora-fan-out"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 340" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15" role="img" aria-label="One status broadcast issued about a thousand database calls, and the EXPLAIN estimate for each call was about 7 million rows examined. The product of the two is what pinned Aurora MySQL at 100% CPU and queued everything else behind it.">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"></path>
+    </marker>
+  </defs>
+
+  
+  <rect x="40" y="150" width="220" height="70" rx="10" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="150" y="180" fill="var(--ink, #edeae3)" text-anchor="middle">status broadcast</text>
+  <text x="150" y="202" fill="var(--muted, #949aa2)" text-anchor="middle">runs often</text>
+
+  
+  <g stroke="var(--ink, #edeae3)" stroke-width="1.5" fill="none">
+    <line x1="260" y1="185" x2="400" y2="67"></line>
+    <line x1="260" y1="185" x2="400" y2="111"></line>
+    <line x1="260" y1="185" x2="400" y2="155"></line>
+    <line x1="260" y1="185" x2="400" y2="199"></line>
+    <line x1="260" y1="185" x2="400" y2="287"></line>
+  </g>
+
+  
+  <text x="540" y="36" fill="var(--muted, #949aa2)" text-anchor="middle">about 1,000 calls per broadcast</text>
+  <g fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5">
+    <rect x="400" y="50" width="280" height="34" rx="8"></rect>
+    <rect x="400" y="94" width="280" height="34" rx="8"></rect>
+    <rect x="400" y="138" width="280" height="34" rx="8"></rect>
+    <rect x="400" y="182" width="280" height="34" rx="8"></rect>
+    <rect x="400" y="270" width="280" height="34" rx="8"></rect>
+  </g>
+  <g fill="var(--ink, #edeae3)" text-anchor="middle">
+    <text x="540" y="72">one call, ~7M rows scanned</text>
+    <text x="540" y="116">one call, ~7M rows scanned</text>
+    <text x="540" y="160">one call, ~7M rows scanned</text>
+    <text x="540" y="204">one call, ~7M rows scanned</text>
+    <text x="540" y="292">one call, ~7M rows scanned</text>
+  </g>
+  <text x="540" y="248" fill="var(--muted, #949aa2)" text-anchor="middle">...</text>
+  <text x="540" y="330" fill="var(--muted, #949aa2)" text-anchor="middle">rows are the EXPLAIN estimate</text>
+
+  
+  <g stroke="var(--ink, #edeae3)" stroke-width="1.5" fill="none" marker-end="url(#ink)">
+    <line x1="680" y1="67" x2="812" y2="137"></line>
+    <line x1="680" y1="111" x2="812" y2="161"></line>
+    <line x1="680" y1="155" x2="812" y2="185"></line>
+    <line x1="680" y1="199" x2="812" y2="209"></line>
+    <line x1="680" y1="287" x2="812" y2="233"></line>
+  </g>
+
+  
+  <rect x="820" y="120" width="220" height="130" rx="10" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"></rect>
+  <text x="930" y="162" fill="var(--ink, #edeae3)" text-anchor="middle">Aurora MySQL</text>
+  <text x="930" y="188" fill="var(--accent, #57c7ba)" text-anchor="middle">100% CPU, sustained</text>
+  <rect x="860" y="206" width="140" height="10" rx="5" fill="var(--border, #262b33)"></rect>
+  <rect x="860" y="206" width="140" height="10" rx="5" fill="var(--accent, #57c7ba)"></rect>
+  <text x="930" y="238" fill="var(--muted, #949aa2)" text-anchor="middle">everything else queues</text>
+</svg><figcaption>One status broadcast issued about a thousand database calls, and the EXPLAIN estimate for each call was about 7 million rows examined. The product of the two is what pinned Aurora MySQL at 100% CPU and queued everything else behind it.</figcaption></figure>
+<p>At that point all I had was a database pinned at full CPU and one caller running about a thousand queries a broadcast. I did not yet know why it mattered.</p>
+<h2 id="three-fixes-that-were-all-guesses">Three fixes that were all guesses</h2>
+<p>The instinct was to tune: add an index, raise the instance size, cache harder. All three were guesses, because I had not yet looked at what the query asked the database to do.</p>
+<p>An index does nothing if the query is not using one, and without the plan you do not know which index, on which column, would change anything.</p>
+<p>A bigger instance buys time by hiding the cause. Performance Insights draws a Max vCPU line from the instance's vCPU count, and the docs put the mechanism plainly: one process runs on a vCPU at a time, and when there are more processes than vCPUs, they queue. That, I think, is the queue the rest of the product was standing in. A larger instance class raises the line. It does nothing to the broadcast, whose load grows with how often it runs and how many calls it makes, so it grows back into whatever ceiling you buy it. The same AWS page lists three remedies when load sits above the line and the main wait is CPU: throttle connections, tune the high-CPU SQL, or move to a larger instance class. I would take them in that order, and the third only after the first two.</p>
+<p>A cache is a real design for status fan-out, not a bad idea in itself. At a previous job I served hot order state from Redis with MySQL behind it, to keep status fan-out off the transactional path. Bolted on mid-incident, though, a cache would have hidden a query I had not read yet, and handed me a second copy of the status to keep fresh.</p>
+<p>I also could not take the broadcast down. Clients needed fresh status. The goal was to keep the system up for everyone, not to protect the database by breaking a feature.</p>
+<h2 id="fast-queries-never-reach-the-slow-log">Fast queries never reach the slow log</h2>
+<p>Finding the query that burns the CPU is its own trap, because the usual tool is tuned for a different shape of problem.</p>
+<p>The MySQL slow query log records statements that take longer than <code>long_query_time</code> seconds and examine at least <code>min_examined_row_limit</code> rows. The default <code>long_query_time</code> is 10 seconds. A statement can take a fraction of that, run about a thousand times per broadcast, and never appear in the log while it keeps the CPU pinned. Turning on <code>log_queries_not_using_indexes</code> closes part of the gap, since the server then logs statements that used no index for row lookups even when they finish under <code>long_query_time</code>.</p>
+<p>Two places see frequency as well as cost. Performance Insights slices database load by top SQL, which shows which statements contribute most of the load even when no single execution is slow. Each per-second sample also records the host and the database user behind the session, and that is how you get from "this SQL" to "this service".</p>
+<p>Inside the engine, the Performance Schema keeps a per-digest summary: every statement normalized to a shape, with a call count and running totals that are counted, not estimated. This is the query that finds the shape this post is about:</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">SELECT</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> DIGEST_TEXT,</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">       COUNT_STAR                                </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">AS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> calls,</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">       ROUND</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(SUM_ROWS_EXAMINED </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">/</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> COUNT_STAR)     </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">AS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> rows_examined_per_call,</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">       ROUND</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(SUM_ROWS_SENT </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">/</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> COUNT_STAR)         </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">AS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> rows_sent_per_call,</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">       SUM_NO_INDEX_USED                         </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">AS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> calls_without_index,</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">       ROUND</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(SUM_TIMER_WAIT </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">/</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> 1000000000000</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">1</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">)  </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">AS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> total_seconds,</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">       QUERY_SAMPLE_TEXT</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">FROM</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> performance_schema</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">events_statements_summary_by_digest</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">WHERE</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> DIGEST</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> IS NOT NULL</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">ORDER BY</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> SUM_ROWS_EXAMINED </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">DESC</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">LIMIT</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> 10</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span></code></pre>
+<p>Sort by rows examined, not by latency. Dividing by <code>COUNT_STAR</code> separates a statement that is expensive from one that is merely frequent; the broadcast query was both. Rows sent per call sits next to rows examined per call on purpose, because the gap between them is what the decision later in this post turns on. Performance Schema reports timer columns in picoseconds, hence the division by 10^12. <code>QUERY_SAMPLE_TEXT</code> holds a real statement the server saw for that digest, and the manual suggests exactly this use for it: take the sample and run <code>EXPLAIN</code> on it.</p>
+<p>Two details make the table more useful than it first looks. <code>TRUNCATE TABLE performance_schema.events_statements_summary_by_digest</code> empties it, which turns running totals into a measurement window: truncate, let a known number of broadcasts run, read the counts. And when the table fills up, new statements land in a catch-all row with <code>DIGEST</code> = <code>NULL</code>; the <code>WHERE</code> clause keeps that bucket out of the ranking, but if it holds a large share of <code>COUNT_STAR</code> the ranking is not telling you the whole story. For a shortcut, the <code>sys</code> schema ships <code>sys.statements_with_full_table_scans</code>, the same digests filtered to statements that did full scans, with <code>exec_count</code> and <code>rows_examined_avg</code> already worked out.</p>
+<h2 id="an-estimated-7-million-rows-per-call">An estimated 7 million rows per call</h2>
+<p>I ran <code>EXPLAIN</code> on the broadcast query instead of guessing. It estimated 7 million rows examined per call. That is the optimizer's estimate, not a count, and it was enough to act on; why is further down.</p>
+<p>I cannot show the real query or schema here. Below is a reconstruction of the shape, with made-up names: a status row read by primary key, joined to a much larger history table to derive one value for the payload. The <code>rows</code> value is set to the about 7 million the real <code>EXPLAIN</code> estimated; putting all of it on one table is this example's choice, not a claim about the real plan. I also gave the history table an index on the join column, to make a point about it further down.</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">EXPLAIN</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">SELECT</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> b</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">id</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">b</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">status</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">b</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">updated_at</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">,</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">       MAX</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">e</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">created_at</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">AS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> last_event_at</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">FROM</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> batches</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> AS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> b</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">JOIN</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> batch_events </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">AS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> e </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">ON</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> e</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">account_id</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> b</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">account_id</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">WHERE</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> b</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">id</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> 42</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">GROUP BY</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> b</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">id</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">\G</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>*************************** 1. row ***************************</span></span>
+<span class="line"><span>           id: 1</span></span>
+<span class="line"><span>  select_type: SIMPLE</span></span>
+<span class="line"><span>        table: b</span></span>
+<span class="line"><span>   partitions: NULL</span></span>
+<span class="line"><span>         type: const</span></span>
+<span class="line"><span>possible_keys: PRIMARY</span></span>
+<span class="line"><span>          key: PRIMARY</span></span>
+<span class="line"><span>      key_len: 8</span></span>
+<span class="line"><span>          ref: const</span></span>
+<span class="line"><span>         rows: 1</span></span>
+<span class="line"><span>     filtered: 100.00</span></span>
+<span class="line"><span>        Extra: NULL</span></span>
+<span class="line"><span>*************************** 2. row ***************************</span></span>
+<span class="line"><span>           id: 1</span></span>
+<span class="line"><span>  select_type: SIMPLE</span></span>
+<span class="line"><span>        table: e</span></span>
+<span class="line"><span>   partitions: NULL</span></span>
+<span class="line"><span>         type: ALL</span></span>
+<span class="line"><span>possible_keys: idx_account</span></span>
+<span class="line"><span>          key: NULL</span></span>
+<span class="line"><span>      key_len: NULL</span></span>
+<span class="line"><span>          ref: NULL</span></span>
+<span class="line"><span>         rows: 7330000</span></span>
+<span class="line"><span>     filtered: 50.00</span></span>
+<span class="line"><span>        Extra: Using where</span></span></code></pre>
+<p>Four columns carry the story. <code>type: ALL</code> is a full table scan. The manual rates it "normally not good" on the first table that is not <code>const</code>, which is where it sits here, and "usually very bad" anywhere else. <code>possible_keys</code> names an index the optimizer could have used, and <code>key: NULL</code> says it chose not to. <code>rows</code> is how many rows MySQL believes it must examine for that table, and the manual's rule of thumb is that the product of the <code>rows</code> column across the plan approximates how many rows the whole query examines. The rule follows from how MySQL runs a join, as nested loops: each row read from one table is passed into a loop over the next. Here the outer side is one row, so the product is the scan: an estimated 1 times about 7 million, on every call.</p>
+<figure class="diagram" data-diagram="aurora-join-shape"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 330" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15" role="img" aria-label="The plan before and after. Before, one batches row read by primary key drives a full scan of batch_events, an estimated 7 million rows, to send one row back. After the join is dropped the same row is read once and the history table is not touched.">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"></path>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"></path>
+    </marker>
+  </defs>
+
+  
+  <text x="40" y="30" fill="var(--ink, #edeae3)">before: joined to the history table</text>
+
+  <rect x="40" y="120" width="140" height="60" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <text x="110" y="145" fill="var(--ink, #edeae3)" text-anchor="middle">batches</text>
+  <text x="110" y="167" fill="var(--muted, #949aa2)" text-anchor="middle">const, 1 row</text>
+
+  <line x1="180" y1="150" x2="292" y2="150" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></line>
+  <text x="236" y="176" fill="var(--muted, #949aa2)" text-anchor="middle">nested loop</text>
+
+  <text x="460" y="58" fill="var(--muted, #949aa2)" text-anchor="middle">~7M rows examined per call, estimated</text>
+  <rect x="300" y="70" width="320" height="180" rx="8" fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="1.5"></rect>
+  <g stroke="var(--border, #262b33)" stroke-width="1.5">
+    <line x1="318" y1="92" x2="602" y2="92"></line>
+    <line x1="318" y1="106" x2="602" y2="106"></line>
+    <line x1="318" y1="120" x2="602" y2="120"></line>
+    <line x1="318" y1="134" x2="602" y2="134"></line>
+    <line x1="318" y1="148" x2="602" y2="148"></line>
+    <line x1="318" y1="162" x2="602" y2="162"></line>
+    <line x1="318" y1="176" x2="602" y2="176"></line>
+    <line x1="318" y1="190" x2="602" y2="190"></line>
+  </g>
+  <text x="460" y="216" fill="var(--ink, #edeae3)" text-anchor="middle">batch_events</text>
+  <text x="460" y="238" fill="var(--muted, #949aa2)" text-anchor="middle">type: ALL, key: NULL</text>
+
+  <line x1="460" y1="250" x2="460" y2="290" stroke="var(--ink, #edeae3)" stroke-width="1.5" marker-end="url(#ink)"></line>
+  <text x="460" y="316" fill="var(--ink, #edeae3)" text-anchor="middle">1 row sent</text>
+
+  
+  <text x="680" y="30" fill="var(--ink, #edeae3)">after: the join dropped</text>
+
+  <rect x="680" y="120" width="160" height="60" rx="8" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="1.5"></rect>
+  <text x="760" y="145" fill="var(--ink, #edeae3)" text-anchor="middle">batches</text>
+  <text x="760" y="167" fill="var(--muted, #949aa2)" text-anchor="middle">const, 1 row</text>
+
+  <line x1="760" y1="180" x2="760" y2="290" stroke="var(--accent, #57c7ba)" stroke-width="1.5" marker-end="url(#acc)"></line>
+  <text x="760" y="316" fill="var(--ink, #edeae3)" text-anchor="middle">1 row sent</text>
+
+  <rect x="880" y="70" width="160" height="180" rx="8" fill="none" stroke="var(--muted, #949aa2)" stroke-width="1.5" stroke-dasharray="6 6"></rect>
+  <text x="960" y="154" fill="var(--muted, #949aa2)" text-anchor="middle">batch_events</text>
+  <text x="960" y="176" fill="var(--muted, #949aa2)" text-anchor="middle">not read</text>
+</svg><figcaption>The plan before and after. Before, one batches row read by primary key drives a full scan of batch_events, an estimated 7 million rows, to send one row back. After the join is dropped the same row is read once and the history table is not touched.</figcaption></figure>
+<p><code>rows</code> is an estimate. The manual says so for InnoDB and calls the values an educated guess from the join optimizer. I still treated it as decision-grade, for two reasons. The columns that carried the decision were not estimates: <code>type: ALL</code> and <code>key: NULL</code> are the plan the optimizer chose, and a full scan is a full scan whatever the row count turns out to be. And the number only had to be right to an order of magnitude. Set an estimate in the millions against a query that returns a single row, as the reconstruction does, and an estimate that is off by a factor of ten still points at the same fix. Precision would have changed the size of the problem, not its kind.</p>
+<p>That number changed the problem. This was not a missing index. The query scanned and joined a large set every time it ran, about a thousand times per broadcast.</p>
+<p>On an instance that is already pinned, how you get the plan matters. Plain <code>EXPLAIN</code> does not run the statement, so it costs almost nothing. If the statement is running right now you do not even need its text: <code>EXPLAIN FOR CONNECTION</code> returns the plan a connection is currently executing, given the <code>Id</code> from the process list. Looking at other sessions needs the <code>PROCESS</code> privilege, and it does not work for prepared statements.</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">SHOW PROCESSLIST;</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">EXPLAIN </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">FOR</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> CONNECTION</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> 373</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;   </span><span style="--shiki-light:#6A737D;--shiki-dark:#768390">-- 373 stands for an Id from the process list</span></span></code></pre>
+<p><code>EXPLAIN ANALYZE</code> is the measured version. In MySQL 8.0.18 and later it reports actual time, actual rows and loop counts per iterator next to the estimates, and it gets them by running the statement. On a writer pinned by that statement, measuring means paying for one more execution. If you want counted rows, take them from a reader. AWS documents instance endpoints for diagnosis and tuning on one specific instance, so connect to a reader's instance endpoint rather than the cluster endpoint, and either run <code>EXPLAIN ANALYZE</code> there or count handler reads around a single execution:</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">FLUSH </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">STATUS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">SELECT</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> b</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">id</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">b</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">status</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, </span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">b</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">updated_at</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">,</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">       MAX</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">(</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">e</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">created_at</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">) </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">AS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> last_event_at</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">FROM</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> batches</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> AS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> b</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">JOIN</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> batch_events </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">AS</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> e </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">ON</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> e</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">account_id</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> b</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">account_id</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">WHERE</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> b</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">id</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> =</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> 42</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">GROUP BY</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> b</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">.</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">id</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">SHOW </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">SESSION</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> STATUS</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> LIKE</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> 'Handler_read%'</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">;</span></span></code></pre>
+<p><code>FLUSH STATUS</code> adds the session's counters to the global totals and resets the session values to zero; it needs the <code>FLUSH_STATUS</code> or <code>RELOAD</code> privilege. After the query, a large <code>Handler_read_rnd_next</code>, the manual's counter for reading the next row in the data file, means a table scan. A large <code>Handler_read_next</code> means an index range or index scan. The about 7 million in this post is the <code>EXPLAIN</code> estimate, not one of these counts.</p>
+<h2 id="an-index-makes-the-scan-cheaper-not-smaller">An index makes the scan cheaper, not smaller</h2>
+<p>This is the part that makes "just add an index" a guess rather than a fix.</p>
+<p>The manual is precise about when an index lookup on a join pays off. A <code>ref</code> join reads all rows with matching index values, and it is "a good join type" if the key matches only a few rows. When the join genuinely needs a large share of the table, an index turns one scan into a very large number of index lookups, and the optimizer may decide the scan is cheaper. The manual lists that among the causes of full scans: when the matching values cover too large a part of the table, MySQL calculates that a table scan is faster. That is the situation the reconstruction shows, with <code>idx_account</code> sitting in <code>possible_keys</code> and going unused.</p>
+<p>A covering index goes one step further. When every column the query needs is in one index, <code>EXPLAIN</code> shows <code>Using index</code> and MySQL reads the index tree without a second seek into the row. That makes each row cheaper to touch. It still touches every one of them. Once a query genuinely needs a set of rows, an index changes how they are read, not how many.</p>
+<p>Read together, the digest numbers from earlier make this decision for you. When rows examined per call is far above rows sent per call and the <code>WHERE</code> clause is selective, the query reads rows it then throws away, and an index is the fix, a covering one if the select list is small. When rows examined is far above rows sent but the query genuinely needs the set, as an aggregate over a large history does, no index will shrink it, so the fix is to stop asking for those rows: drop the join, or move the value it computes somewhere cheaper to read. When rows examined per call is close to rows sent but <code>calls</code> is enormous, the query is fine and the caller is the problem. I read the broadcast as the second and the third at once, which is why it took two changes.</p>
+<p>So the useful question was not how to read an estimated 7 million rows faster. It was whether the broadcast needed them at all. It did not. The data behind that join was not worth a full scan, a thousand times over.</p>
+<h2 id="dropping-the-join">Dropping the join</h2>
+<p>Two changes, in order of impact. First, I dropped the join that forced the scan and let the broadcast read only the rows it needed.</p>
+<p>In the reconstruction, that leaves a primary key lookup:</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">EXPLAIN</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">SELECT</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> id, </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">status</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">, updated_at</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">FROM</span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067"> batches</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">WHERE</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7"> id </span><span style="--shiki-light:#D73A49;--shiki-dark:#F47067">=</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> 42</span><span style="--shiki-light:#24292E;--shiki-dark:#ADBAC7">\G</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>*************************** 1. row ***************************</span></span>
+<span class="line"><span>           id: 1</span></span>
+<span class="line"><span>  select_type: SIMPLE</span></span>
+<span class="line"><span>        table: batches</span></span>
+<span class="line"><span>   partitions: NULL</span></span>
+<span class="line"><span>         type: const</span></span>
+<span class="line"><span>possible_keys: PRIMARY</span></span>
+<span class="line"><span>          key: PRIMARY</span></span>
+<span class="line"><span>      key_len: 8</span></span>
+<span class="line"><span>          ref: const</span></span>
+<span class="line"><span>         rows: 1</span></span>
+<span class="line"><span>     filtered: 100.00</span></span>
+<span class="line"><span>        Extra: NULL</span></span></code></pre>
+<p><code>const</code> is what MySQL uses when every part of a primary or unique key is compared to a constant: at most one matching row, read once. There is nothing left to tune in that plan.</p>
+<p>What the payload gives up is whatever the join existed to compute; in the reconstruction, <code>last_event_at</code>. Whether a value like that can go is a product question as much as a database one. Asked with the plan in hand, it is a much shorter conversation.</p>
+<h2 id="throttling-the-caller-at-the-price-of-freshness">Throttling the caller, at the price of freshness</h2>
+<p>The second change was the caller. I throttled it so it could not fan out a thousand times in a burst. Calls dropped from roughly a thousand to about a hundred per broadcast.</p>
+<figure class="diagram" data-diagram="aurora-calls-per-broadcast"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15" role="img" aria-label="Database calls per broadcast, before and after throttling the caller: roughly a thousand down to about a hundred.">
+  <text x="120" y="36" fill="var(--muted, #949aa2)">database calls per broadcast</text>
+
+  
+  <rect x="336" y="80" width="48" height="170" fill="var(--accent, #57c7ba)"></rect>
+  <text x="360" y="68" fill="var(--ink, #edeae3)" text-anchor="middle">~1,000</text>
+
+  <rect x="576" y="233" width="48" height="17" fill="var(--accent, #57c7ba)"></rect>
+  <text x="600" y="221" fill="var(--ink, #edeae3)" text-anchor="middle">about 100</text>
+
+  
+  <line x1="120" y1="250" x2="840" y2="250" stroke="var(--border, #262b33)" stroke-width="1.5"></line>
+
+  <g fill="var(--muted, #949aa2)" text-anchor="middle">
+    <text x="360" y="280">before</text>
+    <text x="600" y="280">after throttling</text>
+  </g>
+</svg><figcaption>Database calls per broadcast, before and after throttling the caller: roughly a thousand down to about a hundred.</figcaption></figure>
+<p>Throttling had a visible cost: some clients got a slightly staler broadcast. That was the trade. Freshness for a subset, in exchange for a database that stayed reachable for everyone.</p>
+<p>My view is that a broadcast's database work should follow how often the state changes, not how often someone gets told about it. When those two rates are coupled, every new client is a new load on the database, and the system's capacity is set by its most talkative feature. Decoupling them is the fix that keeps working as the client count grows. Dropping the join took the scan out of each call; throttling made the number of calls stop tracking the fan-out.</p>
+<h2 id="before-and-after">Before and after</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th>Before</th><th>After</th></tr></thead><tbody><tr><td>Aurora MySQL CPU</td><td>100%, sustained</td><td>back to baseline</td></tr><tr><td>Database calls per broadcast</td><td>about 1,000</td><td>about 100</td></tr><tr><td>Rows examined per call, <code>EXPLAIN</code> estimate</td><td>about 7 million</td><td>join that forced the scan dropped</td></tr><tr><td>Broadcast freshness</td><td>fresh for every client</td><td>slightly staler for some clients</td></tr></tbody></table>
+<p>The feature stayed up. No instance resize, no new cache layer, no guessing.</p>
+<p>If you make a change like this, check it from two layers, because each one can fool you on its own. The database layer is the digest table: truncate it, let a known number of broadcasts run, and read <code>calls</code> and <code>rows_examined_per_call</code> for the statement you changed. The new <code>EXPLAIN</code> should show the plan you meant, <code>const</code> and one row in the reconstruction. The infrastructure layer is CPU on the writer over a window that spans the change, aggregated by role so a failover does not leave you graphing the wrong instance:</p>
+<pre class="astro-code astro-code-themes github-light github-dark-dimmed" style="--shiki-light:#24292e;--shiki-dark:#adbac7;--shiki-light-bg:#fff;--shiki-dark-bg:#22272e; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#768390"># example cluster name and window; choose a window that spans the change</span></span>
+<span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#F69D50">aws</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> cloudwatch</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> get-metric-statistics</span><span style="--shiki-light:#005CC5;--shiki-dark:#F47067"> \</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">  --namespace</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> AWS/RDS</span><span style="--shiki-light:#005CC5;--shiki-dark:#F47067"> \</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">  --metric-name</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> CPUUtilization</span><span style="--shiki-light:#005CC5;--shiki-dark:#F47067"> \</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">  --dimensions</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> Name=DBClusterIdentifier,Value=my-cluster</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> Name=Role,Value=WRITER</span><span style="--shiki-light:#005CC5;--shiki-dark:#F47067"> \</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">  --start-time</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> 2026-09-01T00:00:00Z</span><span style="--shiki-light:#005CC5;--shiki-dark:#F47067"> \</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">  --end-time</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> 2026-09-03T00:00:00Z</span><span style="--shiki-light:#005CC5;--shiki-dark:#F47067"> \</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">  --period</span><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF"> 300</span><span style="--shiki-light:#005CC5;--shiki-dark:#F47067"> \</span></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-dark:#6CB6FF">  --statistics</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> Maximum</span><span style="--shiki-light:#032F62;--shiki-dark:#96D0FF"> Average</span></span></code></pre>
+<p>Look at <code>Maximum</code> as well as <code>Average</code>. A broadcast is bursty, and a five-minute average can look healthy while every burst still touches the ceiling. If the two layers disagree, say calls are down but CPU is not, the disagreement is the next thing to investigate, not a rounding error.</p>
+<h2 id="when-the-index-or-the-bigger-box-is-right">When the index or the bigger box is right</h2>
+<p>Throttling is the wrong call when the status is the product. If a client acting on a stale broadcast does something it cannot undo, slightly staler is not a trade you get to make on the client's behalf; you fix the query and pay for the calls.</p>
+<p>An index is the right call when the predicate is selective, and most of the time it is. This broadcast was one query. Separately, I kept a running backlog of Aurora MySQL's worst queries and cleared it query by query: rewrote plans, added covering indexes and restructured hot reads, until CPU pressure stopped turning into incidents. Covering indexes earned their place on that list many times. They did not here, because here the query was asking for rows it did not need.</p>
+<p>A bigger instance is the right call when the load is real growth rather than waste, or as a few hours of cover while you read the plan. I would not object to resizing in the middle of an incident. I would object to closing the incident on it.</p>
+<h2 id="read-the-plan-before-you-buy-the-instance">Read the plan before you buy the instance</h2>
+<p>Before changing anything on a database that is out of CPU, get two numbers for the top caller: rows examined per call, where <code>EXPLAIN</code>'s estimate will do, and calls per unit of work. Multiply them. If that product surprises you, no instance class will make it stop surprising you, and no index will either if the rows are ones the caller never needed. Every fix that worked here came from those two numbers.</p>
+<h2 id="sources">Sources</h2>
+<ul>
+<li>MySQL 8.0 Reference Manual, EXPLAIN Output Format (<code>type</code>, <code>possible_keys</code>, <code>key</code>, <code>rows</code>, <code>filtered</code>, <code>Using index</code>, the <code>rows</code> product rule): <a href="https://dev.mysql.com/doc/refman/8.0/en/explain-output.html">https://dev.mysql.com/doc/refman/8.0/en/explain-output.html</a></li>
+<li>MySQL 8.0 Reference Manual, EXPLAIN Statement (<code>EXPLAIN ANALYZE</code> from 8.0.18, <code>FORMAT=TREE</code>): <a href="https://dev.mysql.com/doc/refman/8.0/en/explain.html">https://dev.mysql.com/doc/refman/8.0/en/explain.html</a></li>
+<li>MySQL 8.0 Reference Manual, Obtaining Execution Plan Information for a Named Connection (<code>EXPLAIN FOR CONNECTION</code>): <a href="https://dev.mysql.com/doc/refman/8.0/en/explain-for-connection.html">https://dev.mysql.com/doc/refman/8.0/en/explain-for-connection.html</a></li>
+<li>MySQL 8.0 Reference Manual, Avoiding Full Table Scans: <a href="https://dev.mysql.com/doc/refman/8.0/en/table-scan-avoidance.html">https://dev.mysql.com/doc/refman/8.0/en/table-scan-avoidance.html</a></li>
+<li>MySQL 8.0 Reference Manual, Nested-Loop Join Algorithms: <a href="https://dev.mysql.com/doc/refman/8.0/en/nested-loop-joins.html">https://dev.mysql.com/doc/refman/8.0/en/nested-loop-joins.html</a></li>
+<li>MySQL 8.0 Reference Manual, The Slow Query Log (<code>long_query_time</code> default, <code>log_queries_not_using_indexes</code>): <a href="https://dev.mysql.com/doc/refman/8.0/en/slow-query-log.html">https://dev.mysql.com/doc/refman/8.0/en/slow-query-log.html</a></li>
+<li>MySQL 8.0 Reference Manual, Statement Summary Tables (<code>events_statements_summary_by_digest</code>, <code>QUERY_SAMPLE_TEXT</code>, <code>TRUNCATE TABLE</code>, the <code>DIGEST</code> = <code>NULL</code> row): <a href="https://dev.mysql.com/doc/refman/8.0/en/performance-schema-statement-summary-tables.html">https://dev.mysql.com/doc/refman/8.0/en/performance-schema-statement-summary-tables.html</a></li>
+<li>MySQL 8.0 Reference Manual, Performance Schema Event Timing (picoseconds): <a href="https://dev.mysql.com/doc/refman/8.0/en/performance-schema-timing.html">https://dev.mysql.com/doc/refman/8.0/en/performance-schema-timing.html</a></li>
+<li>MySQL 8.0 Reference Manual, The statements_with_full_table_scans and x$statements_with_full_table_scans Views: <a href="https://dev.mysql.com/doc/refman/8.0/en/sys-statements-with-full-table-scans.html">https://dev.mysql.com/doc/refman/8.0/en/sys-statements-with-full-table-scans.html</a></li>
+<li>MySQL 8.0 Reference Manual, FLUSH Statement (<code>FLUSH STATUS</code>): <a href="https://dev.mysql.com/doc/refman/8.0/en/flush.html">https://dev.mysql.com/doc/refman/8.0/en/flush.html</a></li>
+<li>MySQL 8.0 Reference Manual, Server Status Variables (<code>Handler_read_rnd_next</code>, <code>Handler_read_next</code>): <a href="https://dev.mysql.com/doc/refman/8.0/en/server-status-variables.html">https://dev.mysql.com/doc/refman/8.0/en/server-status-variables.html</a></li>
+<li>Amazon Aurora User Guide, Maximum CPU: <a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_PerfInsights.Overview.MaxCPU.html">https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_PerfInsights.Overview.MaxCPU.html</a></li>
+<li>Amazon Aurora User Guide, Database load and top SQL (per-sample host and user): <a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_PerfInsights.Overview.ActiveSessions.html">https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_PerfInsights.Overview.ActiveSessions.html</a></li>
+<li>Amazon Aurora User Guide, Amazon Aurora endpoint connections (reader and instance endpoints): <a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.Endpoints.html">https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.Endpoints.html</a></li>
+<li>Amazon Aurora User Guide, CloudWatch metrics for Aurora (<code>CPUUtilization</code> in <code>AWS/RDS</code>): <a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraMonitoring.Metrics.html">https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraMonitoring.Metrics.html</a></li>
+<li>Amazon Aurora User Guide, CloudWatch dimensions for Aurora (<code>DBClusterIdentifier</code>, <code>Role</code>): <a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/dimensions.html">https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/dimensions.html</a></li>
+<li>AWS CLI reference, <code>aws cloudwatch get-metric-statistics</code>: <a href="https://docs.aws.amazon.com/cli/latest/reference/cloudwatch/get-metric-statistics.html">https://docs.aws.amazon.com/cli/latest/reference/cloudwatch/get-metric-statistics.html</a></li>
+</ul> </div> <nav class="post-nav"> <a class="post-nav-prev" href="/blog/extracting-fulfillment-from-a-php-monolith-over-sqs" rel="prev">
+← Extracting fulfillment from a PHP monolith over SQS </a> <a class="post-nav-next" href="/blog/making-llm-triage-verdicts-testable-in-code" rel="next"> Making LLM triage verdicts testable in code →
+</a> </nav> </article>  </main> <footer class="site-footer"> <div class="container"> <span>© 2026 Abdelwahab Mahmoud</span> <span>built with astro · hosted on github pages</span> </div> </footer> <script data-track-target="theme-toggle">
+      function applyThemeColor(theme) {
+        var meta = document.getElementById("theme-color");
+        if (meta)
+          meta.setAttribute(
+            "content",
+            theme === "dark" ? "#0e1013" : "#faf8f3"
+          );
+      }
+      applyThemeColor(document.documentElement.dataset.theme);
+      var toggle = document.getElementById("theme-toggle");
+      if (toggle) {
+        toggle.addEventListener("click", function () {
+          var theme =
+            document.documentElement.dataset.theme === "dark"
+              ? "light"
+              : "dark";
+          document.documentElement.dataset.theme = theme;
+          localStorage.setItem("theme", theme);
+          applyThemeColor(theme);
+        });
+      }
+      document.addEventListener("click", function (event) {
+        var el = event.target.closest("[data-track]");
+        if (!el) return;
+        window.gtag &&
+          window.gtag("event", "click", {
+            hitType: "event",
+            event_category: "Reached",
+            event_label: el.getAttribute("data-track")
+          });
+      });
+    </script> </body> </html>

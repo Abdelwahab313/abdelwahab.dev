@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)">
+  <defs>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  <!-- the monolith, with the slot fulfillment used to fill -->
+  <rect x="100" y="110" width="380" height="380" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <g fill="none" stroke="var(--muted, #949aa2)" stroke-width="3">
+    <rect x="140" y="150" width="300" height="90" rx="12"/>
+    <rect x="140" y="370" width="300" height="90" rx="12"/>
+  </g>
+  <rect x="140" y="260" width="300" height="90" rx="12" fill="none" stroke="var(--muted, #949aa2)" stroke-width="3" stroke-dasharray="10 10"/>
+  <text x="290" y="540" font-size="28" fill="var(--muted, #949aa2)" text-anchor="middle">monolith</text>
+
+  <!-- the queue carrying the piece out -->
+  <line x1="480" y1="305" x2="812" y2="305" stroke="var(--accent, #57c7ba)" stroke-width="4" marker-end="url(#acc)"/>
+  <g fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="3">
+    <rect x="530" y="283" width="44" height="44" rx="8"/>
+    <rect x="600" y="283" width="44" height="44" rx="8"/>
+    <rect x="670" y="283" width="44" height="44" rx="8"/>
+  </g>
+  <text x="646" y="390" font-size="26" fill="var(--muted, #949aa2)" text-anchor="middle">SQS FIFO</text>
+
+  <!-- fulfillment, standing on its own -->
+  <rect x="820" y="245" width="300" height="120" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="970" y="315" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">fulfillment</text>
+</svg>

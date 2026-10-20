@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)">
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  <!-- the broadcast -->
+  <rect x="90" y="230" width="240" height="140" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <text x="210" y="310" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">broadcast</text>
+
+  <!-- 13 of the thousand or so calls, fanning out from one point -->
+  <g stroke="var(--muted, #949aa2)" stroke-width="3" fill="none" stroke-linecap="round">
+    <line x1="330" y1="300" x2="820" y2="212"/>
+    <line x1="330" y1="300" x2="820" y2="229"/>
+    <line x1="330" y1="300" x2="820" y2="246"/>
+    <line x1="330" y1="300" x2="820" y2="263"/>
+    <line x1="330" y1="300" x2="820" y2="280"/>
+    <line x1="330" y1="300" x2="820" y2="297"/>
+    <line x1="330" y1="300" x2="820" y2="314"/>
+    <line x1="330" y1="300" x2="820" y2="331"/>
+    <line x1="330" y1="300" x2="820" y2="348"/>
+    <line x1="330" y1="300" x2="820" y2="365"/>
+    <line x1="330" y1="300" x2="820" y2="382"/>
+    <line x1="330" y1="300" x2="820" y2="399"/>
+    <line x1="330" y1="300" x2="820" y2="416"/>
+  </g>
+  <text x="575" y="200" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">~1,000 calls</text>
+
+  <!-- Aurora, pinned -->
+  <path d="M820 190 V430 A145 40 0 0 0 1110 430 V190" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <ellipse cx="965" cy="190" rx="145" ry="40" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="965" y="290" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">Aurora</text>
+  <rect x="865" y="318" width="200" height="16" rx="8" fill="var(--border, #262b33)"/>
+  <rect x="865" y="318" width="200" height="16" rx="8" fill="var(--accent, #57c7ba)"/>
+  <text x="965" y="382" font-size="28" fill="var(--accent, #57c7ba)" text-anchor="middle">100% CPU</text>
+</svg>

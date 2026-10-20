@@ -1,0 +1,340 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Blog: Rails, AWS, platform and LLM systems | Abdelwahab Mahmoud</title><meta name="title" content="Blog: Rails, AWS, platform and LLM systems | Abdelwahab Mahmoud"><meta name="description" content="Case studies and notes from eight years building production systems. What was there, what I decided, what it cost, and what changed."><meta name="theme-color" id="theme-color" content="#0e1013"><link rel="canonical" href="https://abdelwahab.dev/blog/"><link rel="alternate" type="application/rss+xml" title="Blog | Abdelwahab Mahmoud" href="/rss.xml"><link rel="alternate" type="application/atom+xml" title="Blog | Abdelwahab Mahmoud" href="/atom.xml"><meta property="og:type" content="article"><meta property="og:url" content="https://abdelwahab.dev/blog/"><meta property="og:title" content="Blog: Rails, AWS, platform and LLM systems | Abdelwahab Mahmoud"><meta property="og:description" content="Case studies and notes from eight years building production systems. What was there, what I decided, what it cost, and what changed."><meta property="og:image" content="https://abdelwahab.dev/og.png"><meta property="og:image:alt" content="Blog: Rails, AWS, platform and LLM systems | Abdelwahab Mahmoud"><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://abdelwahab.dev/blog/"><meta property="twitter:title" content="Blog: Rails, AWS, platform and LLM systems | Abdelwahab Mahmoud"><meta property="twitter:description" content="Case studies and notes from eight years building production systems. What was there, what I decided, what it cost, and what changed."><meta property="twitter:image" content="https://abdelwahab.dev/og.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="shortcut icon" href="/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.json"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://abdelwahab.dev/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://abdelwahab.dev/blog"}]}</script><script>
+      (function () {
+        var theme = localStorage.getItem("theme");
+        if (theme !== "light" && theme !== "dark") theme = "dark";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script><script async src="https://www.googletagmanager.com/gtag/js?id=G-PNVK2LGZM4"></script><script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-PNVK2LGZM4");
+    </script><link rel="stylesheet" href="/_astro/_slug_.zg9CucUM.css"></head> <body> <header class="site-header"> <div class="container"> <a class="cwd" href="/"><span class="cwd-dot"></span><span class="path">~/</span>abdelwahab</a> <nav class="site-nav" aria-label="Primary"> <a class="nav-primary" href="/#about">About</a> <a href="/work">Work</a> <a href="/#experience">Experience</a> <a href="/#skills">Skills</a> <a class="nav-blog" href="/blog">Blog</a> <a href="/#contact">Contact</a> <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" data-track="theme-toggle"> <span class="toggle-dark">dark</span> <span class="toggle-light">light</span> </button> </nav> </div> </header> <main>  <div class="blog-main"> <p class="preamble">
+$ ls ./blog <span class="comment"># notes and case studies</span> </p> <header class="blog-head"> <h1 class="blog-title">Writing</h1> <p class="blog-subtitle">
+Notes and case studies from building production systems. What was tried,
+        what cost, and what changed.
+</p> </header> <div class="blog-tools"> <div class="blog-search"> <span class="search-prompt">$ grep</span> <input id="blog-search" type="search" placeholder="search posts" aria-label="Search posts by title, lede or tag" autocomplete="off"> </div> <ul class="tag-chips" aria-label="Filter posts by tag"> <li> <a class="tag-chip is-active" data-tag="all" href="/blog">
+all<span class="chip-count">9</span> </a> </li> <li> <a class="tag-chip" data-tag="agents" href="/blog/tag/agents/"> agents <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="architecture" href="/blog/tag/architecture/"> architecture <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="aurora" href="/blog/tag/aurora/"> aurora <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="aws" href="/blog/tag/aws/"> aws <span class="chip-count">2</span> </a> </li><li> <a class="tag-chip" data-tag="ci" href="/blog/tag/ci/"> ci <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="concurrency" href="/blog/tag/concurrency/"> concurrency <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="ecs" href="/blog/tag/ecs/"> ecs <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="llm" href="/blog/tag/llm/"> llm <span class="chip-count">2</span> </a> </li><li> <a class="tag-chip" data-tag="lua" href="/blog/tag/lua/"> lua <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="mysql" href="/blog/tag/mysql/"> mysql <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="node" href="/blog/tag/node/"> node <span class="chip-count">2</span> </a> </li><li> <a class="tag-chip" data-tag="performance" href="/blog/tag/performance/"> performance <span class="chip-count">2</span> </a> </li><li> <a class="tag-chip" data-tag="rails" href="/blog/tag/rails/"> rails <span class="chip-count">3</span> </a> </li><li> <a class="tag-chip" data-tag="react" href="/blog/tag/react/"> react <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="react-native" href="/blog/tag/react-native/"> react-native <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="realtime" href="/blog/tag/realtime/"> realtime <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="redis" href="/blog/tag/redis/"> redis <span class="chip-count">2</span> </a> </li><li> <a class="tag-chip" data-tag="sqs" href="/blog/tag/sqs/"> sqs <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="streams" href="/blog/tag/streams/"> streams <span class="chip-count">1</span> </a> </li><li> <a class="tag-chip" data-tag="terraform" href="/blog/tag/terraform/"> terraform <span class="chip-count">1</span> </a> </li> </ul> </div> <article class="post-featured" data-filter-row data-tags="aws ecs terraform" data-title="Scaling ECS workers on queue depth without killing long jobs" data-lede="ECS scale-in was killing translation jobs up to two hours into their run. Scaling on queue depth and letting busy tasks finish before they stop fixed it."> <a class="featured-cover" href="/blog/scaling-ecs-workers-on-queue-depth-without-killing-long-jobs" tabindex="-1" aria-hidden="true"> <div class="cover"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" role="img" aria-label="Line drawing of queued jobs draining into a container before shutdown.">
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  <text x="90" y="110" font-size="30" fill="var(--muted, #949aa2)">scale-in: desired 4 → 2</text>
+
+  
+  <g stroke="var(--muted, #949aa2)" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M200 160 V214"/>
+    <path d="M190 206 L200 217 L210 206"/>
+    <path d="M466 160 V214"/>
+    <path d="M456 206 L466 217 L476 206"/>
+    <path d="M998 160 V214"/>
+    <path d="M988 206 L998 217 L1008 206"/>
+  </g>
+
+  
+  <path d="M732 160 V198" stroke="var(--accent, #57c7ba)" stroke-width="3" fill="none"/>
+  <path d="M672 210 H792" stroke="var(--accent, #57c7ba)" stroke-width="5" stroke-linecap="round"/>
+
+  
+  <g fill="none" stroke="var(--muted, #949aa2)" stroke-width="3" stroke-dasharray="10 10">
+    <rect x="90" y="236" width="220" height="190" rx="18"/>
+    <rect x="356" y="236" width="220" height="190" rx="18"/>
+    <rect x="888" y="236" width="220" height="190" rx="18"/>
+  </g>
+  <g font-size="28" fill="var(--muted, #949aa2)" text-anchor="middle">
+    <text x="200" y="342">idle</text>
+    <text x="466" y="342">idle</text>
+    <text x="998" y="342">idle</text>
+  </g>
+  <g font-size="26" fill="var(--muted, #949aa2)" text-anchor="middle">
+    <text x="200" y="482">stopped</text>
+    <text x="466" y="482">stopped</text>
+    <text x="998" y="482">stopped</text>
+  </g>
+
+  
+  <rect x="622" y="236" width="220" height="190" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="732" y="314" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">2 h job</text>
+  <rect x="662" y="346" width="140" height="14" rx="7" fill="var(--border, #262b33)"/>
+  <rect x="662" y="346" width="119" height="14" rx="7" fill="var(--accent, #57c7ba)"/>
+  <text x="732" y="482" font-size="26" fill="var(--accent, #57c7ba)" text-anchor="middle">protected</text>
+</svg></div> </a> <div class="featured-body"> <div class="post-meta"> <time datetime="2026-09-02"> 2026-09-02 </time> <span class="post-kind">Note</span> <span class="post-flag">Featured</span>  <span class="post-read">16 min read</span> </div> <a class="featured-title" href="/blog/scaling-ecs-workers-on-queue-depth-without-killing-long-jobs"> Scaling ECS workers on queue depth without killing long jobs </a> <p class="post-lede">ECS scale-in was killing translation jobs up to two hours into their run. Scaling on queue depth and letting busy tasks finish before they stop fixed it.</p> <ul class="post-tags"> <li class="post-tag"> <a href="/blog/tag/aws/">aws</a> </li><li class="post-tag"> <a href="/blog/tag/ecs/">ecs</a> </li><li class="post-tag"> <a href="/blog/tag/terraform/">terraform</a> </li> </ul> </div> </article> <ul class="post-list"> <li class="post-row has-cover" data-filter-row data-tags="node streams performance" data-title="Handling backpressure in Node.js streams" data-lede="A Node.js stream says slow down with one boolean. Ignore it and a single stalled client parks 200 MiB in your process. Here is how the signal travels."> <a class="row-cover" href="/blog/handling-backpressure-in-node-js-streams" tabindex="-1" aria-hidden="true"> <div class="cover"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" role="img" aria-label="A producer box writes into a buffer whose third chunk crosses a dashed mark, with a slow sink beyond. An accent arrow labelled false loops back to the producer, and an arrow labelled drain returns underneath.">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  
+  <rect x="90" y="250" width="170" height="110" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+  <line x1="260" y1="305" x2="394" y2="305" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+  <text x="327" y="285" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">write</text>
+
+  
+  <rect x="410" y="250" width="380" height="110" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+  <rect x="434" y="274" width="76" height="62" rx="10" fill="var(--muted, #949aa2)" opacity="0.45"/>
+  <rect x="522" y="274" width="76" height="62" rx="10" fill="var(--muted, #949aa2)" opacity="0.45"/>
+  <rect x="610" y="274" width="76" height="62" rx="10" fill="var(--muted, #949aa2)" opacity="0.45"/>
+  <line x1="660" y1="230" x2="660" y2="380" stroke="var(--ink, #edeae3)" stroke-width="3" stroke-dasharray="10 10"/>
+
+  
+  <line x1="790" y1="305" x2="924" y2="305" stroke="var(--muted, #949aa2)" stroke-width="3"/>
+  <rect x="940" y="250" width="170" height="110" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+
+  
+  <path d="M600 250 C600 110 175 110 175 238" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="4" marker-end="url(#acc)"/>
+  <text x="388" y="120" font-size="30" fill="var(--accent, #57c7ba)" text-anchor="middle">false</text>
+
+  <path d="M600 360 C600 490 175 490 175 372" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+  <text x="388" y="510" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">drain</text>
+</svg></div> </a> <div class="row-body"> <div class="post-meta"> <time datetime="2026-10-19"> 2026-10-19 </time> <span class="post-kind">Note</span>  <span class="post-read">23 min read</span> </div> <a class="post-row-title" href="/blog/handling-backpressure-in-node-js-streams"> Handling backpressure in Node.js streams </a> <p class="post-lede">A Node.js stream says slow down with one boolean. Ignore it and a single stalled client parks 200 MiB in your process. Here is how the signal travels.</p> <ul class="post-tags"> <li class="post-tag"> <a href="/blog/tag/node/">node</a> </li><li class="post-tag"> <a href="/blog/tag/streams/">streams</a> </li><li class="post-tag"> <a href="/blog/tag/performance/">performance</a> </li> </ul> </div> </li><li class="post-row has-cover" data-filter-row data-tags="rails react ci" data-title="Building a booking marketplace from empty repo to beta" data-lede="A booking marketplace from empty repo to beta. Why CI came in week one, and why double booking is a database problem, not a UI check."> <a class="row-cover" href="/blog/building-a-booking-marketplace-from-empty-repo-to-beta" tabindex="-1" aria-hidden="true"> <div class="cover"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" role="img" aria-label="One mentor's hours from 10:00 to 12:00, with a confirmed booking from 10:00 to 11:00 and a dashed, rejected booking from 10:30 to 11:30 overlapping it.">
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  
+  <rect x="240" y="110" width="360" height="120" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="420" y="180" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">confirmed</text>
+
+  
+  <rect x="420" y="270" width="360" height="120" rx="18" fill="none" stroke="var(--muted, #949aa2)" stroke-width="4" stroke-dasharray="12 12"/>
+  <text x="600" y="340" font-size="28" fill="var(--muted, #949aa2)" text-anchor="middle">rejected</text>
+
+  
+  <g stroke="var(--border, #262b33)" stroke-width="4" stroke-linecap="round">
+    <line x1="120" y1="450" x2="1080" y2="450"/>
+    <line x1="240" y1="436" x2="240" y2="464"/>
+    <line x1="600" y1="436" x2="600" y2="464"/>
+    <line x1="960" y1="436" x2="960" y2="464"/>
+  </g>
+  <g font-size="26" fill="var(--muted, #949aa2)" text-anchor="middle">
+    <text x="240" y="508">10:00</text>
+    <text x="600" y="508">11:00</text>
+    <text x="960" y="508">12:00</text>
+  </g>
+</svg></div> </a> <div class="row-body"> <div class="post-meta"> <time datetime="2026-10-13"> 2026-10-13 </time> <span class="post-kind">Case study</span>  <span class="post-read">15 min read</span> </div> <a class="post-row-title" href="/blog/building-a-booking-marketplace-from-empty-repo-to-beta"> Building a booking marketplace from empty repo to beta </a> <p class="post-lede">A booking marketplace from empty repo to beta. Why CI came in week one, and why double booking is a database problem, not a UI check.</p> <ul class="post-tags"> <li class="post-tag"> <a href="/blog/tag/rails/">rails</a> </li><li class="post-tag"> <a href="/blog/tag/react/">react</a> </li><li class="post-tag"> <a href="/blog/tag/ci/">ci</a> </li> </ul> </div> </li><li class="post-row has-cover" data-filter-row data-tags="redis lua concurrency" data-title="Preventing stock overselling in Redis with Lua scripts" data-lede="Every Redis command is atomic. The check-then-write your app wraps around them is not, and that gap is how 100 units become 121 orders."> <a class="row-cover" href="/blog/preventing-stock-overselling-in-redis-with-lua-scripts" tabindex="-1" aria-hidden="true"> <div class="cover"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" role="img" aria-label="Two clients A and B send to one Redis box. Four interleaved dashed command slots end at minus one; two solid script blocks, one after the other, end at zero.">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  
+  <rect x="100" y="170" width="100" height="70" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+  <text x="150" y="216" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">A</text>
+  <rect x="100" y="360" width="100" height="70" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+  <text x="150" y="406" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">B</text>
+  <path d="M200 205 L408 290" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+  <path d="M200 395 L408 310" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+
+  
+  <rect x="420" y="80" width="700" height="440" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+  <text x="460" y="134" font-size="30" fill="var(--ink, #edeae3)">Redis</text>
+
+  
+  <g fill="none" stroke-width="3" stroke-dasharray="10 10">
+    <rect x="470" y="177" width="120" height="56" rx="10" stroke="var(--ink, #edeae3)"/>
+    <rect x="610" y="177" width="120" height="56" rx="10" stroke="var(--muted, #949aa2)"/>
+    <rect x="750" y="177" width="120" height="56" rx="10" stroke="var(--ink, #edeae3)"/>
+    <rect x="890" y="177" width="120" height="56" rx="10" stroke="var(--muted, #949aa2)"/>
+  </g>
+  <text x="1040" y="216" font-size="30" fill="var(--ink, #edeae3)">-1</text>
+
+  
+  <rect x="470" y="367" width="260" height="56" rx="10" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <rect x="750" y="367" width="260" height="56" rx="10" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="1040" y="406" font-size="30" fill="var(--ink, #edeae3)">0</text>
+</svg></div> </a> <div class="row-body"> <div class="post-meta"> <time datetime="2026-10-07"> 2026-10-07 </time> <span class="post-kind">Note</span>  <span class="post-read">16 min read</span> </div> <a class="post-row-title" href="/blog/preventing-stock-overselling-in-redis-with-lua-scripts"> Preventing stock overselling in Redis with Lua scripts </a> <p class="post-lede">Every Redis command is atomic. The check-then-write your app wraps around them is not, and that gap is how 100 units become 121 orders.</p> <ul class="post-tags"> <li class="post-tag"> <a href="/blog/tag/redis/">redis</a> </li><li class="post-tag"> <a href="/blog/tag/lua/">lua</a> </li><li class="post-tag"> <a href="/blog/tag/concurrency/">concurrency</a> </li> </ul> </div> </li><li class="post-row has-cover" data-filter-row data-tags="react-native node realtime" data-title="Live order status over Socket.IO and Redis" data-lede="Socket.IO delivers at most once by default, so live order status on a driver's phone is only as good as the Redis read it makes on reconnect."> <a class="row-cover" href="/blog/live-order-status-over-socket-io-and-redis" tabindex="-1" aria-hidden="true"> <div class="cover"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" role="img" aria-label="One server box pushing to a laptop and a phone, with the phone's reconnect read going straight to Redis.">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  
+  <rect x="120" y="170" width="300" height="170" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <text x="270" y="265" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">server</text>
+
+  
+  <rect x="120" y="430" width="300" height="100" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="270" y="490" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">redis</text>
+  <line x1="270" y1="340" x2="270" y2="430" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+
+  
+  <rect x="780" y="70" width="260" height="160" rx="14" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <line x1="740" y1="252" x2="1080" y2="252" stroke="var(--ink, #edeae3)" stroke-width="4" stroke-linecap="round"/>
+
+  
+  <rect x="830" y="320" width="160" height="250" rx="24" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <line x1="885" y1="540" x2="935" y2="540" stroke="var(--ink, #edeae3)" stroke-width="3" stroke-linecap="round"/>
+
+  
+  <path d="M420 220 H600 V150 H772" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+  <path d="M420 290 H600 V400 H822" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+
+  
+  <path d="M830 480 H428" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="4" marker-end="url(#acc)"/>
+  <text x="630" y="520" font-size="26" fill="var(--accent, #57c7ba)" text-anchor="middle">on reconnect</text>
+</svg></div> </a> <div class="row-body"> <div class="post-meta"> <time datetime="2026-09-28"> 2026-09-28 </time> <span class="post-kind">Case study</span>  <span class="post-read">14 min read</span> </div> <a class="post-row-title" href="/blog/live-order-status-over-socket-io-and-redis"> Live order status over Socket.IO and Redis </a> <p class="post-lede">Socket.IO delivers at most once by default, so live order status on a driver&#39;s phone is only as good as the Redis read it makes on reconnect.</p> <ul class="post-tags"> <li class="post-tag"> <a href="/blog/tag/react-native/">react-native</a> </li><li class="post-tag"> <a href="/blog/tag/node/">node</a> </li><li class="post-tag"> <a href="/blog/tag/realtime/">realtime</a> </li> </ul> </div> </li><li class="post-row has-cover" data-filter-row data-tags="architecture sqs redis" data-title="Extracting fulfillment from a PHP monolith over SQS" data-lede="Fulfillment came out of a PHP monolith piece by piece, over SQS, so six people never froze features. The price was a contract both sides had to keep."> <a class="row-cover" href="/blog/extracting-fulfillment-from-a-php-monolith-over-sqs" tabindex="-1" aria-hidden="true"> <div class="cover"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" role="img" aria-label="A monolith block with one empty dashed slot, and the fulfillment piece standing on its own across an SQS FIFO queue.">
+  <defs>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  
+  <rect x="100" y="110" width="380" height="380" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <g fill="none" stroke="var(--muted, #949aa2)" stroke-width="3">
+    <rect x="140" y="150" width="300" height="90" rx="12"/>
+    <rect x="140" y="370" width="300" height="90" rx="12"/>
+  </g>
+  <rect x="140" y="260" width="300" height="90" rx="12" fill="none" stroke="var(--muted, #949aa2)" stroke-width="3" stroke-dasharray="10 10"/>
+  <text x="290" y="540" font-size="28" fill="var(--muted, #949aa2)" text-anchor="middle">monolith</text>
+
+  
+  <line x1="480" y1="305" x2="812" y2="305" stroke="var(--accent, #57c7ba)" stroke-width="4" marker-end="url(#acc)"/>
+  <g fill="var(--surface, #161a20)" stroke="var(--ink, #edeae3)" stroke-width="3">
+    <rect x="530" y="283" width="44" height="44" rx="8"/>
+    <rect x="600" y="283" width="44" height="44" rx="8"/>
+    <rect x="670" y="283" width="44" height="44" rx="8"/>
+  </g>
+  <text x="646" y="390" font-size="26" fill="var(--muted, #949aa2)" text-anchor="middle">SQS FIFO</text>
+
+  
+  <rect x="820" y="245" width="300" height="120" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="970" y="315" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">fulfillment</text>
+</svg></div> </a> <div class="row-body"> <div class="post-meta"> <time datetime="2026-09-24"> 2026-09-24 </time> <span class="post-kind">Case study</span>  <span class="post-read">17 min read</span> </div> <a class="post-row-title" href="/blog/extracting-fulfillment-from-a-php-monolith-over-sqs"> Extracting fulfillment from a PHP monolith over SQS </a> <p class="post-lede">Fulfillment came out of a PHP monolith piece by piece, over SQS, so six people never froze features. The price was a contract both sides had to keep.</p> <ul class="post-tags"> <li class="post-tag"> <a href="/blog/tag/architecture/">architecture</a> </li><li class="post-tag"> <a href="/blog/tag/sqs/">sqs</a> </li><li class="post-tag"> <a href="/blog/tag/redis/">redis</a> </li> </ul> </div> </li><li class="post-row has-cover" data-filter-row data-tags="aurora mysql performance" data-title="Fixing 100% CPU on Aurora MySQL by removing a join" data-lede="A status broadcast made about a thousand database calls, each scanning 7 million rows, and pinned Aurora at 100% CPU. The fix was a dropped join, not an index."> <a class="row-cover" href="/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join" tabindex="-1" aria-hidden="true"> <div class="cover"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" role="img" aria-label="One broadcast box fanning about a thousand calls into an Aurora database cylinder whose CPU bar is full at 100%.">
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  
+  <rect x="90" y="230" width="240" height="140" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <text x="210" y="310" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">broadcast</text>
+
+  
+  <g stroke="var(--muted, #949aa2)" stroke-width="3" fill="none" stroke-linecap="round">
+    <line x1="330" y1="300" x2="820" y2="212"/>
+    <line x1="330" y1="300" x2="820" y2="229"/>
+    <line x1="330" y1="300" x2="820" y2="246"/>
+    <line x1="330" y1="300" x2="820" y2="263"/>
+    <line x1="330" y1="300" x2="820" y2="280"/>
+    <line x1="330" y1="300" x2="820" y2="297"/>
+    <line x1="330" y1="300" x2="820" y2="314"/>
+    <line x1="330" y1="300" x2="820" y2="331"/>
+    <line x1="330" y1="300" x2="820" y2="348"/>
+    <line x1="330" y1="300" x2="820" y2="365"/>
+    <line x1="330" y1="300" x2="820" y2="382"/>
+    <line x1="330" y1="300" x2="820" y2="399"/>
+    <line x1="330" y1="300" x2="820" y2="416"/>
+  </g>
+  <text x="575" y="200" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">~1,000 calls</text>
+
+  
+  <path d="M820 190 V430 A145 40 0 0 0 1110 430 V190" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <ellipse cx="965" cy="190" rx="145" ry="40" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="965" y="290" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">Aurora</text>
+  <rect x="865" y="318" width="200" height="16" rx="8" fill="var(--border, #262b33)"/>
+  <rect x="865" y="318" width="200" height="16" rx="8" fill="var(--accent, #57c7ba)"/>
+  <text x="965" y="382" font-size="28" fill="var(--accent, #57c7ba)" text-anchor="middle">100% CPU</text>
+</svg></div> </a> <div class="row-body"> <div class="post-meta"> <time datetime="2026-09-17"> 2026-09-17 </time> <span class="post-kind">Note</span>  <span class="post-read">17 min read</span> </div> <a class="post-row-title" href="/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join"> Fixing 100% CPU on Aurora MySQL by removing a join </a> <p class="post-lede">A status broadcast made about a thousand database calls, each scanning 7 million rows, and pinned Aurora at 100% CPU. The fix was a dropped join, not an index.</p> <ul class="post-tags"> <li class="post-tag"> <a href="/blog/tag/aurora/">aurora</a> </li><li class="post-tag"> <a href="/blog/tag/mysql/">mysql</a> </li><li class="post-tag"> <a href="/blog/tag/performance/">performance</a> </li> </ul> </div> </li><li class="post-row has-cover" data-filter-row data-tags="agents llm rails" data-title="Making LLM triage verdicts testable in code" data-lede="Prompting an LLM to be careful never made pass/fail testable. Moving the verdict into code did, and replaying old incidents caught three false passes."> <a class="row-cover" href="/blog/making-llm-triage-verdicts-testable-in-code" tabindex="-1" aria-hidden="true"> <div class="cover"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" role="img" aria-label="An agent box hands evidence to a small solid verdict box, while its dashed write path is blocked by a human gate.">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+    <marker id="mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--muted, #949aa2)"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  
+  <rect x="90" y="110" width="360" height="200" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+  <text x="270" y="222" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">agent</text>
+
+  
+  <line x1="450" y1="210" x2="766" y2="210" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+  <text x="610" y="192" font-size="26" fill="var(--muted, #949aa2)" text-anchor="middle">evidence</text>
+
+  
+  <rect x="780" y="150" width="330" height="120" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="945" y="221" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">verdict</text>
+
+  
+  <path d="M270 310 V430 H630" fill="none" stroke="var(--muted, #949aa2)" stroke-width="3" stroke-dasharray="10 10"/>
+  <line x1="645" y1="398" x2="645" y2="462" stroke="var(--ink, #edeae3)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M660 430 H766" fill="none" stroke="var(--muted, #949aa2)" stroke-width="3" stroke-dasharray="10 10" marker-end="url(#mut)"/>
+  <text x="645" y="506" font-size="26" fill="var(--muted, #949aa2)" text-anchor="middle">human gate</text>
+  <rect x="780" y="380" width="330" height="100" rx="18" fill="none" stroke="var(--muted, #949aa2)" stroke-width="3" stroke-dasharray="10 10"/>
+  <text x="945" y="440" font-size="26" fill="var(--muted, #949aa2)" text-anchor="middle">write</text>
+</svg></div> </a> <div class="row-body"> <div class="post-meta"> <time datetime="2026-09-12"> 2026-09-12 </time> <span class="post-kind">Note</span>  <span class="post-read">13 min read</span> </div> <a class="post-row-title" href="/blog/making-llm-triage-verdicts-testable-in-code"> Making LLM triage verdicts testable in code </a> <p class="post-lede">Prompting an LLM to be careful never made pass/fail testable. Moving the verdict into code did, and replaying old incidents caught three false passes.</p> <ul class="post-tags"> <li class="post-tag"> <a href="/blog/tag/agents/">agents</a> </li><li class="post-tag"> <a href="/blog/tag/llm/">llm</a> </li><li class="post-tag"> <a href="/blog/tag/rails/">rails</a> </li> </ul> </div> </li><li class="post-row has-cover" data-filter-row data-tags="llm rails aws" data-title="Handling LLM rate limits as reschedules, not errors" data-lede="Rate limits caused 65% of our LLM review failures. Treating them as reschedules, not errors, kept provider throttling from becoming our outage."> <a class="row-cover" href="/blog/handling-llm-rate-limits-as-reschedules-not-errors" tabindex="-1" aria-hidden="true"> <div class="cover"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" role="img" aria-label="An engine box with three provider paths, the dashed Bedrock path returning 429, the solid path routed to OpenAI, and Gemini waiting in the chain.">
+  <defs>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+    <marker id="mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--muted, #949aa2)"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  
+  <rect x="90" y="200" width="310" height="200" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="245" y="310" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">engine</text>
+
+  
+  <path d="M400 300 C600 300, 600 130, 790 130" fill="none" stroke="var(--muted, #949aa2)" stroke-width="4" stroke-dasharray="12 12" marker-end="url(#mut)"/>
+  <text x="600" y="176" font-size="28" fill="var(--muted, #949aa2)" text-anchor="middle">429</text>
+  <rect x="800" y="80" width="310" height="100" rx="18" fill="none" stroke="var(--muted, #949aa2)" stroke-width="4" stroke-dasharray="12 12"/>
+  <text x="955" y="140" font-size="30" fill="var(--muted, #949aa2)" text-anchor="middle">Bedrock</text>
+
+  
+  <path d="M400 300 H790" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="4" marker-end="url(#acc)"/>
+  <rect x="800" y="250" width="310" height="100" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <text x="955" y="310" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">OpenAI</text>
+
+  
+  <path d="M400 300 C600 300, 600 470, 790 470" fill="none" stroke="var(--muted, #949aa2)" stroke-width="4" marker-end="url(#mut)"/>
+  <rect x="800" y="420" width="310" height="100" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="4"/>
+  <text x="955" y="480" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">Gemini</text>
+</svg></div> </a> <div class="row-body"> <div class="post-meta"> <time datetime="2026-09-05"> 2026-09-05 </time> <span class="post-kind">Note</span>  <span class="post-read">18 min read</span> </div> <a class="post-row-title" href="/blog/handling-llm-rate-limits-as-reschedules-not-errors"> Handling LLM rate limits as reschedules, not errors </a> <p class="post-lede">Rate limits caused 65% of our LLM review failures. Treating them as reschedules, not errors, kept provider throttling from becoming our outage.</p> <ul class="post-tags"> <li class="post-tag"> <a href="/blog/tag/llm/">llm</a> </li><li class="post-tag"> <a href="/blog/tag/rails/">rails</a> </li><li class="post-tag"> <a href="/blog/tag/aws/">aws</a> </li> </ul> </div> </li> </ul> <p class="blog-empty" id="blog-empty" hidden>
+No posts match. Clear the search or pick another tag.
+</p> </div> <script type="module">const c=document.querySelectorAll(".tag-chip"),o=document.getElementById("blog-search"),m=document.querySelectorAll("[data-filter-row]"),i=document.getElementById("blog-empty");let n=null,d="";function r(){const e=d.trim().toLowerCase();let a=0;m.forEach(t=>{const l=(t.dataset.tags??"").split(" ").filter(Boolean),u=`${t.dataset.title??""} ${t.dataset.lede??""} ${l.join(" ")}`.trim().toLowerCase(),g=!n||l.includes(n),f=!e||u.includes(e),s=g&&f;t.hidden=!s,s&&(a+=1)}),i&&(i.hidden=a!==0)}c.forEach(e=>{e.addEventListener("click",a=>{a.preventDefault(),c.forEach(l=>l.classList.toggle("is-active",l===e));const t=e.dataset.tag;n=!t||t==="all"?null:t,r()})});o?.addEventListener("input",()=>{d=o.value,r()});</script>  </main> <footer class="site-footer"> <div class="container"> <span>© 2026 Abdelwahab Mahmoud</span> <span>built with astro · hosted on github pages</span> </div> </footer> <script data-track-target="theme-toggle">
+      function applyThemeColor(theme) {
+        var meta = document.getElementById("theme-color");
+        if (meta)
+          meta.setAttribute(
+            "content",
+            theme === "dark" ? "#0e1013" : "#faf8f3"
+          );
+      }
+      applyThemeColor(document.documentElement.dataset.theme);
+      var toggle = document.getElementById("theme-toggle");
+      if (toggle) {
+        toggle.addEventListener("click", function () {
+          var theme =
+            document.documentElement.dataset.theme === "dark"
+              ? "light"
+              : "dark";
+          document.documentElement.dataset.theme = theme;
+          localStorage.setItem("theme", theme);
+          applyThemeColor(theme);
+        });
+      }
+      document.addEventListener("click", function (event) {
+        var el = event.target.closest("[data-track]");
+        if (!el) return;
+        window.gtag &&
+          window.gtag("event", "click", {
+            hitType: "event",
+            event_category: "Reached",
+            event_label: el.getAttribute("data-track")
+          });
+      });
+    </script> </body> </html>

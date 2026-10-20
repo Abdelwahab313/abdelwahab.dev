@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)">
+  <defs>
+    <marker id="ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ink, #edeae3)"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  <!-- two clients -->
+  <rect x="100" y="170" width="100" height="70" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+  <text x="150" y="216" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">A</text>
+  <rect x="100" y="360" width="100" height="70" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+  <text x="150" y="406" font-size="30" fill="var(--ink, #edeae3)" text-anchor="middle">B</text>
+  <path d="M200 205 L408 290" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+  <path d="M200 395 L408 310" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3" marker-end="url(#ink)"/>
+
+  <!-- one Redis, one thread -->
+  <rect x="420" y="80" width="700" height="440" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+  <text x="460" y="134" font-size="30" fill="var(--ink, #edeae3)">Redis</text>
+
+  <!-- check, then write: A and B interleave -->
+  <g fill="none" stroke-width="3" stroke-dasharray="10 10">
+    <rect x="470" y="177" width="120" height="56" rx="10" stroke="var(--ink, #edeae3)"/>
+    <rect x="610" y="177" width="120" height="56" rx="10" stroke="var(--muted, #949aa2)"/>
+    <rect x="750" y="177" width="120" height="56" rx="10" stroke="var(--ink, #edeae3)"/>
+    <rect x="890" y="177" width="120" height="56" rx="10" stroke="var(--muted, #949aa2)"/>
+  </g>
+  <text x="1040" y="216" font-size="30" fill="var(--ink, #edeae3)">-1</text>
+
+  <!-- one script each: A finishes before B starts -->
+  <rect x="470" y="367" width="260" height="56" rx="10" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <rect x="750" y="367" width="260" height="56" rx="10" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="4"/>
+  <text x="1040" y="406" font-size="30" fill="var(--ink, #edeae3)">0</text>
+</svg>
