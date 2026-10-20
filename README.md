@@ -52,8 +52,8 @@ docs/             blog authoring guide, ADRs, specs
 
 ## Deploy
 
-Every push to `main` builds the site and publishes `dist/` to the `gh-pages` branch
-via `.github/workflows/deploy.yml`. The custom domain is set by `public/CNAME`.
+Netlify builds and serves the site from `main` (`netlify.toml`: `npm run build`,
+publish `dist/`, Node 22). DNS is on Cloudflare in front of Netlify.
 
 ## History
 
