@@ -60,4 +60,43 @@ never names the product, employer, or client.
 
 ## Spin-offs from the pipeline
 
-(none yet)
+Cut from posts trimmed to the 1,800-word budget on 2026-10-27. The full
+pre-trim text of every post is at commit `ec4dbcf`:
+`git show ec4dbcf:src/content/blog/<slug>.md`.
+
+- **Writing a Node.js Transform or Writable that keeps backpressure.**
+  From `handling-backpressure-in-node-js-streams`: the `Lines` Transform and
+  why ignoring `push()` is safe, a batching Writable with `_final`, child
+  process stdin/stdout ordering, and `process.stdout` being async on pipes.
+- **A check-then-act race on a credit balance.** From
+  `handling-llm-rate-limits-as-reschedules-not-errors`: the race a few
+  milliseconds wide that silently paused work, conditional `UPDATE` against
+  `SELECT ... FOR UPDATE`, and the move to one authorization path (diagram
+  `src/diagrams/engine-credit-race.svg` already exists).
+- **Where LLM JSON repair should stop.** Same source: strip fences, refuse to
+  close a truncated object, structured outputs without schema adherence.
+- **Read-only credentials for agents.** From
+  `making-llm-triage-verdicts-testable-in-code`: `readOnlyHint` is a hint,
+  Rails `while_preventing_writes` is not a readonly user, MySQL DDL commits
+  the open transaction, Agent SDK deny order.
+- **Reading a query plan on a writer pinned at 100% CPU.** From
+  `fixing-aurora-mysql-100-percent-cpu-by-removing-a-join`: `EXPLAIN FOR
+  CONNECTION`, `EXPLAIN ANALYZE` on a reader, `FLUSH STATUS` handler counts,
+  the digest table as a measurement window.
+- **Storing availability as wall-clock time plus an IANA zone.** From
+  `building-a-booking-marketplace-from-empty-repo-to-beta`: the DST example,
+  Zoom moving a past `start_time` to now, `freeBusy` intervals (diagram
+  `src/diagrams/launch-ci-gate.svg` is also unused now).
+- **Background location check-ins from a driver app.** From
+  `live-order-status-over-socket-io-and-redis`: volatile emits for positions,
+  acked resends for check-ins, the team of five.
+- **Following one EVAL through the Redis source.** From
+  `preventing-stock-overselling-in-redis-with-lua-scripts`: script flags,
+  replication of effects, EVAL vs Functions and script cache eviction.
+- **SQS FIFO in practice.** From
+  `extracting-fulfillment-from-a-php-monolith-over-sqs`: throughput per
+  group, `maxReceiveCount` traps, the full receive loop with `failedGroups`.
+- **Terraform and deploy races for protected ECS workers.** From
+  `scaling-ecs-workers-on-queue-depth-without-killing-long-jobs`:
+  `DEPLOYMENT_BLOCKED`, the 12-hour visibility ceiling, deadband and lagging
+  SQS counts.

@@ -34,10 +34,11 @@ internal contradictions nobody caught (assessed 2026-10-16). The reference for
 what to do is a post that names a real constraint, what was tried, why the
 winner won, what it cost, and where the author stands.
 
-There is no length limit and no length target. A post is as long as its
-value. Do not ask any agent to shorten a post unless the problem is padding,
-not depth. Depth beyond the five-minute core is welcome where the topic earns
-it; padding never is.
+Length budget: lede plus body, code included, at most 1,800 words, so the
+page shows 9 min or less (decided 2026-10-27; every post before that ran 13
+to 23 min). One story per post. Breadth that does not fit is a spin-off for
+`docs/blog/ideas.md`, not a reason to go over. The writer and reviewer agent
+files carry the rule and the reviewer reports the count.
 
 ## Stages
 

@@ -32,6 +32,9 @@ When available, load the `clarity` skill (call the `skill` tool by name) and use
 - Generic lessons ("write tests", "monitor your systems") without a specific story behind them. Flag each.
 
 ### 3. Structure and the five-minute core
+- Length: lede plus body (code and Sources included, whitespace split) is at most 1,800 words, so the page shows 9 min or less. Over budget is a blocker. Report the count.
+- One story per post. A second case, pattern or tool that the thesis does not need is a Should-fix: cut it and append it to `docs/blog/ideas.md` as a spin-off.
+- At most seven `##` sections, not counting `## Sources`.
 - The lede states a takeaway, not a topic.
 - Headings stand alone as a skim: read only the headings and you still get the argument. Generic headings ("Background", "Conclusion", "What we learned") fail this.
 - First sentence of each paragraph carries the paragraph's point; front-loaded throughout.
@@ -96,6 +99,7 @@ Verdict: SHIP | REVISE | REJECT
 
 ## Value check
 - Reader walks away with: <one sentence>
+- Length: <n> words (budget 1,800) -> pass | fail
 - Five-minute core: pass | fail, <why>
 - Trade-off section: present | missing
 

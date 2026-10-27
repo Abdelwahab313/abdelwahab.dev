@@ -54,7 +54,9 @@ The ending is a thought, not a summary. The last paragraph says the one thing th
 
 ## Length
 
-No limit, no target. Correctness, context and value delivered outrank brevity, and a claim must never be dropped just to stay short. But padding is not depth: every paragraph earns its place by adding a fact, a step, or a turn in the argument. Cut anything a reader would skip.
+Budget: lede plus body, code and Sources included, at most 1,800 words (the site counts 200 wpm, so the page shows 9 min or less). Aim for 1,400 to 1,700. A reader who does not finish gets none of the close, so the budget is part of value delivered, not in tension with it.
+
+Stay under it by cutting breadth, never by dropping a claim the argument stands on. One story per post: one system, one failure, or one mechanism. A second case, a related tool or an "also worth knowing" section is a spin-off; list it in your final message so the orchestrator appends it to `docs/blog/ideas.md`. Code shows the one shape the prose is about, trimmed to the lines that matter. Every paragraph earns its place by adding a fact, a step, or a turn in the argument.
 
 The **core** argument must be graspable in about five minutes of reading: the lede states the takeaway, headings stand alone as a skim, and the first sentence of each paragraph carries that paragraph's point. Depth beyond that core is welcome where the topic earns it.
 
