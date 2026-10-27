@@ -12,7 +12,7 @@ coverAlt: One broadcast box fanning about a thousand calls into an Aurora databa
 
 ## Aurora at 100% CPU, and everything queued behind it
 
-Aurora MySQL sat at 100% CPU and stayed there. Requests that had been fine started queuing, and the whole product felt it, not just the feature behind the load.
+Aurora MySQL sat at 100% CPU and stayed there. Requests that had been fine started queuing, and the whole product felt it.
 
 One endpoint was behind it: a status broadcast that pushed state out to a lot of clients. Each time it ran, it called the database about a thousand times, and `EXPLAIN` estimated that each call would examine about 7 million rows.
 
@@ -28,7 +28,7 @@ The instinct was to tune: add an index, raise the instance size, cache harder. A
 
 An index does nothing if the query is not using one, and without the plan you do not know which index would change anything.
 
-A bigger instance buys time by hiding the cause. Performance Insights draws a Max vCPU line from the instance's vCPU count, and when there are more processes than vCPUs, they queue. That, I think, is the queue the rest of the product was standing in. A larger class raises the line, and a broadcast whose load scales with its call count grows back into it. When load sits above the line and the main wait is CPU, AWS lists three remedies: throttle connections, tune the high-CPU SQL, or move to a larger instance class. I would take them in that order, and the third only after the first two.
+A bigger instance buys time by hiding the cause. Performance Insights draws a Max vCPU line from the instance's vCPU count, and when there are more processes than vCPUs, they queue. That, I think, is the queue the rest of the product was standing in. A larger instance raises the line, and a broadcast whose load scales with its call count grows back into it. When load sits above the line and the main wait is CPU, AWS lists three remedies: throttle connections, tune the high-CPU SQL, or move to a larger instance class. I would take them in that order, and the third only after the first two.
 
 A cache is a real design for status fan-out. At a previous job I served hot order state from Redis with MySQL behind it, to keep that fan-out off the transactional path. Bolted on mid-incident, though, a cache would have hidden a query I had not read yet, and handed me a second copy of the status to keep fresh.
 
@@ -101,19 +101,19 @@ Four columns carry the story. `type: ALL` is a full table scan. `possible_keys` 
 
 ![The plan before and after. Before, one batches row read by primary key drives a full scan of batch_events, an estimated 7 million rows, to send one row back. After the join is dropped the same row is read once and the history table is not touched.](diagram:aurora-join-shape)
 
-`rows` is an estimate, but `type: ALL` and `key: NULL` are the plan the optimizer chose, and against a one-row result an estimate off by a factor of ten still points at the same fix. `EXPLAIN ANALYZE` counts rows by running the statement, so on a pinned writer, take the counts from a reader's instance endpoint.
+`rows` is an estimate, but `type: ALL` and `key: NULL` are the plan the optimizer chose, and against a one-row result an estimate off by a factor of ten still points at the same fix. For real counts, `EXPLAIN ANALYZE` runs the statement, so on a pinned writer, run it against a reader's instance endpoint.
 
 ## An index makes the scan cheaper, not smaller
 
-A `ref` join reads all rows with matching index values, and the manual calls it "a good join type" if the key matches only a few rows. When the join needs a large share of the table, an index turns one scan into a very large number of lookups. The manual lists this among the causes of full scans: MySQL calculates that a table scan is faster. That is the reconstruction, with `idx_account` in `possible_keys` and unused. A covering index, shown as `Using index` in the plan, would make each row cheaper to read and would still read every one of them.
+Using `idx_account`, the join would be `ref`, which reads all rows with matching index values, and the manual calls it "a good join type" if the key matches only a few rows. When the join needs a large share of the table, an index turns one scan into a very large number of lookups. The manual lists this among the causes of full scans: MySQL calculates that a table scan is faster. That is the reconstruction, with `idx_account` in `possible_keys` and unused. A covering index, shown as `Using index` in the plan, would make each row cheaper to read and would still read every one of them.
 
-The digest numbers from earlier make this decision. When rows examined per call is far above rows sent and the `WHERE` clause is selective, the query reads rows it then throws away, and an index is the fix, a covering one if the select list is small. When rows examined is far above rows sent but the query genuinely needs the set, as an aggregate over a large history does, no index will shrink it, so stop asking for those rows: drop the join, or move the value it computes somewhere cheaper to read. When rows examined is close to rows sent but `calls` is enormous, the query is fine and the caller is the problem. I read the broadcast as the second and the third at once, which is why it took two changes.
+The digest numbers from earlier make this decision. When rows examined per call is far above rows sent and the `WHERE` clause is selective, the query reads rows it then throws away, and an index is the fix, a covering one if the select list is small. When rows examined is far above rows sent but the query genuinely needs the set, as an aggregate over a large history does, no index will shrink it, so stop asking for those rows: drop the join, or move the value it computes somewhere cheaper to read. When rows examined is close to rows sent but `calls` is enormous, the query is fine and the caller is the problem. I read the broadcast as the second case with the call count of the third, which is why it took two changes.
 
 So the useful question was whether the broadcast needed those rows at all. It did not.
 
 ## Dropping the join and throttling the caller
 
-First, I dropped the join that forced the scan and let the broadcast read only the rows it needed. In the reconstruction that leaves `SELECT id, status, updated_at FROM batches WHERE id = 42`, a `const` lookup: every part of the primary key compared to a constant, at most one row, read once.
+First, I dropped the join that forced the scan and let the broadcast read only the rows it needed. In the reconstruction that leaves `SELECT id, status, updated_at FROM batches WHERE id = 42`, the same `const` lookup as the plan's first row: every part of the primary key compared to a constant, at most one row, read once.
 
 What the payload gives up is whatever the join existed to compute; in the reconstruction, `last_event_at`. Whether a value like that can go is a product question as much as a database one. Asked with the plan in hand, it is a much shorter conversation.
 
@@ -123,7 +123,7 @@ The second change was the caller. I throttled it so it could not fan out a thous
 
 Throttling had a visible cost: some clients got a slightly staler broadcast. That was the trade, freshness for a subset in exchange for a database that stayed reachable for everyone.
 
-My view is that a broadcast's database work should follow how often the state changes, not how often someone gets told about it. When those two rates are coupled, every new client is new load on the database, and the system's capacity is set by its most talkative feature.
+My view is that a broadcast's database work should follow how often the state changes, not how often someone gets told about it. When those two rates are coupled, every new client is new load on the database, and the product's capacity is set by its most talkative feature.
 
 | | Before | After |
 |---|---|---|
@@ -132,7 +132,7 @@ My view is that a broadcast's database work should follow how often the state ch
 | Rows examined per call, `EXPLAIN` estimate | about 7 million | join that forced the scan dropped |
 | Broadcast freshness | fresh for every client | slightly staler for some clients |
 
-The feature stayed up, with no instance resize and no new cache layer. To check the change, read `calls` and `rows_examined_per_call` in the digest table, and writer CPU at `Maximum`, because a five-minute average of a bursty broadcast can look healthy while every burst touches the ceiling.
+The feature stayed up, with no instance resize and no new cache layer. To check the change, read `calls` and `rows_examined_per_call` in the digest table, and writer CPU with the `Maximum` statistic, because a five-minute average of a bursty broadcast can look healthy while every burst touches the ceiling.
 
 ## When the index or the bigger box is right
 

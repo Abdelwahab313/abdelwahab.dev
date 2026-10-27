@@ -18,11 +18,11 @@ My answer had two parts: a pipeline that deploys nothing its browser specs have 
 
 ## Decision
 
-Two things went in before the product did much at all: a CI/CD pipeline, and BDD tests in Cypress, written from the user's side of the screen. After that I led features from business requirements to deployment, backend and frontend. The code here is a sketch written for this post, not the code that shipped, though the SQL targets Postgres, the engine the product ran on. In the booking flow an advisor is a mentor, and the code uses that word.
+Two things went in before the product did much at all: a CI/CD pipeline, and BDD tests in Cypress, written from the user's side of the screen. After that I led features from business requirements to deployment, backend and frontend. The code here is a sketch written for this post, not the code that shipped, though the SQL targets Postgres, the engine the product ran on. In the code below an advisor is a mentor and a company is a client.
 
 ### A deploy gate before the first feature
 
-A week-one pipeline does very little. It starts a database, runs whatever specs exist, and deploys `main` if they pass. On day one that might be a single spec, a visitor can sign up, and that is enough. The point is that the gate exists before there is any code that would fail it.
+A week-one pipeline does very little. It starts a database, runs whatever specs exist, and deploys `main` if they pass. On day one that might be one spec, "a visitor can sign up", and that is enough. The point is that the gate exists before there is any code that would fail it.
 
 ```yaml
 on: [push, pull_request]
@@ -82,7 +82,7 @@ CREATE TABLE bookings (
 );
 ```
 
-Read it as: no two rows may have the same `mentor_id` and overlapping time ranges, unless one of them is cancelled. `btree_gist` gives GiST an equality operator for `bigint`, so the mentor and the range share one constraint. It is a trusted extension, so a non-superuser with `CREATE` on the database can install it, which matters on a managed database. `tstzrange` defaults to `[)` bounds, so a 10:00 to 11:00 session and an 11:00 to 12:00 one do not overlap, and the `WHERE` clause frees the slot when a booking is cancelled.
+Read it as: no two rows may have the same `mentor_id` and overlapping time ranges, unless one of them is cancelled. `btree_gist` gives the GiST index behind the constraint an equality operator for `bigint`, so the mentor and the range share one constraint. It is a trusted extension, so a non-superuser with `CREATE` on the database can install it, which matters on a managed database. `tstzrange` defaults to `[)` bounds, so a 10:00 to 11:00 session and an 11:00 to 12:00 one do not overlap, and the `WHERE` clause frees the slot when a booking is cancelled.
 
 One Rails default is why I write this table in SQL by hand: the Active Record PostgreSQL guide says datetime columns default to `timestamp without time zone`, and a booking table is the last place I want a timestamp that has forgotten its zone.
 
@@ -90,7 +90,7 @@ One Rails default is why I write this table in SQL by hand: the Active Record Po
 
 ### What the second session sees
 
-Run this sketch against Postgres 17 with two sessions booking the same mentor at the same time, and the one property that matters shows up. The second session's own check, a plain `SELECT` for overlapping rows, returns zero, because the first has not committed yet. Its `INSERT` then waits on the first transaction and, the moment that commits, fails with SQLSTATE `23P01`, `exclusion_violation`. The application check is fooled. The constraint is not.
+Run this sketch against Postgres 17 with two sessions booking the same mentor at the same time. The second session's check-then-write `SELECT` for overlapping rows returns zero, because the first has not committed yet. Its `INSERT` then waits on the first transaction and, the moment that commits, fails with SQLSTATE `23P01`, `exclusion_violation`. The application check is fooled. The constraint is not.
 
 ![Two sessions booking the same mentor, as a sequence. Both SELECT for overlapping rows and both see none, because the first has not committed. The second INSERT waits on the first transaction and fails with 23P01 once it commits. Without the constraint the second row would have been inserted, double booking the mentor.](diagram:launch-race-sequence)
 
@@ -114,7 +114,7 @@ class BookingsController < ApplicationController
 end
 ```
 
-`CreateMeetingJob` runs after the row commits, because a transaction held open across an HTTP call to Zoom puts someone else's latency inside your lock, and a retried job checks `zoom_meeting_id` first so it does not create a second meeting.
+`CreateMeetingJob` runs after the row commits, because a transaction held open across an HTTP call to Zoom puts someone else's latency inside your lock. A retried job checks `zoom_meeting_id` first, so it does not create a second meeting.
 
 The UI shows that `409` as "That time was just booked", and this is the spec that checks it:
 
@@ -138,15 +138,15 @@ describe('Booking a mentor', () => {
 })
 ```
 
-State is seeded with `cy.request` against test-only endpoints, as Cypress's best-practices page recommends, and the spec creates its own conflicting booking after the page has loaded, which is the stale-page race a real user hits. Any spec that books a slot reaches Zoom from the Rails server, where `cy.intercept` cannot see it, so the test environment swaps in a fake Zoom client that returns a canned `join_url`.
+State is seeded with `cy.request` against test-only endpoints, as Cypress's best-practices page recommends. The spec creates its own conflicting booking after the page has loaded, which is the stale-page race a real user hits. Any spec that books a slot reaches Zoom from the Rails server, where `cy.intercept` cannot see it, so the test environment swaps in a fake Zoom client that returns a canned `join_url`.
 
 ## Trade-off
 
 The first cost was time. Pipeline and specs went in before there was a feature anyone could click, and the first week demoed worse than it would have. None of this is the right call for every MVP. If the first version is an experiment to find out whether anyone wants the thing, with a person behind a form doing the matching, a week on pipelines is a week not learning. Here the first version was the booking flow, so the tests were tests of the product itself.
 
-The exclusion constraint has costs a validation does not. It ties the rule to Postgres. With Postgres as the database that cost nothing at the time, but it is one more thing any later database move would have to carry. It turns a business rule into schema, so "leave 15 minutes between sessions" becomes a migration that changes the range expression. And it surfaces as an exception the controller has to translate, which is easy to forget in a second endpoint that writes bookings.
+The exclusion constraint has costs a validation does not. It ties the rule to Postgres. With Postgres as the database, that cost nothing at the time, but it is one more thing any later database move would have to carry. It turns a business rule into schema, so "leave 15 minutes between sessions" becomes a migration that changes the range expression. And it surfaces as an exception the controller has to translate, which is easy to forget in a second endpoint that writes bookings.
 
-It also only covers rows in our table. An advisor accepting a meeting in their own calendar is outside our transaction, and checking their calendar again just before the insert narrows that window without closing it. I would accept that. A collision with an outside calendar is an annoyed advisor, and it is visible to them before the meeting. A collision inside our own table is two companies who both did everything right.
+It also only covers rows in our table. An advisor accepting a meeting in their own calendar is outside our transaction. Checking that calendar just before the insert narrows the gap without closing it. I would accept that. A collision with an outside calendar is an annoyed advisor, and it is visible to them before the meeting. A collision inside our own table is two companies who both did everything right.
 
 ## Outcome
 

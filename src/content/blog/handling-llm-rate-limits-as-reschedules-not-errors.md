@@ -12,17 +12,17 @@ coverAlt: An engine box with three provider paths, the dashed Bedrock path retur
 
 ## 65% of review failures were the provider saying "not now"
 
-Work in the review step kept failing, and each time the user saw an error. When we looked at why, rate limit errors were behind 65% of those failures.
+Work in the review step of our translation pipeline kept failing, and each time the user saw an error. When we looked at why, rate limit errors were behind 65% of those failures.
 
 That number changed what the problem was. Most of our review failures were not bugs in our code or bad model output. They were a provider telling us to slow down, and our code hearing "this work is broken."
 
-The product was a metered LLM translation service. Customers paid in credits, so ordering, cost and correctness all mattered on every call. From where the user sat, our product was broken, and the provider that caused it was invisible to them.
+The product was a metered LLM translation service. Customers paid in credits, so cost and correctness mattered on every call. From where the user sat, our product was broken, and the provider that caused it was invisible to them.
 
 The fix was to read a 429 as a signal to reschedule the work.
 
 ## A 429 is not one thing
 
-The engine called three providers: Claude on Bedrock, OpenAI and Gemini. They all use HTTP 429 for "too many requests," and that shared status code hides three different vocabularies. Some 429s clear in seconds. Some do not clear until a daily quota resets or someone adds credit.
+We called three providers: Claude on Bedrock, OpenAI and Gemini. They all use HTTP 429 for "too many requests," and that shared status code hides three different vocabularies. Some 429s clear in seconds. Some do not clear until a daily quota resets or someone adds credit.
 
 | Provider | Throttling signal | Looks similar, means something else |
 |---|---|---|
@@ -67,7 +67,7 @@ module Engine
 end
 ```
 
-The others are one-liners: `Unavailable` (5xx, overload, model timeouts), `QuotaExhausted` (will not clear on its own), `BadRequest` (our fault, never retried) and `Reschedule`, which carries a `retry_after` and means every provider in the chain refused.
+The other error classes are one-liners: `Unavailable` (5xx, overload, model timeouts), `QuotaExhausted` (will not clear on its own), `BadRequest` (our fault, never retried) and `Reschedule`, which carries a `retry_after` and means every provider in the fallback chain refused.
 
 The OpenAI adapter has to look inside the body, because the same 429 status carries both a rate limit and a billing failure:
 
@@ -83,9 +83,9 @@ def classify(status, headers, body)
 end
 ```
 
-Bedrock's `ModelNotReadyException` is also a 429, but closer to "not up yet" than "slow down," and the Converse API reference notes the SDK already retries it up to 5 times. So the Bedrock adapter files it under `Unavailable`, not as a polite throttle.
+Bedrock's `ModelNotReadyException` is also a 429, but closer to "not up yet" than "slow down," and the Converse API reference notes the SDK already retries it up to 5 times. So the Bedrock adapter files it under `Unavailable`.
 
-The same engine repaired malformed JSON, and the line I draw there is to strip code fences around a complete object and refuse to close a truncated one, because on a metered product the customer should not pay for a guess. Credits were charged per LLM request, and I found a check-then-act race on the balance, a few milliseconds wide, that had been silently pausing work. The fix shape is the one from [the Redis post](/blog/preventing-stock-overselling-in-redis-with-lua-scripts): put the check inside the `UPDATE`.
+An answer could still be unusable. The engine stripped code fences around a complete JSON object and refused to close a truncated one, because on a metered product the customer should not pay for a guess. Metering had its own failure. Credits were charged per LLM request, and I found a race between checking the balance and charging it, a few milliseconds wide, that had been silently pausing work. The fix shape is the one from [the Redis post](/blog/preventing-stock-overselling-in-redis-with-lua-scripts): put the check inside the `UPDATE`.
 
 ## A fallback chain where a 429 does not trip the breaker
 
@@ -164,7 +164,7 @@ end
 
 Rails' own `retry_on` would do much of this, but its wait proc gets the execution count, not the error, so it cannot read `Retry-After`, the most accurate number in the calculation.
 
-The cap matters more than it looks. A daily quota that is gone will refuse every reschedule until it resets. Without a limit, a reschedule loop is a retry storm that happens to be slow.
+The reschedule limit matters more than it looks. A daily quota that is gone will refuse every reschedule until it resets. Without a limit, a reschedule loop is a retry storm that happens to be slow.
 
 ## What the single engine cost
 

@@ -53,7 +53,7 @@ Redis kept every individual promise you asked for, and another request slipped i
 
 The fix is to stop sending two commands and send one thing that reads the stock and decrements it if there is enough.
 
-Redis ships a Lua 5.1 interpreter compiled into the server. It runs a script to completion before the event loop picks up the next client. This sale allows two per order, so the script takes the quantity as an argument:
+Redis ships a Lua 5.1 interpreter compiled into the server. It runs a script, sent with the `EVAL` command, to completion before the event loop picks up the next client. This sale allows two per order, so the script takes the quantity as an argument:
 
 ```lua
 local stock = tonumber(redis.call('GET', KEYS[1]) or '0')
@@ -77,7 +77,7 @@ Long reserved = redisTemplate.execute(
 );
 ```
 
-The key arrives as `KEYS[1]` because Cluster routes a script by its declared keys. The `or '0'` covers a missing key: `GET` returns Lua `false`, `tonumber(false)` is `nil`, and `nil >= qty` throws, so the default makes "key absent" mean "no stock". And the check is `stock >= qty` because a buyer asking for two when one is left must be refused, which `stock > 0` would let through.
+The key name is passed in as `KEYS[1]` because Redis Cluster routes a script by the keys it declares. The `or '0'` covers a missing key: `GET` returns Lua `false`, `tonumber(false)` is `nil`, and `nil >= qty` throws, so the default makes "key absent" mean "no stock". And the check is `stock >= qty` because a buyer asking for two when one is left must be refused, which `stock > 0` would let through.
 
 Redis does not wrap scripts in a mutex or a transaction log. The atomicity falls out of the execution path. `EVAL` comes in through the normal dispatch, `processCommand` then `call`, on the main thread. `evalGenericCommand()` in `src/eval.c` hands the script to `luaCallFunction()`, which does a `lua_pcall` into the interpreter, and while that runs the event loop dispatches nothing else. There is no yield point. A `redis.call('GET', ...)` inside the script goes through `luaRedisGenericCommand()` and `scriptCall()` and executes inline on the same thread.
 
@@ -89,7 +89,7 @@ A script's effects have either not happened yet or have already happened. There 
 
 Redis finishes A's whole script before it starts B's, so B reads `0`, fails the check and never decrements. Across the thousands of interleavings a real sale produces, the counter cannot go negative through this path.
 
-That guarantee is isolation, not a transaction. Redis serializes scripts and does not roll them back. If a script writes key A and then errors on key B, A stays written and the caller gets an error. Design multi-key scripts so that a failure halfway through leaves a state you can reconstruct. Replicas receive the commands the script wrote, asynchronously, so never read stock from a replica.
+That guarantee is isolation, not a transaction. Redis serializes scripts and does not roll them back. If a script writes one key and then errors on the next, the first write stays and the caller gets an error. Design multi-key scripts so that a failure halfway through leaves a state you can reconstruct. Replicas receive the commands the script wrote, asynchronously, so never read stock from a replica.
 
 For new code I would load the script once as a Redis 7.0 Function and call it with `FCALL`. Functions persist with the dataset, survive failover and run with the same atomicity.
 
@@ -109,25 +109,25 @@ if (remaining < 0) {
 
 This is race-free for everything above. The compensating `INCRBY` costs a second round trip, and only on the rare overshoot.
 
-Where `DECRBY` loses is crash semantics and expressiveness. If the process dies between `DECRBY` and `INCRBY`, the units are silently gone, which shrinks inventory and never oversells. A script cannot stop the crash either. It can fold the guard and the reservation record into one atomic step, so the state you crash into is always reconstructable. And a lone command cannot express a rule bigger than "is the counter above zero", such as a per-customer limit or an idempotency guard keyed on `order_id`.
+`DECRBY` loses in two places. If the process dies between `DECRBY` and `INCRBY`, the units are silently gone, which shrinks inventory and never oversells. A script cannot stop the crash either. It can put the check, the decrement and a reservation record in one atomic step, so the state you crash into is always reconstructable. And a lone command cannot express a rule bigger than "is the counter above zero", such as a per-customer limit or an idempotency guard keyed on `order_id`.
 
 My rule is blunt. Reach for the atomic command first. Use Lua when the decision is multi-step, conditional, and has to be indivisible. The same shape shows up in rate limiters, compare-and-delete lock release (the half of Redlock people forget), dedup markers, and state machines that move `pending` to `confirmed` only if it is still `pending`. Each one is read, decide, write, with a gap in the middle. Redis made each of your commands atomic. A script is how you make a decision atomic.
 
 ## A cart needs keys on one slot, or a saga
 
-The race is per key, so twenty SKUs on sale are twenty copies of the same script. A cart that reserves phone, case and charger together needs atomicity across keys. In Cluster mode a script may only touch keys that hash to one slot, or it fails with `CROSSSLOT`. A shared hash tag forces co-location: `sale:{inv}:phone:stock`, `sale:{inv}:case:stock` and `sale:{inv}:charger:stock` all hash on `{inv}` and land on one node, where one script reserves all or nothing. The cost is a hotspot: all of them live on one node. Tagging by warehouse (`{wh:1}`) spreads the load and keeps each reservation atomic.
+The race is per key, so twenty SKUs on sale run the same script against twenty keys. A cart that reserves phone, case and charger together needs atomicity across keys. In Cluster mode a script may only touch keys that hash to one slot, or it fails with `CROSSSLOT`. A shared hash tag forces co-location: `sale:{inv}:phone:stock`, `sale:{inv}:case:stock` and `sale:{inv}:charger:stock` all hash on `{inv}` and land on one node, where one script reserves all or nothing. The cost is a hotspot on that node. Tagging by warehouse (`{wh:1}`, `{wh:2}`) keeps each warehouse's keys on one slot, which spreads the load across nodes and keeps each reservation atomic.
 
 If the inventory is large and hot, or the keys cannot share a slot, I think the honest answer is to stop forcing one script. Reserve each SKU on its own and treat the cart as a saga: reserve, then release each reservation if a later step fails. Atomicity across arbitrary keys in a distributed store is exactly what Redis cannot give you cheaply.
 
-## A slow script stalls everyone
+## Slow scripts, retries and crashes
 
 The atomicity comes from one serialization point, and so does the risk. A script that takes 500 ms is 500 ms in which no other client on that instance is served. Past `busy-reply-threshold` (default 5000 ms, `lua-time-limit` before Redis 7), Redis answers other clients with `BUSY` and logs `Slow script detected`. `SCRIPT KILL` can stop the script only if it has not written yet. After a write, killing it would break atomicity, so the only exit is `SHUTDOWN NOSAVE`. Keep scripts short, roughly O(1), and treat any script that iterates a large collection as a latent outage.
 
-That is also why the script only decides who owns the unit. The payment call, the order row and the email happen in the application afterwards, and that split leaves two failures outside the script.
+That is also why the script only decides who owns the unit. The payment call, the order row and the email happen in the application afterwards, and that split leaves two failures to design for.
 
-A retry can reserve twice. A client that times out may resend the same request, and nothing in the script above stops the second `DECRBY`. Pass a request id with the call and have the script `SET` a marker for it with `NX`, returning early if the marker exists, so a retry becomes a no-op.
+A retry can reserve twice. A client that times out may resend the same request, and nothing in the script above stops the second `DECRBY`. Pass the `order_id` with the call and have the script `SET` a marker for it with `NX`, returning early if the marker exists, so a retry becomes a no-op.
 
-A crash between reserve and order leaks inventory. If the process dies after the script and before the order row is persisted, the units stay reserved with no order behind them. Give reservations an expiry, a TTL key or a checkpoint a reconciler reads, and run a job that returns expired reservations to stock. Order the writes so that a crash can only under-sell.
+A crash between reserve and order leaks inventory. If the process dies after the script and before the order row is persisted, the units stay reserved with no order behind them. Give reservations an expiry, a TTL key or a checkpoint, and run a reconciler job that returns expired reservations to stock. Order the writes so that a crash can only under-sell.
 
 ## Sources
 

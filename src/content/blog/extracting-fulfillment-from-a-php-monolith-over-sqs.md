@@ -12,7 +12,7 @@ coverAlt: A monolith block with one empty dashed slot, and the fulfillment piece
 
 ## Situation
 
-Every order state change in the delivery product shipped in the same deploy as everything else. Fulfillment was one more component inside a PHP/Laravel monolith, so changing how an order moved meant releasing the whole application.
+Every change to order state logic in the delivery product shipped in the same deploy as everything else. Fulfillment was one more component inside a PHP/Laravel monolith, so changing how an order moved meant releasing the whole application.
 
 The product had 100K daily users, and every order moved through kitchen, driver and delivery in real time. I had already built the real-time order service, on Node.js and Socket.IO, which consumed order state changes from the monolith over SQS and pushed them to mobile and web clients. So one part of the system already lived outside the monolith. Fulfillment was still inside.
 
@@ -28,7 +28,7 @@ I took fulfillment out piece by piece instead. It became a standalone Node.js/Ex
 
 ### The monolith already had a queue
 
-A companion article on Fowler's site names the move underneath every strangler fig, event interception, and advises reusing existing integration points as seams. It is the boring part of the pattern, and I think the useful one. A second consumer on a queue the monolith already writes to costs the legacy code far less than a new integration. Legacy code you do not have to touch is legacy code you cannot break.
+A companion article on Fowler's site names "event interception" as the move underneath every strangler fig, and advises reusing existing integration points as seams. It is the boring part of the pattern, and I think the useful one. A second consumer on a queue the monolith already writes to costs the legacy code far less than a new integration. Legacy code you do not have to touch is legacy code you cannot break.
 
 ![The fulfillment service joins the monolith's existing SQS FIFO queue as a second consumer, beside the real-time order service.](diagram:fulfillment-strangler)
 
@@ -38,13 +38,13 @@ The harder question is ownership. The same article says redirecting writes made 
 
 Each FIFO message carries a deduplication ID, set by the producer or derived from a SHA-256 hash of the body, and copies sent with the same ID within the 5-minute deduplication interval are delivered once. A monolith that times out on `SendMessage` and retries does not put the event on the queue twice.
 
-Messages that share a message group ID are handed out one at a time in strict order, and different groups have no order between them, which is where the parallelism comes from.
+Messages that share a message group ID are delivered in strict order, and different groups have no order between them, which is where the parallelism comes from.
 
 ![Two order-id message groups on one FIFO queue: strict order inside each, none across them, and a retried send inside five minutes dropped.](diagram:fulfillment-fifo-groups)
 
 AWS calls this exactly-once processing, and I think the name promises more than the mechanism. Deduplication guards the send side, but the receive side still runs on a lease: a received message is hidden for the visibility timeout and comes back if nobody deletes it. The visibility timeout page says so for FIFO queues too: "there's no absolute guarantee that a message won't be delivered more than once during the visibility timeout period."
 
-That leaves a gap no queue setting closes. A consumer can commit its database change and die before `DeleteMessage`, and the message comes back for another attempt. So the consumer still has to be idempotent. FIFO is a reason to see fewer duplicates, not a reason to handle none.
+That leaves a gap no queue setting closes. A consumer can commit its database change and die before `DeleteMessage`, and the message comes back for another attempt. So the consumer still has to be idempotent.
 
 ### One transaction for the event and the state
 
@@ -140,15 +140,15 @@ The `processed_events` row commits in the same transaction as the state change. 
 
 ![Commit, crash before delete, redelivery after the visibility timeout, and the second attempt stopped by the primary key.](diagram:fulfillment-redelivery)
 
-The receive loop deletes a message only after `apply()` succeeds, and a `failedGroups` set skips the rest of a group once one event fails, because a single receive can return up to 10 messages from one group. `processed_events` grows forever unless rows older than the queue's retention period, 14 days at most, are pruned.
+The receive loop, not shown here, deletes a message only after `apply()` succeeds. Once one event fails, it skips the rest of that group, because a single receive can return up to 10 messages from one group. `processed_events` grows forever unless rows older than the queue's retention period, 14 days at most, are pruned.
 
 ### Strict order is not commit order
 
 SQS can only preserve the order it is given, and with several producers on one group the docs say it keeps arrival order. Two PHP requests that change the same order can commit in one sequence and reach `SendMessage` in the other, and SQS will faithfully preserve the wrong one.
 
-A dead-letter queue breaks order too: a redrive delivers a poisoned event after the newer ones that went through without it. The version guard covers both cases, because a late `picked_up` after `delivered` matches no row and changes nothing.
+A dead-letter queue breaks order too: a redrive delivers a poisoned event after the newer ones that went through without it. The `version < ?` check covers both cases, because a late `picked_up` after `delivered` carries a lower version and matches no row.
 
-For an order state machine I would keep the version column even on FIFO. It is the one guard here that lives in your own database, where you can read it at two in the morning when an order looks wrong.
+For an order state machine I would keep the version column even on FIFO. It is the one ordering guard here that lives in your own database, where you can read it at two in the morning when an order looks wrong.
 
 ## Trade-off
 
@@ -160,7 +160,7 @@ Incremental extraction is the wrong call when there is no seam. If the component
 
 ## Outcome
 
-Fulfillment ran as a standalone service while the rest of the product kept shipping. Nobody froze feature work to get there, which was the point. I also moved the real-time order service to TypeScript, so payload mismatches failed at compile time, though the types still end at the PHP edge.
+Fulfillment ran as a standalone service while the rest of the product kept shipping. Nobody froze feature work to get there, which was the point. I also moved the real-time order service to TypeScript, so payload mismatches failed at compile time, though the types ended at the PHP edge.
 
 The queue type, the idempotency table and the version column all follow from one list: every piece of state the new service touches, which side is the system of record for it this week, and what a reader on the other side does when it is behind. Without that list they are guesses that happen to compile.
 

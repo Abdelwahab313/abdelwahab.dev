@@ -47,7 +47,7 @@ curl --request PUT --header 'Content-Type: application/json' \
   --data '{"ProtectionEnabled":true,"ExpiresInMinutes":135}'
 ```
 
-It needs agent 1.65.0 or later, and the task role needs `ecs:GetTaskProtection` and `ecs:UpdateTaskProtection` even though the container only talks to the agent. Protection lasts 1 to 2,880 minutes and defaults to 120 if you leave the expiry out, which a job running the full two hours outlives. Derive it from the job's timeout plus a margin, and if you deploy with CloudFormation, keep it under the stack update's 3-hour timeout.
+It needs agent 1.65.0 or later, and the task role needs `ecs:GetTaskProtection` and `ecs:UpdateTaskProtection` even though the container only talks to the agent. Protection lasts 1 to 2,880 minutes and defaults to 120 if you leave the expiry out, and a full two-hour job outlives that. Derive it from the job's timeout plus a margin, and if you deploy with CloudFormation, keep it under the stack update's 3-hour timeout.
 
 Calling the endpoint again resets the expiry, so it is tempting to protect at boot and renew forever. A protected idle task cannot be scaled in and holds up every deployment. The rule: protect after receiving a message and before starting it, unprotect the moment it ends, success or failure. An idle task is always stoppable.
 
@@ -78,9 +78,9 @@ until $stopping
 end
 ```
 
-The order is the design. Receive, protect, check the stop flag again (ECS may have decided to stop this task while the protect call was in flight), and only then work, so a job never runs unprotected. `translate` has to honour its deadline: a job killed at its deadline is a visible failure, and one still running after its protection lapsed is a silent one.
+The order is the design. Receive, protect, check the stop flag again (ECS may have decided to stop this task while the protect call was in flight), and only then work, so a job never runs unprotected. `protection` wraps the agent call above, and the heartbeat stops the message reappearing to another worker mid-job. `translate` has to honour its deadline: a job killed at its deadline is a visible failure, and one still running after its protection lapsed is a silent one.
 
-## Deployments now wait for the longest job
+## Deployments wait for the longest job
 
 On a rolling update ECS starts new tasks but does not stop old ones until their protection clears or expires. With `deployment_maximum_percent = 200`, a full new revision can run next to the old fleet for as long as the longest old job runs, up to double the task count. "Deployed" has to split in two. The new revision taking work should take minutes, and the deployment completing waits for the longest job that was running when it started. Any design that refuses to kill jobs has that bound, and once you name it, it stops looking like a bug.
 
@@ -88,7 +88,7 @@ Under steady load, an old-revision task that unprotects and takes the next messa
 
 ## The scaler should not be able to kill anything
 
-Once workers protect themselves, the scaler moves one number, the desired count, and never chooses a task. The policy, from the rework's ADR:
+Once workers protect themselves, the scaler only sets the desired count. The policy, from the rework's ADR, with `target` as messages per task:
 
 ```text
 work      = visible + in_flight            # ApproximateNumberOfMessages + ApproximateNumberOfMessagesNotVisible
@@ -107,11 +107,11 @@ Counting in-flight messages matters more than it looks. On a queue where every m
 
 The closest native option is target tracking with metric math, and AWS documents this signal as `ApproximateNumberOfMessagesVisible` divided by `RunningTaskCount`, with scale-in already paused during an ECS deployment. The documented expression reads only visible messages and the policy cannot floor at the protected count, but for a fleet of short jobs I would use it and write no scaler at all.
 
-I owned that platform and its Terraform for a year and a half and ran the worker fleet 90% on Spot, where a Fargate Spot interruption is neither scale-in nor a deployment, so protection does not cover it. It comes with a two-minute warning, as `SIGTERM` and an EventBridge event, and for those stops the queue's retry is the only net.
+I owned that platform and its Terraform for a year and a half, and ran the worker fleet 90% on Spot. A Fargate Spot interruption is neither scale-in nor a deployment, so protection does not cover it. It comes with a two-minute warning, as `SIGTERM` and an EventBridge event, and for those stops the queue's retry is the only net.
 
-The trade is a few idle minutes while a task finishes its job on shutdown, against throwing away up to 2 hours of work. The scaler is also software you own, so in the rework any error means no change to the desired count, and an alarm fires when the scaler has not run for ten minutes, because a disabled schedule fails silently.
+The trade is paying for a task until its job finishes, against throwing away up to two hours of work. The scaler is also software you own, so in the rework any error means no change to the desired count, and an alarm fires when the scaler has not run for ten minutes, because a disabled schedule fails silently.
 
-What drain does guarantee is that the scaler is never the thing that kills a job. My rule now is that the thing which scales a worker fleet should only move a number. The only thing that knows a task is busy is the worker holding the message, so the worker says so, and the scaler's IAM policy carries no `ecs:StopTask` and no `ecs:UpdateTaskProtection`. That policy is the proof, not a comment promising it.
+Spot aside, the design guarantees that the scaler is never the thing that kills a job. My rule now is that the thing which scales a worker fleet should only move a number. The only thing that knows a task is busy is the worker holding the message, so the worker says so, and the scaler's IAM policy carries no `ecs:StopTask` and no `ecs:UpdateTaskProtection`. That policy is the proof, not a comment promising it.
 
 ## Sources
 

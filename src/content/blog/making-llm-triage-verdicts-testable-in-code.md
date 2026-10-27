@@ -26,19 +26,19 @@ My first attempt was prompt-only. I asked the agent to be cautious and explain i
 
 I could tune the words, but I could not point at the exact check that decided pass or fail, and I could not test it. When the agent passed an incident, the reason was somewhere inside a paragraph of prose. When I changed the prompt to fix one case, I had no way to know which other cases had moved with it.
 
-The obvious next move is a confidence score with a threshold, and I think that moves the fuzziness into a number without removing it. OpenAI's GPT-4 technical report measured calibration on the model's token probabilities and found that "the post-training hurts calibration significantly", and a confidence number the model writes into its own answer is one step further from anything measured.
+The obvious next move is a confidence score with a threshold, and I think that moves the fuzziness into a number without removing it. OpenAI's GPT-4 technical report measured calibration on the model's token probabilities and found that "the post-training hurts calibration significantly". A confidence number the model writes into its own answer is one step further from anything measured.
 
 ## The model gathers, code decides
 
 I kept the agent for what it is good at: reading, reasoning, and collecting evidence. I moved the pass/fail decision itself into code, into checks I could test and replay.
 
-The agent investigated through an MCP server that exposed live databases, logs and selected APIs to the team's agents through authenticated, monitored access. Access was read-only, every action was written to an audit log, and any write to production sat behind a gate only a human could open. The MCP spec says there should always be a human in the loop able to deny a tool call, and for production writes I treated that SHOULD as a must.
+The agent investigated through an MCP (Model Context Protocol) server that exposed live databases, logs and selected APIs to the team's agents through authenticated, monitored access. Access was read-only, every action was written to an audit log, and any write to production sat behind a gate only a human could open. The MCP spec says there should always be a human in the loop able to deny a tool call, and for production writes I treated that SHOULD as a must. That server outlived the triage use and became the team's standard agent integration path.
 
-Read-only has to live in the database user. The MCP schema calls `readOnlyHint` a hint, and it enforces nothing. The rollback wrapper around data access is a second line, because it only undoes what the database can roll back. The first line is a credential that cannot write. That server outlived the triage use and became the team's standard agent integration path.
+Read-only has to live in the database user. A tool can declare itself read-only with the `readOnlyHint` annotation. The MCP schema calls that a hint, and it enforces nothing. A rollback wrapper around data access is a second line, since it undoes only what the database can roll back. The first line is a credential that cannot write.
 
 ![The split. An inquiry goes to the agent, which calls read-only tools through an MCP server that logs every call. The agent returns a hypothesis and findings that cite audit ids, never a verdict. A tested verdict function reads the tool results from the audit log and answers pass or fail, and any write to production sits behind a gate only a human can open.](diagram:triage-gather-decide)
 
-What changes is the agent's output. It no longer says "pass". It returns a hypothesis and a list of findings, and each finding points at the audit-log entry of the tool call that shows it. The verdict function never reads the agent's prose. It reads the tool results the agent cited, straight from the audit log, and runs a fixed check against each one. Here is the shape, with an illustrative rule:
+What changes is the agent's output. It no longer says "pass". It returns a hypothesis and a list of findings, and each finding points at the audit-log entry of the tool call that shows it. The verdict function never reads the agent's prose. It reads the tool results the agent cited, straight from the audit log, and runs a fixed check against each one. Each known hypothesis maps to the facts that would prove it, and each fact has its own check. Here is the shape, with an illustrative rule:
 
 ```ruby
 module Triage
@@ -69,7 +69,7 @@ end
 
 The rules matter less than the defaults around them. A hypothesis with no rule fails, so the agent cannot pass an incident by inventing a new kind of explanation. A missing finding fails, so "it has not happened again" counts only if the search that came back empty is in the audit log. The checks run against what the tool returned, not the agent's description of what it returned, so a paraphrase that drifted from the data cannot carry the verdict. There is no confidence input anywhere. The model's certainty has nowhere to go.
 
-Support claims ran through the same platform with a critic agent added to find the hole in the investigator's case, and two agents arguing is still two opinions, which is why I would keep the verdict out of both.
+Support claims ran through the same platform, with a critic agent added to find the hole in the investigating agent's case. Two agents arguing is still two opinions, which is why I would keep the verdict out of both.
 
 ## Replaying old incidents caught three false passes
 
@@ -96,7 +96,7 @@ RSpec.describe "Triage.verdict replay" do
 end
 ```
 
-Replaying old incidents through the checks caught three false passes that a prompt had let through. Three times, the prompt-only agent had called an incident fine and the real outcome said otherwise. Those three are the most valuable fixtures in a suite like this. Any later change to a rule that would let one of them pass again turns its example red.
+Three times, the prompt-only agent had called an incident fine and the real outcome said otherwise. The checks failed all three. Those three are the most valuable fixtures in a suite like this. Any later change to a rule that would let one of them pass again turns its example red.
 
 ![The replay. Each past incident is a fixture of findings, audit entries and the real outcome. It runs through the same verdict function as production, with no model call, and the result is compared with what actually happened. A mismatch turns the example red, which is how the three false passes surfaced.](diagram:triage-replay)
 
@@ -114,7 +114,7 @@ All of this is the wrong design when being wrong is cheap. If an agent only rout
 
 ## Make the go/no-go a function
 
-The platform cut Mean Time To Resolve across incident and support inquiries because a human started from a drafted answer and its evidence instead of an empty screen.
+The platform still cut MTTR across incident and support inquiries, because a human started from a drafted answer and its evidence instead of an empty screen.
 
 Pick the one decision in your agent pipeline that closes something without a person looking. If you cannot write the RSpec example that goes red when that decision is wrong, the model should not be making it alone.
 

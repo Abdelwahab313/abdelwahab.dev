@@ -22,7 +22,7 @@ Socket.IO delivers at most once by default. A driver's phone that lost signal tw
 
 ### A room per order, typed on both ends
 
-Socket.IO groups sockets two ways, and I keep namespaces for audiences whose access rules differ and rooms, server-side channels a socket joins and leaves, for orders. A room per order maps straight onto the problem. The kitchen app, the driver's phone and the customer's browser each join `order:<id>`, and a status change is one emit to that room.
+Socket.IO groups sockets into namespaces and rooms. A room is a server-side channel a socket joins and leaves. I kept namespaces for audiences whose access rules differ and gave each order a room, which maps straight onto the problem. The kitchen app, the driver's phone and the customer's browser each join `order:<id>`, and a status change is one emit to that room.
 
 ![One state change fans out from one place. The service consumes the change from the queue, writes the new state to Redis, and emits once to the order's room, which reaches the kitchen app, the driver app and the customer web client. Redis is the read source for snapshots; MySQL is updated behind it asynchronously.](diagram:mobile-fanout)
 
@@ -47,7 +47,7 @@ export interface ClientToServerEvents {
 }
 ```
 
-The server joins the socket to the order's room and answers with a snapshot:
+The server joins the socket to the order's room and answers with a snapshot through `ack`, the callback the client sends with the event:
 
 ```ts
 import { Server } from "socket.io";
@@ -101,25 +101,25 @@ socket.on("connect", () => {
 
 I moved this service from JavaScript to TypeScript so payload mismatches failed at compile time. Socket.IO's typed events put event names and payloads in two interfaces, and the server and every client import them from one file. A change to `OrderState` then breaks the build of whichever side has not caught up.
 
-The docs add a caution I agree with: "These type hints do not replace proper validation/sanitization of the input." The compiler never sees what a client or the Laravel monolith actually sent, so runtime validation still belongs at both edges. If I could keep only one, I would keep the shared types file over a suite of socket integration tests. The types catch the mistake as it is typed, on both sides.
+The docs add a caution I agree with: "These type hints do not replace proper validation/sanitization of the input." The compiler never sees what a client or the Laravel monolith actually sent, so runtime validation still belongs at both edges. Between the shared types file and a suite of socket integration tests, I would keep the types file. It catches the mistake as it is typed, on both sides.
 
 ### Join the room before reading the snapshot
 
-Most of the design sits in four lines of the code above. `join` comes before the read. Read first and join second, and a change published between the two is lost for good: the snapshot is already old and the socket was not in the room to hear the update. Join first and the change arrives as a live event, inside the snapshot, or both.
+The order of two lines in the `order:watch` handler matters most. `join` comes before the read. Read first and join second, and a change published between the two is lost for good: the snapshot is already old and the socket was not in the room to hear the update. Join first and the change arrives as a live event, inside the snapshot, or both.
 
 ![Why join comes before read. Reading the snapshot first leaves a gap in which a published change reaches nobody, and the screen stays stale. Joining first means the change arrives as a live event, and the version check discards a snapshot that turns out to be older.](diagram:mobile-join-before-read)
 
-The `version` check is what makes "both" harmless. Socket.IO guarantees ordering on a connection, but the snapshot and the live event are produced at different moments. If a change is published after the server read the snapshot and before it sent the ack, the newer live event arrives first and the older snapshot second. Without a version, the screen moves backwards.
+The `version` check makes "both" harmless, because a copy at the same version is ignored. It also covers a reorder. Socket.IO keeps messages in order on a connection, but that is the order they were sent in. If a change is published after the server read the snapshot and before it sent the ack, the newer live event arrives first and the older snapshot second. Without a version, the screen moves backwards.
 
 The watch is re-sent on every `connect`. The client docs say that event also fires on reconnection, with a new `socket.id`, so a reconnected phone is a new socket in no rooms. Unless it asks again, it hears nothing.
 
-Handlers live outside `connect`, because the same docs warn that registering them inside adds a fresh copy on every reconnect. On a phone that drops signal many times in one shift, that is a slow leak of duplicate renders.
+Handlers live outside `connect`, because the same docs warn that registering them inside adds a fresh copy on every reconnect. On a phone that drops signal many times in one shift, that is a slow leak of duplicate handlers.
 
 ### Redis takes the reconnect burst
 
 Hot order state lived in Redis as the service's read source, in a write-behind cache with MySQL behind it, so changes reached MySQL asynchronously. That kept status fan-out off the transactional path.
 
-Every watch reads a snapshot, and reconnects arrive in bursts. The Socket.IO client reconnects by default with no attempt limit, waiting a second at first and backing off to a cap of five, with jitter. Jitter spreads a herd over a few seconds. It does not shrink it. When a server process restarts, every client it held comes back inside that window and asks for state, and I would much rather that burst hit memory than the database taking order writes.
+Every watch reads a snapshot, and reconnects arrive in bursts. The Socket.IO client reconnects by default with no attempt limit, waiting a second at first and backing off to a cap of five seconds, with jitter. Jitter spreads a herd over a few seconds. It does not shrink it. When a server process restarts, every client it held comes back inside that window and asks for state, and I would much rather that burst hit memory than the database taking order writes.
 
 The version also has to be enforced where state is written. If an old or repeated change can overwrite a newer one in Redis, every snapshot after it is wrong. Reading the stored version and then writing is the check-then-act gap from [the Redis post](/blog/preventing-stock-overselling-in-redis-with-lua-scripts), so the compare and the write need to be one atomic step.
 
@@ -131,17 +131,17 @@ The delivery guarantees page is blunt: by default Socket.IO provides an at most 
 
 ![A driver's phone loses signal, misses a status push that is never resent, then reconnects. The connect handler sends order:watch, the server joins the room and reads Redis, and one snapshot brings the screen back to the current state in a single round trip.](diagram:mobile-reconnect)
 
-Connection state recovery narrows the gap by restoring rooms and missed packets after a temporary disconnection, but it does not work with the Redis adapter and the docs say it will not always succeed, so the snapshot path stays the floor.
+Connection state recovery narrows the gap by restoring rooms and missed packets after a temporary disconnection. It does not work with the Redis adapter, which carries room broadcasts between server processes, and the docs say it will not always succeed. The snapshot path stays the floor.
 
 ### The write-behind window
 
 Write-behind buys a fast write path and pays for it with a window: Redis has the change, MySQL does not yet. Anything reading MySQL inside that window sees older state, so the read source has to be Redis for everything that cares about now.
 
-If Redis loses data inside that window, the change is gone unless something upstream can replay it. Changes came out of the monolith on SQS FIFO, and deleting a message only after the Redis write lands covers a consumer crash in between. The version check in that write stays, because the AWS docs give no absolute guarantee that a FIFO message will not be delivered more than once.
+If Redis loses data inside that window, the change is gone unless something upstream can replay it. Changes came out of the monolith on SQS FIFO, which redelivers a message until it is deleted. A delete that waits for the Redis write covers a consumer crash between the two. The version check in that write stays, because the AWS docs give no absolute guarantee that a FIFO message will not be delivered more than once.
 
 ### One room across processes
 
-Rooms are local to a process. Running more than one takes an adapter, and the Redis adapter carries broadcasts between processes over Pub/Sub, the same one that rules out connection state recovery. A WebSocket-only client like the one above also avoids the sticky sessions that long-polling needs, and gives up the long-polling fallback for a network that blocks WebSockets.
+Rooms are local to a process. Running more than one takes an adapter, and the Redis adapter carries broadcasts between processes over Pub/Sub, the same adapter that rules out connection state recovery. A WebSocket-only client like the one above also avoids the sticky sessions that long-polling needs, and gives up the long-polling fallback for a network that blocks WebSockets.
 
 ## Outcome
 

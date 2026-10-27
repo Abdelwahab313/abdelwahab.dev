@@ -54,13 +54,15 @@ async function respect() {
 | Ignored | about 20 MB | almost twenty thousand times |
 | Respected | about 63 KiB | not counted |
 
-The ignoring loop finishes in a few milliseconds and the sink needs at least 20 seconds, so every byte it produced sat in the queue. The respecting loop never held more than one chunk short of the stream's limit. Same data, same sink, roughly the same total time.
+The ignoring loop finishes in a few milliseconds and the sink needs at least 20 seconds, so every byte it produced sat in the queue. The respecting loop peaked one chunk short of the stream's 64 KiB limit. Same data, same sink, roughly the same total time.
 
 ## `highWaterMark` is where `false` starts
 
-The `highWaterMark` is the queue level at which a stream starts saying `false`. Nothing stops you writing past it, as the table above shows. The docs describe the return value as `true` "if the internal buffer is less than the `highWaterMark` configured when the stream was created after admitting `chunk`". The chunk is queued first and compared second, so one 100 KiB write to a stream with a 64 KiB mark returns `false` on the first call.
+The `highWaterMark` is that limit, the queue level where a stream starts saying `false`. Nothing stops you writing past it, as the table above shows. The docs describe the return value as `true` "if the internal buffer is less than the `highWaterMark` configured when the stream was created after admitting `chunk`". The chunk is queued first and compared second, so one 100 KiB write to a stream with a 64 KiB mark returns `false` on the first call.
 
 Node 22.0.0 changed the defaults (pull request 52037, "bump default highWaterMark"), and a lot of articles still carry the old ones. They are now 64 KiB for byte streams on Linux and macOS, 16 KiB on Windows, and 16 objects in `objectMode`.
+
+A higher `highWaterMark` never fixes a slow consumer. It only makes the queue in front of it longer before the `false` arrives.
 
 ## Stop at `false`, resume on `'drain'`
 
@@ -145,7 +147,7 @@ http.createServer(async (req, res) => {
 }).listen(3000);
 ```
 
-The `stat` comes first because a failed `pipeline` destroys every stream in the chain, including `res`, which closes the socket. A missing file found in the `catch` can no longer get a 404.
+The `stat` comes first because a failed `pipeline` destroys every stream in the chain, including `res`, which closes the socket. A missing file reaching that second `catch` can no longer get a 404.
 
 ## A slow disk pauses the client
 
@@ -198,8 +200,6 @@ await pipeline(orderLines(db), fs.createWriteStream('orders.csv'));
 ```
 
 `pipeline` pulls one line, writes it, and on `false` waits for `'drain'` before pulling the next. Meanwhile the generator is suspended at its `yield`, and a suspended generator is not issuing the next `SELECT`. The disk sets the pace of the database queries without a line of flow-control code.
-
-A higher `highWaterMark` never fixes a slow consumer. It only makes the queue in front of it longer before the `false` arrives.
 
 My opinion: if your code calls `write()` in a loop, you have usually written a Readable by hand, without its flow control. Turn the loop into an async generator and give it to `pipeline`, and the backpressure, the error propagation and the cleanup come with it. Manual `write()` with `'drain'` is for the few places that cannot be shaped that way, such as a single connection pushing server events from several sources at once.
 
