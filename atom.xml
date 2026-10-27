@@ -23,7 +23,7 @@
     <id>https://abdelwahab.dev/blog/building-a-booking-marketplace-from-empty-repo-to-beta/</id>
     <published>2026-10-13T00:00:00.000Z</published>
     <updated>2026-10-13T00:00:00.000Z</updated>
-    <summary>A booking marketplace from empty repo to beta. Why CI came in week one, and why double booking is a database problem, not a UI check.</summary>
+    <summary>A booking marketplace from empty repo to beta: a deploy gate in week one, and a Postgres exclusion constraint that rejects double bookings.</summary>
   </entry>
   <entry>
     <title>Preventing stock overselling in Redis with Lua scripts</title>
@@ -47,7 +47,7 @@
     <id>https://abdelwahab.dev/blog/extracting-fulfillment-from-a-php-monolith-over-sqs/</id>
     <published>2026-09-24T00:00:00.000Z</published>
     <updated>2026-09-24T00:00:00.000Z</updated>
-    <summary>Fulfillment came out of a PHP monolith piece by piece, over SQS, so six people never froze features. The price was a contract both sides had to keep.</summary>
+    <summary>Fulfillment came out of a PHP monolith piece by piece, over the SQS queue it already had. FIFO only dedupes sends, so the consumer still has to be idempotent.</summary>
   </entry>
   <entry>
     <title>Fixing 100% CPU on Aurora MySQL by removing a join</title>
@@ -55,7 +55,7 @@
     <id>https://abdelwahab.dev/blog/fixing-aurora-mysql-100-percent-cpu-by-removing-a-join/</id>
     <published>2026-09-17T00:00:00.000Z</published>
     <updated>2026-09-17T00:00:00.000Z</updated>
-    <summary>A status broadcast made about a thousand database calls, each scanning 7 million rows, and pinned Aurora at 100% CPU. The fix was a dropped join, not an index.</summary>
+    <summary>A status broadcast made about a thousand queries, each estimated at 7 million rows, and pinned Aurora at 100% CPU. The fix was a dropped join, not an index.</summary>
   </entry>
   <entry>
     <title>Making LLM triage verdicts testable in code</title>
