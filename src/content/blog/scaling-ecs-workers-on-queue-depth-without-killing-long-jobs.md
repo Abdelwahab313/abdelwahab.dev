@@ -19,7 +19,7 @@ Nothing failed loudly. A task that had done most of a long translation just stop
 
 ## CPU said the fleet was idle while it was busy
 
-It was an LLM translation product, and I had moved it off a single EC2 host onto ECS Fargate. Its load swung between a baseline of about 5K jobs an hour and peaks of 500K. A fleet with that swing scales in constantly, so whatever decides when to scale in also decides how often work gets thrown away.
+It was an LLM translation product, and I had moved it off a single EC2 host onto ECS Fargate. Its load ran at a baseline of about 5K jobs an hour and peaked at 100K. A fleet with that swing scales in constantly, so whatever decides when to scale in also decides how often work gets thrown away.
 
 That decision belonged to the default autoscaler, and it watched CPU and memory. For a web tier that is a fair proxy for load. A translation worker sends text to a model provider (Bedrock, OpenAI, Gemini) and waits, and a worker blocked on a slow provider call looks idle to CPU in the middle of a job. Ten of them look like spare capacity, so the autoscaler lowers the desired count, and ECS has no way to know which of the tasks it stops is holding a half-done translation.
 
@@ -29,9 +29,9 @@ When ECS stops a task, each container gets a stop signal, `SIGTERM` unless the i
 
 The job then fails quietly. An SQS message nobody deletes becomes visible again when its visibility timeout runs out, and another worker starts it from zero, every minute of the first attempt paid for and discarded. If the job had side effects, they run twice. If the retries reach `maxReceiveCount`, the message lands in the dead-letter queue, a failure the platform caused and someone else has to explain.
 
-The other fixes did not fit. Never scaling in means paying all day for a fleet sized for 500K jobs an hour that sits almost idle at 5K. Making every job resumable meant a rewrite of how translation state is tracked, the kind of project that quietly becomes a quarter, and the team could not freeze feature work for it. A longer `stopTimeout` covers the 30-second jobs and nothing else. One task per job through `RunTask` removes scale-in, but a 30-second translation behind a Fargate cold start is mostly cold start, and I would expect the `RunTask` call rate to become the ceiling long before 500K jobs an hour. If the jobs were hours long and rare, I would use AWS Batch, which already works this way, and stop there.
+The other fixes did not fit. Never scaling in means paying all day for a fleet built for the 100K peak that sits almost idle at 5K. Making every job resumable meant a rewrite of how translation state is tracked, the kind of project that quietly becomes a quarter, and the team could not freeze feature work for it. A longer `stopTimeout` covers the 30-second jobs and nothing else. One task per job through `RunTask` removes scale-in, but a 30-second translation behind a Fargate cold start is mostly cold start, and I would expect the `RunTask` call rate to become the ceiling long before 100K jobs an hour. If the jobs were hours long and rare, I would use AWS Batch, which already works this way, and stop there.
 
-In production I replaced the default autoscaler with a queue-depth autoscaler on Lambda, because queue depth measures the work waiting. On scale-in it told workers to drain: stop taking new jobs, finish the current one, exit, and only then get stopped. Its deployment state lived in DynamoDB, and that setup carried the fleet through peaks of 500K jobs an hour without killing jobs mid-run.
+In production I replaced the default autoscaler with a queue-depth autoscaler on Lambda, because queue depth measures the work waiting. On scale-in it told workers to drain: stop taking new jobs, finish the current one, exit, and only then get stopped. Its deployment state lived in DynamoDB, and that setup carried the fleet through a peak of 100K jobs an hour without killing jobs mid-run.
 
 ## Let the busy task say it is busy
 

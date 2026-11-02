@@ -30,7 +30,7 @@ An index does nothing if the query is not using one, and without the plan you do
 
 A bigger instance buys time by hiding the cause. Performance Insights draws a Max vCPU line from the instance's vCPU count, and when there are more processes than vCPUs, they queue. That, I think, is the queue the rest of the product was standing in. A larger instance raises the line, and a broadcast whose load scales with its call count grows back into it. When load sits above the line and the main wait is CPU, AWS lists three remedies: throttle connections, tune the high-CPU SQL, or move to a larger instance class. I would take them in that order, and the third only after the first two.
 
-A cache is a real design for status fan-out. At a previous job I served hot order state from Redis with MySQL behind it, to keep that fan-out off the transactional path. Bolted on mid-incident, though, a cache would have hidden a query I had not read yet, and handed me a second copy of the status to keep fresh.
+A cache is a real design for status fan-out. At a previous job I served hot order state from Redis with PostgreSQL behind it, to keep that fan-out off the transactional path. Bolted on mid-incident, though, a cache would have hidden a query I had not read yet, and handed me a second copy of the status to keep fresh.
 
 I also could not take the broadcast down. Clients needed fresh status, so the database had to recover with the feature still running.
 

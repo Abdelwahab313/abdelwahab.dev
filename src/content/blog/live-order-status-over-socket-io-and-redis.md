@@ -24,7 +24,7 @@ Socket.IO delivers at most once by default. A driver's phone that lost signal tw
 
 Socket.IO groups sockets into namespaces and rooms. A room is a server-side channel a socket joins and leaves. I kept namespaces for audiences whose access rules differ and gave each order a room, which maps straight onto the problem. The kitchen app, the driver's phone and the customer's browser each join `order:<id>`, and a status change is one emit to that room.
 
-![One state change fans out from one place. The service consumes the change from the queue, writes the new state to Redis, and emits once to the order's room, which reaches the kitchen app, the driver app and the customer web client. Redis is the read source for snapshots; MySQL is updated behind it asynchronously.](diagram:mobile-fanout)
+![One state change fans out from one place. The service consumes the change from the queue, writes the new state to Redis, and emits once to the order's room, which reaches the kitchen app, the driver app and the customer web client. Redis is the read source for snapshots; PostgreSQL is updated behind it asynchronously.](diagram:mobile-fanout)
 
 The code is a sketch, written the way I would write it today. It starts with the file both sides import:
 
@@ -117,7 +117,7 @@ Handlers live outside `connect`, because the same docs warn that registering the
 
 ### Redis takes the reconnect burst
 
-Hot order state lived in Redis as the service's read source, in a write-behind cache with MySQL behind it, so changes reached MySQL asynchronously. That kept status fan-out off the transactional path.
+Hot order state lived in Redis as the service's read source, in a write-behind cache with PostgreSQL behind it, so changes reached PostgreSQL asynchronously. That kept status fan-out off the transactional path.
 
 Every watch reads a snapshot, and reconnects arrive in bursts. The Socket.IO client reconnects by default with no attempt limit, waiting a second at first and backing off to a cap of five seconds, with jitter. Jitter spreads a herd over a few seconds. It does not shrink it. When a server process restarts, every client it held comes back inside that window and asks for state, and I would much rather that burst hit memory than the database taking order writes.
 
@@ -135,13 +135,13 @@ Connection state recovery narrows the gap by restoring rooms and missed packets 
 
 ### The write-behind window
 
-Write-behind buys a fast write path and pays for it with a window: Redis has the change, MySQL does not yet. Anything reading MySQL inside that window sees older state, so the read source has to be Redis for everything that cares about now.
+Write-behind buys a fast write path and pays for it with a window: Redis has the change, PostgreSQL does not yet. Anything reading PostgreSQL inside that window sees older state, so the read source has to be Redis for everything that cares about now.
 
 If Redis loses data inside that window, the change is gone unless something upstream can replay it. Changes came out of the monolith on SQS FIFO, which redelivers a message until it is deleted. A delete that waits for the Redis write covers a consumer crash between the two. The version check in that write stays, because the AWS docs give no absolute guarantee that a FIFO message will not be delivered more than once.
 
 ### One room across processes
 
-Rooms are local to a process. Running more than one takes an adapter, and the Redis adapter carries broadcasts between processes over Pub/Sub, the same adapter that rules out connection state recovery. A WebSocket-only client like the one above also avoids the sticky sessions that long-polling needs, and gives up the long-polling fallback for a network that blocks WebSockets.
+Rooms are local to a process. This service ran as one Socket.IO instance, so it needed no adapter. Running more than one process takes an adapter, and the Redis adapter carries broadcasts between processes over Pub/Sub, the same adapter that rules out connection state recovery. A WebSocket-only client like the one above also avoids the sticky sessions that long-polling needs, and gives up the long-polling fallback for a network that blocks WebSockets.
 
 ## Outcome
 

@@ -15,13 +15,12 @@ function knowsAbout(): string[] {
   return [
     ...cvStack.languages,
     ...cvStack.backend,
+    ...cvStack.messaging,
     ...cvStack.frontend,
-    ...cvStack.ai_llm,
-    ...cvStack.cloud,
-    ...cvStack.observability,
     ...cvStack.databases,
-    ...cvStack.testing,
-    ...cvStack.compatibility
+    ...cvStack.cloud,
+    ...cvStack.testing_observability,
+    ...cvStack.ai_llm
   ];
 }
 

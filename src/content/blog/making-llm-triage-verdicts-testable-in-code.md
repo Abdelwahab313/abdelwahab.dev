@@ -14,7 +14,7 @@ coverAlt: An agent box hands evidence to a small solid verdict box, while its da
 
 I was looking at production incidents and wanted to triage them before pulling a human in. An LLM could read the logs, summarize what happened, and sound convincing. That was the whole problem, because the platform was about to treat 'convincing' as 'correct'.
 
-The platform took first-line incident and support inquiries. I built it alone over three months, and the part that took longest to get right was not the investigating. It was deciding who gets to say "this is fine".
+The platform took first-line incident and support inquiries. I built it with the team lead over three months, and the part that took longest to get right was not the investigating. It was deciding who gets to say "this is fine".
 
 ## A false pass costs more than a false alarm
 
@@ -106,7 +106,7 @@ If your traces already live in Langfuse, its datasets fit that second replay: `c
 
 ## What the narrow verdict costs
 
-The verdict function is narrow on purpose, and every kind of pass needs a rule someone wrote by hand. When the agent finds a real, harmless cause that no rule describes, the answer is still fail, and a human reads a correct draft and closes it. The automation covers exactly as much ground as the rules do, and on a solo build the rules grow at the speed of one person.
+The verdict function is narrow on purpose, and every kind of pass needs a rule someone wrote by hand. When the agent finds a real, harmless cause that no rule describes, the answer is still fail, and a human reads a correct draft and closes it. The automation covers exactly as much ground as the rules do, and the rules grow at the speed of the people writing them.
 
 Rules also encode how the system looks today. A renamed job state or a changed log format can make a check stop matching. Written like the rule above, where a missing field is falsy, that drift turns into more fails and more human work, never into a false pass. Written carelessly, with a check that treats a missing count as zero, it drifts the other way. That is the bug in this design I would look for first in a code review.
 
@@ -114,7 +114,7 @@ All of this is the wrong design when being wrong is cheap. If an agent only rout
 
 ## Make the go/no-go a function
 
-The platform still cut MTTR across incident and support inquiries, because a human started from a drafted answer and its evidence instead of an empty screen.
+The platform handled over 200 bugs, incidents and support requests in its first month, and a human started from a drafted answer and its evidence instead of an empty screen.
 
 Pick the one decision in your agent pipeline that closes something without a person looking. If you cannot write the RSpec example that goes red when that decision is wrong, the model should not be making it alone.
 

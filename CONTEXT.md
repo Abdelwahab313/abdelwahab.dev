@@ -5,10 +5,10 @@ Glossary of canonical terms for this portfolio's content. The site's copy (src/d
 ## Terms
 
 ### Positioning
-The one-line professional identity used in the greeting, SEO meta, and resume. Canonical: **"Senior Software Engineer · Full-stack & Platform"**, eight years in (career start: Jan 2018). The years figure is derived from the career start date and must be re-checked yearly — never hardcoded in more than one place mentally; the greeting is its single on-site source.
+The one-line professional identity used in the greeting, SEO meta, and resume. Canonical: **"Senior Full-Stack Engineer · Node.js, TypeScript, React, AWS"**, the node CV's position line. Years: "nearly 9 years" (career start: Dec 2017), never split by stack. The years figure is derived from the career start date and must be re-checked yearly — never hardcoded in more than one place mentally; the greeting is its single on-site source.
 
 ### Experience
-A full-time employment entry in the Work Experience section. Ordered newest-first. Every Experience has a real (non-placeholder) description. All four entries are past tense; no role is current. Timeline: AI translation platform (under NDA) (Dec 2024 – Sep 2026) → Dailymealz (Dec 2021 – Dec 2024) → Nformacy → DevSquads (formerly Fikr Labs). Four entries, not five. Company names exactly as in CONTENT.md section 1.
+A full-time employment entry in the Work Experience section. Ordered newest-first. Every Experience has a real (non-placeholder) description. All four entries are past tense; no role is current. Timeline: OnTheGoSystems (WPML) (Dec 2024 – Sep 2026) → Dailymealz (Dec 2021 – Dec 2024) → Nformacy (Oct 2020 – Dec 2021) → DevSquads (Dec 2017 – Oct 2020). Four entries, not five. Company names exactly as in CONTENT.md section 1. Experience text follows the node CV framing: Node.js/TypeScript, React and AWS work shown; Rails, Ruby, Delayed Job, Laravel and PHP omitted, never denied.
 
 ### Voice
 All site copy reads as human-written: no em dashes, no symmetrical buzzword bullets, no stock AI phrasing ("Design and ship", "Drive product decisions"). Short sentences, first person, concrete over abstract. Matches the site's existing casual tone. Company and product names taken verbatim from the CV are exempt from the em dash rule.

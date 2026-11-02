@@ -4,9 +4,9 @@
 export const greeting = {
   username: "Abdelwahab",
   title: "Abdelwahab Mahmoud",
-  subTitle: "Senior Software Engineer · Full-stack & Platform",
+  subTitle: "Senior Full-Stack Engineer · Node.js, TypeScript, React, AWS",
   valueProp:
-    "I build and run production systems end to end, from React in the browser to AWS underneath. Most recently: the LLM engine and cloud platform behind an AI translation product that peaked at ~100K requests an hour.",
+    "I build and run production systems end to end, from React in the browser to AWS underneath. Most recently I built the LLM engine and the cloud platform behind PTC, the AI translation platform at OnTheGoSystems, where the job queues peaked at 100K jobs an hour.",
   resumeLink: "/resume.pdf",
   githubLink: "https://github.com/abdelwahab313",
   linkedinLink: "https://www.linkedin.com/in/abdelwahab313/"
@@ -18,82 +18,58 @@ export const socialMediaLinks = {
   gmail: "abdelwahabahmed93@gmail.com"
 };
 
-// Same rows as the CV (CONTENT.md section 1).
+// Same rows as the node CV's skills.tex (CONTENT.md section 1).
 export const cvStack = {
-  languages: [
-    "PHP",
-    "TypeScript",
-    "JavaScript",
-    "Go",
-    "Ruby",
-    "Java (Spring)",
-    "Python",
-    "SQL"
-  ],
+  languages: ["TypeScript", "JavaScript", "Ruby", "Go", "SQL"],
   backend: [
-    "Ruby on Rails",
     "Node.js",
-    "REST API design",
-    "service-oriented architecture",
+    "Express",
+    "Socket.IO",
+    "REST",
+    "OpenAPI/Swagger",
+    "Apollo GraphQL",
+    "Prisma"
+  ],
+  messaging: [
+    "BullMQ",
     "SQS",
-    "Kafka"
+    "EventBridge",
+    "Step Functions",
+    "event-driven architecture"
   ],
-  frontend: [
-    "Next.js",
-    "React",
-    "Redux",
-    "Hotwire (Turbo & Stimulus)",
-    "React Native",
-    "Tailwind CSS"
-  ],
-  ai_llm: [
-    "AWS Bedrock",
-    "OpenAI",
-    "Gemini",
-    "agentic workflows",
-    "Claude Agent SDK",
-    "MCP",
-    "Langfuse",
-    "evals"
-  ],
+  frontend: ["React", "Next.js", "React Native"],
+  databases: ["PostgreSQL", "MongoDB", "Redis", "TimescaleDB", "DynamoDB"],
   cloud: [
-    "AWS (ECS Fargate, Lambda, SQS, Step Functions, CloudWatch, S3, IAM)",
-    "Kubernetes",
+    "AWS (ECS Fargate, Lambda, SQS, ALB, S3)",
     "Terraform",
     "Docker",
-    "GitHub Actions",
-    "GitLab CI"
+    "GitLab CI/CD"
   ],
-  observability: [
+  testing_observability: [
+    "TDD",
+    "BDD",
+    "E2E",
+    "Jest",
+    "k6",
+    "JMeter",
     "Datadog",
     "OpenTelemetry",
-    "AWS CloudWatch",
-    "Langfuse tracing"
+    "Prometheus",
+    "CloudWatch"
   ],
-  databases: [
-    "PostgreSQL",
-    "MySQL",
-    "Aurora",
-    "Redis",
-    "DynamoDB",
-    "ClickHouse"
+  ai_llm: [
+    "Claude Code",
+    "Claude Agent SDK",
+    "MCP",
+    "CrewAI",
+    "Bedrock",
+    "OpenAI",
+    "Gemini",
+    "Langfuse",
+    "RAG",
+    "evals"
   ],
-  testing: [
-    "TDD",
-    "Spec-driven development",
-    "RSpec",
-    "Capybara",
-    "Playwright",
-    "Cypress",
-    "Jest",
-    "VCR"
-  ],
-  compatibility: [
-    "backwards compatibility",
-    "deprecation paths",
-    "contract tests",
-    "i18n"
-  ],
+  learning: ["Kafka", "Kubernetes"],
   spoken: ["English", "Arabic (native)"]
 };
 
@@ -115,34 +91,38 @@ export const workExperiences = {
   experience: [
     {
       role: "Senior Software Engineer",
-      company: "AI translation platform (under NDA)",
+      company: "OnTheGoSystems (WPML)",
       companylogo: "",
       date: "December 2024 – September 2026",
       duration: "1 yr 9 mo",
       location: "Remote",
       tags: [
-        "Ruby on Rails",
-        "React",
+        "Node.js",
+        "TypeScript",
         "ECS Fargate",
         "Lambda",
         "Terraform",
-        "Aurora",
+        "DynamoDB",
         "Bedrock",
-        "DynamoDB"
+        "Claude Agent SDK",
+        "MCP"
       ],
       article: "scaling-ecs-workers-on-queue-depth-without-killing-long-jobs",
       headline:
-        "Scaled AI translation to 500K jobs an hour at peak without killing a job mid-run",
+        "Ran AI translation queues that peaked at 100K jobs an hour without scale-in killing a job mid-run",
       story:
-        "The product was an AI translation platform that ran LLM jobs on AWS. I did full-stack product work in Rails and React and owned the AWS platform under it. Load sat at ~5K jobs an hour and peaked at 500K. Jobs could run for hours, and the default ECS autoscaling stopped busy tasks on scale-in, so every peak cost work in progress. I migrated the product onto ECS Fargate with Terraform and replaced the scaler with a queue-depth autoscaler on Lambda, deployment state in DynamoDB, that drains a task before stopping it. The fleet handled ~100K requests an hour at peak across background processing and LLM inference.",
+        "I worked on PTC, the AI translation platform at OnTheGoSystems, and owned the AWS platform under it. Load sat at about 5K jobs an hour and peaked at 100K. A single job could run for hours, and the default ECS scale-in stopped busy tasks, so every peak cost work in progress. I moved production from EC2 to ECS Fargate with Terraform and replaced the scaler with a queue-depth autoscaler on Node.js Lambdas. It scaled each queue type every 10 seconds, kept worker state in DynamoDB and drained a worker before stopping it, so scale-in, deploys and Spot reclaim no longer killed jobs. Other products at the company adopted it.",
       descBullets: [
-        "Built the multi-provider translation LLM engine with the team (Bedrock, OpenAI, Gemini): fallback chains, JSON repair and rate-limit retries kept translations flowing when a provider degraded.",
-        "Cleared Aurora MySQL's worst-query backlog query by query: rewritten plans, covering indexes and restructured hot reads, until CPU pressure stopped turning into incidents.",
-        "Fixed lock contention under concurrent writes: exclusive advisory locks on hot paths, batch-processing rewrites for load management, and connection-pool tuning after autoscaling exposed pooling contention on the shared database.",
-        "Built the MCP server the team's agents ran behind, exposing live databases, logs and selected APIs through authenticated, monitored access. It became the team's standard agent integration path.",
-        "Owned credits and billing correctness for a metered LLM product, and replaced scattered permission checks with one authorization architecture.",
-        "Owned an agentic triage platform that handled first-line incident and support inquiries, cutting Mean Time To Resolve.",
-        "Owned the GitLab CI/CD pipelines: build, e2e test, SAST and deploy gates for every service in the product.",
+        "Built the LLM engine with fallback chains across Bedrock, OpenAI and Gemini, retries with backoff on provider rate limits, evaluation, output validation and Langfuse tracing.",
+        "Built the incident-triage platform with the team lead on the Claude Agent SDK. Investigator and critic agents worked each case, a decider filed the ticket, and it handled over 200 bugs, incidents and support requests in its first month.",
+        "Built the TypeScript MCP server that gated the agents' access to production: CloudWatch logs and Prometheus metrics, GitLab code at the deployed tag, a read-only database user, and business data only through tools with limits.",
+        "Made the case for ECS over EKS as cheaper and easier for the team to adopt, with an AWS cost estimate from current and expected load. Owned the platform with Terraform across environments, on-call, runbooks, postmortems and ISO 27001 controls.",
+        "Ended a 100% database CPU incident where one statement carried 86% of the load: a progress broadcast on every job completion ran a query that examined 7 million rows. Dropped the JOIN and throttled the broadcast, so calls fell from about a thousand to about a hundred.",
+        "Traced 2,510 rejected connections during scale-out to the database connection limit and raised it from 200 to 300. Serialised translation-memory bulk writes per table with advisory locks against gap-lock deadlocks, then re-raised a lock timeout that jobs had reported as success while their writes were dropped.",
+        "Built the pay-as-you-go credit engine that billed per word rather than per LLM request. Closed a 7 ms stale-read race in the credit check, which had silently paused 20,067 translations, with a synchronous word-count refresh before the estimate.",
+        "Built job retries with backoff and a failed-job queue for replay.",
+        "Owned the GitLab CI/CD pipelines: build, e2e test, SAST via OpenGrep and deploy gates.",
+        "Replaced scattered permission checks with one authorization architecture.",
         "Kept public APIs backwards compatible across releases with deprecation paths and contract tests."
       ]
     },
@@ -153,18 +133,33 @@ export const workExperiences = {
       date: "December 2021 – December 2024",
       duration: "3 yrs",
       location: "Riyadh",
-      tags: ["React Native", "Node.js", "AWS", "Datadog", "Redis"],
+      tags: [
+        "Node.js",
+        "TypeScript",
+        "Socket.IO",
+        "React Native",
+        "Next.js",
+        "SQS",
+        "BullMQ",
+        "Redis",
+        "PostgreSQL",
+        "AWS",
+        "Datadog"
+      ],
       product: {name: "Dailymealz", url: "https://dailymealz.com/"},
       article: "extracting-fulfillment-from-a-php-monolith-over-sqs",
       headline:
-        "Pulled fulfillment out of a PHP monolith while 100K daily users kept ordering",
+        "Moved fulfilment into the Node.js order service while 100K daily users kept ordering",
       story:
-        "Dailymealz runs meal subscriptions across Saudi Arabia, and every order moves through kitchen, driver and delivery in real time. I built the order service that pushes that status to mobile and web clients over Node.js and Socket.IO, then took the fulfillment component out of the PHP/Laravel monolith behind it. A full rewrite was off the table: a team of six could not freeze features for months to run two partially consistent systems. So fulfillment came out piece by piece, as a standalone service passing state changes over AWS SQS behind a REST API contract.",
+        "Dailymealz runs meal subscriptions across Saudi Arabia. I built the Node.js and Socket.IO order service that pushed order status to around 100K daily active users, with hot order state in Redis written behind to PostgreSQL. Fulfilment then moved into it. Order events came from the monolith over AWS SQS, same-day orders came over REST on confirmation, and the monolith stayed the system of record. A full event-driven rewrite was on the table and I rejected it, because it would have frozen feature work and left two systems inconsistent for a long time.",
       descBullets: [
+        "Built the driver-location pipeline and geofencing: an Express API wrote positions to TimescaleDB, geofence events went through a BullMQ queue to a worker that updated MongoDB and the order cache, and Socket.IO tracked drivers live.",
+        "Built the BullMQ fulfilment queues on Redis with idempotent consumers, so order, geofence and payment events were applied once under retries with backoff, and added payment-queue alarms and a dead-letter queue for re-applying failed jobs.",
         "Cut Mean Time To Resolve by 30% by instrumenting order, driver and kitchen flows with Datadog and OpenTelemetry.",
-        "Served hot order state from Redis in a write-behind cache with MySQL behind it, keeping status fan-out off the transactional path.",
+        "Built the payment system in the monolith and integrated Apple Pay and other wallets into the mobile apps.",
         "Migrated the real-time order service from JavaScript to TypeScript, so event and message payload mismatches failed at compile time instead of in front of customers.",
-        "Led a team of five building a driver location check-in system in the React Native driver app: planning, reviews and pairing."
+        "Built the React delivery-map dashboard and the Next.js web ordering product, both on Apollo GraphQL.",
+        "Led a team of 6 on the React Native driver app, owned its architecture, planned scope with stakeholders and mentored the team in TDD and spec-driven design. Also built features in the customer and kitchen apps."
       ]
     },
     {
@@ -174,34 +169,34 @@ export const workExperiences = {
       date: "October 2020 – December 2021",
       duration: "1 yr 2 mo",
       location: "Cairo",
-      tags: ["React", "Ruby on Rails"],
+      tags: ["React", "BDD", "CI/CD"],
       product: {name: "Nformacy", url: "https://nformacy.com/"},
       article: "building-a-booking-marketplace-from-empty-repo-to-beta",
       headline: "Took a two-sided marketplace from empty repo to beta launch",
       story:
-        "Nformacy connects business advisors with companies that need their expertise. I built it full stack in React and Ruby on Rails, from the first MVP to the beta launch, along with the cloud infrastructure and deploy pipelines it ran on.",
+        "Nformacy connects business advisors with companies that need their expertise. I built it from the first MVP to the beta launch, React on the front end, along with the cloud infrastructure and deploy pipelines it ran on.",
       descBullets: [
-        "Led full-stack features from requirements to deployment, and moved the web apps to a SaaS model.",
-        "Built mentor calendar booking on Zoom, ClickUp and calendar integrations.",
-        "Wrote BDD tests and owned the CI/CD pipelines."
+        "Led a team of 5, moved the web apps to a SaaS model and built the React translation-management dashboard.",
+        "Built mentor calendar booking with Zoom, ClickUp and calendar integrations driven by webhooks.",
+        "Built the BDD test suite and the CI/CD pipelines, and mentored the team in TDD and spec-driven design."
       ]
     },
     {
       role: "Software Engineer",
-      company: "DevSquads (formerly Fikr Labs)",
+      company: "DevSquads",
       companylogo: "/img/devsquads.webp",
-      date: "January 2018 – October 2020",
-      duration: "2 yrs 9 mo",
+      date: "December 2017 – October 2020",
+      duration: "2 yrs 10 mo",
       location: "Cairo",
-      tags: ["React", "React Native", "Node.js", "Java Spring", "TDD"],
-      product: {name: "Shapa", url: "https://shapahealth.com/"},
+      tags: ["React", "React Native", "TDD"],
+      product: {name: "Shapa", url: "https://home.myshapa.com/"},
       article: "",
       headline:
-        "Built Shapa's mobile app and backend test-first, and mentored teams adopting XP",
+        "Built Shapa's scale link, recommender and dashboards test-first, and mentored teams adopting XP",
       story:
-        "DevSquads started as Fikr Labs, a Cairo venture studio, and became an agile consultancy that takes Extreme Programming seriously: TDD, pair programming and continuous delivery. I delivered products for its international clients. For Shapa, a US health product built around a numberless smart scale and a behavior change program, I built the mobile app and the backend behind it in React Native, Node.js and Java Spring.",
+        "DevSquads was an outsourcing company that practised Extreme Programming: TDD, pair programming and continuous delivery. I worked with its external clients to maintain and support their products. For Shapa, a US health product built around a numberless smart scale and a behaviour change program, I built the health-task recommender, the Bluetooth Low Energy link to the scale in the React Native app, and analytics dashboards for health specialists.",
       descBullets: [
-        "Built software in self-organizing Extreme Programming teams with TDD, thin vertical slices and test-covered refactoring of legacy code, across React Native, Ruby on Rails, Java Spring and React.",
+        "Built client products in React Native and React in XP teams, with TDD, pairing and thin vertical slices.",
         "Mentored teams adopting XP and Agile practices: pairing, code review discipline and iterative planning."
       ]
     }
@@ -274,13 +269,13 @@ export const workChallenges = {
     },
     {
       id: "event-driven-services",
-      title: "Event-driven services",
+      title: "Event-driven order flows",
       summary:
-        "Monoliths split into services that stay consistent when orders, money and data move between them.",
+        "Order fulfilment moved out of a monolith over queues, with consumers that apply each event once.",
       covers: [
-        "Real-time order service for a meal subscription platform",
-        "Moved a PHP monolith to event-driven services",
-        "Queues and streams with SQS and Kafka"
+        "Node.js order service for a meal subscription platform",
+        "Fulfilment moved into it on SQS order events, with the monolith as system of record",
+        "BullMQ consumers made idempotent, with retries, backoff and a dead-letter queue"
       ],
       article: "extracting-fulfillment-from-a-php-monolith-over-sqs"
     },
@@ -304,7 +299,7 @@ export const workChallenges = {
       covers: [
         "Took a marketplace from first MVP to beta launch",
         "Cloud infrastructure and deploy pipelines",
-        "Full-stack delivery across React and Ruby on Rails"
+        "Full-stack delivery with React on the front end"
       ],
       article: "building-a-booking-marketplace-from-empty-repo-to-beta"
     },

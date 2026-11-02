@@ -15,27 +15,27 @@ import {
 } from "../data/portfolio";
 
 const title =
-  "Abdelwahab Mahmoud | Senior Software Engineer, Full-stack & Platform";
+  "Abdelwahab Mahmoud | Senior Full-Stack Engineer, Node.js, TypeScript, React, AWS";
 const description =
-  "Abdelwahab Mahmoud, senior full-stack and platform engineer in Cairo. React, Next.js and React Native, Ruby on Rails and Node.js, AWS (ECS Fargate, Lambda, Terraform) and LLM platforms over Bedrock, OpenAI and Gemini. Eight years building and operating production systems.";
+  "Senior full-stack engineer in Cairo, nearly 9 years in production. Node.js, TypeScript, React, Next.js, React Native, AWS (ECS Fargate, Lambda, Terraform), LLM platforms on Bedrock, OpenAI, Gemini.";
 
 const facts = [
   {key: "Location", value: "Cairo, Egypt"},
-  {key: "Core stack", value: "React, Rails, Node.js, AWS"},
-  {key: "Experience", value: "8+ years"},
+  {key: "Core stack", value: "Node.js, TypeScript, React, AWS"},
+  {key: "Experience", value: "nearly 9 years"},
   {key: "Languages", value: "English, Arabic"}
 ];
 
 const skillGroups = [
   {label: "Languages", items: cvStack.languages},
-  {label: "Backend", items: cvStack.backend},
+  {label: "Backend & APIs", items: cvStack.backend},
+  {label: "Messaging & Queues", items: cvStack.messaging},
   {label: "Frontend", items: cvStack.frontend},
-  {label: "AI & LLM", items: cvStack.ai_llm},
-  {label: "Cloud & Infrastructure", items: cvStack.cloud},
-  {label: "Observability", items: cvStack.observability},
   {label: "Databases", items: cvStack.databases},
-  {label: "Testing", items: cvStack.testing},
-  {label: "Compatibility & i18n", items: cvStack.compatibility},
+  {label: "Cloud & Infrastructure", items: cvStack.cloud},
+  {label: "Testing & Observability", items: cvStack.testing_observability},
+  {label: "AI & LLM", items: cvStack.ai_llm},
+  {label: "Currently learning", items: cvStack.learning},
   {label: "Spoken Languages", items: cvStack.spoken}
 ];
 
@@ -99,16 +99,16 @@ const writing = published.slice(0, 3);
     <div class="about-grid">
       <div class="about-body">
         <p class="lead">
-          I studied geophysics, then started in software in 2018 on Extreme
+          I studied geophysics, then started in software in 2017 on Extreme
           Programming teams: pair programming, the test written first, small
           slices shipped continuously. Most of how I work still comes from
           there.
         </p>
         <p>
           I work across the stack: React, Next.js and React Native in the
-          product, Rails and Node.js services behind it, and the AWS platform
-          and databases underneath. The last few years leaned toward the
-          platform half: autoscaling, database load and LLM provider failover.
+          product, Node.js services behind it, and the AWS platform and
+          databases underneath. The last few years leaned toward the platform
+          half: autoscaling, database load and LLM provider failover.
         </p>
         <p>
           I like owning a system from the architecture decision to the incident
