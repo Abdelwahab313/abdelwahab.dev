@@ -1794,3 +1794,17 @@ html[data-theme="light"] .astro-code span {
     font-size: 15px;
   }
 }
+
+.post-body .diagram video {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+html[data-theme="light"] .post-body .diagram .video-dark,
+html[data-theme="dark"] .post-body .diagram .video-light {
+  display: none;
+}

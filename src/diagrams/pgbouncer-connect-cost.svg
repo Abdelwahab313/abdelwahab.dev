@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 320" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)" font-size="15">
+  <text x="120" y="36" fill="var(--muted, #949aa2)">time to run select 1, median, Node 22 against Postgres 17 in Docker</text>
+
+  <!-- bars -->
+  <rect x="300" y="90" width="56" height="170" fill="var(--accent, #57c7ba)"/>
+  <text x="328" y="78" fill="var(--ink, #edeae3)" text-anchor="middle">about 2 ms</text>
+  <text x="328" y="150" fill="var(--surface, #161a20)" text-anchor="middle" font-size="13">connect</text>
+  <text x="328" y="170" fill="var(--surface, #161a20)" text-anchor="middle" font-size="13">1.6 ms</text>
+
+  <rect x="604" y="254" width="56" height="6" fill="var(--accent, #57c7ba)"/>
+  <text x="632" y="242" fill="var(--ink, #edeae3)" text-anchor="middle">under 0.1 ms</text>
+
+  <!-- baseline -->
+  <line x1="120" y1="260" x2="840" y2="260" stroke="var(--border, #262b33)" stroke-width="1.5"/>
+
+  <g fill="var(--muted, #949aa2)" text-anchor="middle">
+    <text x="328" y="290">new connection per request</text>
+    <text x="632" y="290">checkout from pg.Pool</text>
+  </g>
+</svg>

@@ -116,7 +116,7 @@ the post disappears from the deployed site.
 
 ## Images and diagrams
 
-Figures are hand-authored SVG that follows the page theme. Two kinds:
+Figures follow the page theme. Three kinds:
 
 - **Cover**: `public/img/blog/<slug>.svg`, `viewBox="0 0 1200 600"`, named in
   frontmatter as `cover` with a `coverAlt`. The page inlines it (so CSS
@@ -128,6 +128,21 @@ Figures are hand-authored SVG that follows the page theme. Two kinds:
   the caption as `<figcaption>` and the build fails if the file is missing.
   Astro caches rendered Markdown by the `.md` file, so after editing only a
   diagram run `npx astro build --force` (or touch the post).
+- **Video**: an animated figure for a shape that moves (a hand-off, a leak
+  over time, a waterfall). Authored as a Remotion composition in
+  `remotion/src/`, registered in `remotion/src/Root.tsx` with the id
+  `<slug-or-topic>-<name>`, rendered to
+  `public/video/blog/<id>-dark.mp4` and `<id>-light.mp4` by
+  `npm run render` inside `remotion/` (one id as an argument renders only
+  that one). Placed in the body with `![Caption](video:<id>)` on its own
+  line; the same remark plugin emits a `<figure class="diagram video">` with
+  both files and the CSS shows the one matching `html[data-theme]`. The
+  build fails if either file is missing. `remotion/` is its own npm
+  workspace (`npm install` there once; the first render downloads Chrome
+  Headless Shell) and is never part of the site build. Colours come from
+  `remotion/src/theme.ts`, which mirrors the tokens in `global.css`; keep
+  the two in sync by hand. 1200 by 600, 30 fps, 10 to 16 seconds, no sound.
+  A video counts against the two-or-three figures per post.
 
 Rules, enforced by review:
 

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" font-family="var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace)">
+  <defs>
+    <marker id="acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--accent, #57c7ba)"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="600" fill="var(--surface, #161a20)"/>
+
+  <!-- many clients -->
+  <g stroke="var(--ink, #edeae3)" stroke-width="3" fill="none">
+    <path d="M110 120 C330 120 330 300 470 300"/>
+    <path d="M110 192 C330 192 330 300 470 300"/>
+    <path d="M110 264 C330 264 330 300 470 300"/>
+    <path d="M110 336 C330 336 330 300 470 300"/>
+    <path d="M110 408 C330 408 330 300 470 300"/>
+    <path d="M110 480 C330 480 330 300 470 300"/>
+  </g>
+  <g fill="var(--ink, #edeae3)">
+    <circle cx="110" cy="120" r="9"/>
+    <circle cx="110" cy="192" r="9"/>
+    <circle cx="110" cy="264" r="9"/>
+    <circle cx="110" cy="336" r="9"/>
+    <circle cx="110" cy="408" r="9"/>
+    <circle cx="110" cy="480" r="9"/>
+  </g>
+  <text x="110" y="540" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">50 clients</text>
+
+  <!-- pgbouncer -->
+  <rect x="470" y="245" width="260" height="110" rx="18" fill="none" stroke="var(--ink, #edeae3)" stroke-width="3"/>
+  <text x="600" y="310" font-size="28" fill="var(--ink, #edeae3)" text-anchor="middle">PgBouncer</text>
+
+  <!-- two backends -->
+  <path d="M730 285 C800 285 800 240 870 240" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="4" marker-end="url(#acc)"/>
+  <path d="M730 315 C800 315 800 360 870 360" fill="none" stroke="var(--accent, #57c7ba)" stroke-width="4" marker-end="url(#acc)"/>
+  <rect x="890" y="200" width="200" height="80" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="3"/>
+  <rect x="890" y="320" width="200" height="80" rx="18" fill="var(--accent-soft, rgba(87,199,186,0.12))" stroke="var(--accent, #57c7ba)" stroke-width="3"/>
+  <text x="990" y="460" font-size="28" fill="var(--accent, #57c7ba)" text-anchor="middle">2 backends</text>
+  <text x="990" y="540" font-size="26" fill="var(--muted, #949aa2)" text-anchor="middle">one transaction each</text>
+</svg>
