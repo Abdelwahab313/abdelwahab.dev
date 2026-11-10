@@ -55,7 +55,7 @@
     <id>https://abdelwahab.dev/blog/extracting-fulfillment-from-a-php-monolith-over-sqs/</id>
     <published>2026-09-24T00:00:00.000Z</published>
     <updated>2026-09-24T00:00:00.000Z</updated>
-    <summary>Fulfillment came out of a PHP monolith piece by piece, over the SQS queue it already had. FIFO only dedupes sends, so the consumer still has to be idempotent.</summary>
+    <summary>Fulfilment moved into the order service over the SQS FIFO queue it already consumed. FIFO dedupes sends, so the consumer still has to be idempotent.</summary>
   </entry>
   <entry>
     <title>Fixing 100% CPU on Aurora MySQL by removing a join</title>
